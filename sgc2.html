@@ -1,1 +1,412 @@
+<!DOCTYPE html>
+<html>
 
+<head>
+  <title>Home</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="robots" content="index,follow" />
+  <meta name="generator" content="GrapesJS Studio" />
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+    }
+
+    .gjs-heading {
+      margin: 0;
+      color: rgba(29, 40, 55, 1);
+    }
+
+    .gjs-link {
+      vertical-align: top;
+      max-width: 100%;
+      display: inline-block;
+      text-decoration: none;
+      color: inherit;
+      transition: color 0.3s ease 0s;
+    }
+
+    .text-content {
+      line-height: 20px;
+    }
+
+    .text-main-content {
+      line-height: 30px;
+      font-size: 1.2rem;
+    }
+
+    #iau9 {
+      font-family: Arial, Helvetica, sans-serif;
+      background-image: linear-gradient(rgb(10, 28, 43) 1%, rgb(10, 28, 43) 100%);
+      background-position: 0px 0px;
+      background-size: 100% 100%;
+      background-repeat: repeat;
+      background-attachment: scroll;
+      background-origin: padding-box;
+      color: #475569;
+    }
+
+    .gjs-grid-column.feature-item {
+      padding-top: 15px;
+      padding-right: 15px;
+      padding-bottom: 15px;
+      padding-left: 15px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      min-width: 30%;
+    }
+
+    .gjs-grid-column.testimonial-item {
+      padding-top: 15px;
+      padding-right: 15px;
+      padding-bottom: 15px;
+      padding-left: 15px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      min-width: 45%;
+      background-color: rgba(247, 247, 247, 0.23);
+      border-top-left-radius: 5px;
+      border-top-right-radius: 5px;
+      border-bottom-right-radius: 5px;
+      border-bottom-left-radius: 5px;
+      align-items: flex-start;
+      border-top-width: 1px;
+      border-right-width: 1px;
+      border-bottom-width: 1px;
+      border-left-width: 1px;
+      border-top-style: solid;
+      border-right-style: solid;
+      border-bottom-style: solid;
+      border-left-style: solid;
+      border-top-color: rgba(0, 0, 0, 0.06);
+      border-right-color: rgba(0, 0, 0, 0.06);
+      border-bottom-color: rgba(0, 0, 0, 0.06);
+      border-left-color: rgba(0, 0, 0, 0.06);
+    }
+
+    .gjs-button {
+      vertical-align: top;
+      max-width: 100%;
+      display: inline-block;
+      text-decoration: none;
+      color: white;
+      padding-right: 15px;
+      padding-bottom: 10px;
+      padding-left: 15px;
+      background-color: rgb(36, 99, 235);
+      border-top-left-radius: 5px;
+      border-top-right-radius: 5px;
+      border-bottom-right-radius: 5px;
+      border-bottom-left-radius: 5px;
+      padding-top: 10px;
+      font-size: 1.1rem;
+      text-align: center;
+    }
+
+    .gjs-text-blue {
+      color: rgb(36, 99, 235);
+    }
+
+    .gjs-link:hover {
+      color: rgb(36, 99, 235);
+      text-decoration: underline;
+    }
+
+    .gjs-icon.gjs-feature-icon {
+      padding-top: 10px;
+      padding-right: 10px;
+      padding-bottom: 10px;
+      padding-left: 10px;
+      background-color: rgb(36, 99, 235);
+      color: white;
+      border-top-left-radius: 10px;
+      border-top-right-radius: 10px;
+      border-bottom-right-radius: 10px;
+      border-bottom-left-radius: 10px;
+    }
+
+    #id7da {
+      position: relative;
+      left: 700px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+    }
+
+    .gjs-grid-column {
+      flex: 1 1 0%;
+      padding: 5px 0;
+    }
+
+    .gjs-grid-row {
+      display: flex;
+      justify-content: flex-start;
+      align-items: stretch;
+      flex-direction: row;
+      min-height: auto;
+      padding: 10px 0;
+    }
+
+    #iffs {
+      flex: 0 1 auto;
+    }
+
+    #iyd2 {
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 0px;
+      padding-bottom: 0px;
+      background-color: rgb(37, 60, 92);
+      border-top-left-radius: 10px;
+      border-top-right-radius: 10px;
+      border-bottom-right-radius: 10px;
+      border-bottom-left-radius: 10px;
+      backdrop-filter: blur(13px);
+      box-shadow: 0px 2px 7px 0px rgba(0, 0, 0, 0.14);
+      color: rgba(255, 0, 0, 1);
+    }
+
+    #i6po {
+      justify-content: center;
+      position: sticky;
+      top: 15px;
+      padding-top: 0px;
+      padding-bottom: 0px;
+      padding-left: 20px;
+      padding-right: 20px;
+    }
+
+    #itjq {
+      width: 100%;
+      max-width: 1200px;
+    }
+
+    #it00l {
+      padding-top: 0px;
+      padding-bottom: 0px;
+    }
+
+    #icfyb {
+      padding: 10px;
+      font-family: Arial, Helvetica, sans-serif;
+      padding-left: 20px;
+      padding-right: 20px;
+      background-color: rgba(108, 90, 90, 0);
+      color: rgba(255, 255, 255, 1);
+    }
+
+    #irtfd {
+      flex: 0 1 auto;
+    }
+
+    #icyzp {
+      flex: 0 1 auto;
+    }
+
+    #infmy1 {
+      padding: 10px;
+      font-family: Arial, Helvetica, sans-serif;
+      padding-left: 20px;
+      padding-right: 20px;
+      color: rgba(255, 255, 255, 1);
+    }
+
+    #ixjah {
+      padding: 10px;
+      font-family: Arial, Helvetica, sans-serif;
+      padding-left: 20px;
+      padding-right: 20px;
+      color: rgba(255, 255, 255, 1);
+    }
+
+    #iciug {
+      padding: 10px;
+      font-family: Arial, Helvetica, sans-serif;
+      padding-left: 20px;
+      padding-right: 20px;
+      color: rgba(255, 255, 255, 1);
+    }
+
+    #itp33 {
+      color: black;
+      width: 48px;
+      height: 48px;
+      position: fixed;
+      left: 1500px;
+      top: 24px;
+    }
+
+    #iciug-2 {
+      padding: 10px;
+      font-family: Arial, Helvetica, sans-serif;
+      padding-left: 20px;
+      padding-right: 20px;
+      color: rgba(255, 255, 255, 1);
+    }
+
+    #ietuy {
+      padding: 10px;
+      color: rgba(255, 255, 255, 1);
+      font-size: 20px;
+      position: fixed;
+      left: 771px;
+    }
+
+    #i3x33 {
+      position: fixed;
+      top: 229px;
+      left: 1000px;
+      color: rgb(190, 210, 230);
+    }
+
+    #iocob {
+      color: black;
+      width: 599px;
+      height: 82px;
+      position: fixed;
+      left: 725px;
+    }
+
+    #il1j8 {
+      color: black;
+      position: fixed;
+      left: 1267px;
+      top: 292px;
+      border-top-left-radius: 10px;
+      border-top-right-radius: 10px;
+      border-bottom-right-radius: 10px;
+      border-bottom-left-radius: 10px;
+      width: 185px;
+      height: 121px;
+      min-width: 0px;
+    }
+
+    #il1j8-2 {
+      color: black;
+      position: fixed;
+      left: 598px;
+      top: 292px;
+      border-top-left-radius: 10px;
+      border-top-right-radius: 10px;
+      border-bottom-right-radius: 10px;
+      border-bottom-left-radius: 10px;
+      width: 185px;
+      height: 121px;
+      min-width: 0px;
+    }
+
+    #il1j8-3 {
+      color: black;
+      position: fixed;
+      left: 829px;
+      top: 292px;
+      border-top-left-radius: 10px;
+      border-top-right-radius: 10px;
+      border-bottom-right-radius: 10px;
+      border-bottom-left-radius: 10px;
+      width: 185px;
+      height: 121px;
+      min-width: 0px;
+    }
+
+    #il1j8-4 {
+      color: black;
+      position: fixed;
+      left: 1048px;
+      top: 292px;
+      border-top-left-radius: 10px;
+      border-top-right-radius: 10px;
+      border-bottom-right-radius: 10px;
+      border-bottom-left-radius: 10px;
+      width: 185px;
+      height: 121px;
+      min-width: 0px;
+    }
+
+    #is2jm {
+      height: 205px;
+      width: 331px;
+      font-size: 0px;
+      position: fixed;
+      left: 880px;
+      top: 473px;
+      border-top-left-radius: 10px;
+      border-top-right-radius: 10px;
+      border-bottom-right-radius: 10px;
+      border-bottom-left-radius: 10px;
+      border-top-width: 10px;
+      border-right-width: 10px;
+      border-bottom-width: 10px;
+      border-left-width: 10px;
+      border-top-style: dashed;
+      border-right-style: dashed;
+      border-bottom-style: dashed;
+      border-left-style: dashed;
+      border-top-color: rgb(28, 48, 73);
+      border-right-color: rgb(28, 48, 73);
+      border-bottom-color: rgb(28, 48, 73);
+      border-left-color: rgb(28, 48, 73);
+    }
+
+    @media (max-width: 992px) {
+      .gjs-grid-row {
+        flex-direction: column;
+      }
+
+      #iyd2 {
+        flex-direction: row;
+      }
+
+      #it00l {
+        flex-direction: row;
+      }
+    }
+
+    @media (max-width: 768px) {
+      #iffs {
+        display: none;
+      }
+    }
+  </style>
+</head>
+
+<body id="iau9">
+  <div id="i6po" class="gjs-grid-row">
+    <div id="itjq" class="gjs-grid-column">
+      <div id="iyd2" class="gjs-grid-row">
+        <div id="iffs" class="gjs-grid-column">
+          <div id="it00l" class="gjs-grid-row">
+            <div id="irtfd" class="gjs-grid-column"><a id="icfyb" href="https://encantia.lat/index.html"
+                class="gjs-link">Inicio</a><a href="https://encantia.lat/contact.html" id="infmy1"
+                class="gjs-link">Contacto</a></div>
+            <div id="icyzp" class="gjs-grid-column"><a href="https://discord.gg/jqedHwcHPP" id="ixjah"
+                class="gjs-link">Discord</a><a href="https://encantia.lat/sgc.html" id="iciug"
+                class="gjs-link">SGC</a><a href="https://stats.uptimerobot.com/KFEwDpFYx9" id="iciug-2"
+                class="gjs-link">Status</a></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div><img id="itp33" src="https://i.ibb.co/H9WH6c9/Sin-t-tlo.png"/>
+  <div id="i97d8" class="gjs-grid-row">
+    <div class="gjs-grid-column">
+      <div id="ietuy"><span id="i3x33">Frase</span></div>
+    </div>
+  </div>
+  <img id="iocob" src="https://i.ibb.co/ZpTKMrts/minecraft-title.png"/><img id="il1j8" src="https://i.ibb.co/ZpTKMrts/minecraft-title.png"/><img id="il1j8-4" src="https://i.ibb.co/ZpTKMrts/minecraft-title.png"/><img id="il1j8-3" src="https://i.ibb.co/ZpTKMrts/minecraft-title.png"/><img id="il1j8-2" src="https://i.ibb.co/ZpTKMrts/minecraft-title.png"/><iframe
+    allowfullscreen="allowfullscreen" id="is2jm"
+    src="https://www.youtube.com/embed/video?&autoplay=1&mute=1&controls=0&showinfo=0"></iframe>
+</body>
+
+</html>
