@@ -1,1 +1,571 @@
+<!DOCTYPE html>
+<html>
 
+<head>
+  <title>Home</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="index,follow">
+  <meta name="generator" content="GrapesJS Studio">
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+    }
+
+    .gjs-heading {
+      margin: 0;
+      color: rgba(29, 40, 55, 1);
+    }
+
+    .gjs-grid-column {
+      flex: 1 1 0%;
+      padding: 5px 0;
+    }
+
+    .gjs-grid-row {
+      display: flex;
+      justify-content: flex-start;
+      align-items: stretch;
+      flex-direction: row;
+      min-height: auto;
+      padding: 10px 0;
+    }
+
+    .gjs-link {
+      vertical-align: top;
+      max-width: 100%;
+      display: inline-block;
+      text-decoration: none;
+      color: inherit;
+      transition: color 0.3s ease 0s;
+    }
+
+    #iffs {
+      flex: 0 1 auto;
+    }
+
+    #iyd2 {
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 0px;
+      padding-bottom: 0px;
+      background-color: rgb(28, 28, 28);
+      border-top-left-radius: 10px;
+      border-top-right-radius: 10px;
+      border-bottom-right-radius: 10px;
+      border-bottom-left-radius: 10px;
+      backdrop-filter: blur(13px);
+      box-shadow: 0px 2px 7px 0px rgba(0, 0, 0, 0.14);
+    }
+
+    #i6po {
+      justify-content: center;
+      position: sticky;
+      top: 15px;
+      padding-top: 0px;
+      padding-bottom: 0px;
+      padding-left: 20px;
+      padding-right: 20px;
+    }
+
+    #itjq {
+      width: 100%;
+      max-width: 1200px;
+    }
+
+    #it00l {
+      padding-top: 0px;
+      padding-bottom: 0px;
+    }
+
+    #icfyb {
+      padding: 10px;
+      font-family: Arial, Helvetica, sans-serif;
+      padding-left: 20px;
+      padding-right: 20px;
+      color: rgba(255, 255, 255, 1);
+    }
+
+    #irtfd {
+      flex: 0 1 auto;
+    }
+
+    #i88iz {
+      padding: 10px;
+      font-family: Arial, Helvetica, sans-serif;
+      padding-left: 20px;
+      padding-right: 20px;
+      color: rgba(255, 255, 255, 1);
+    }
+
+    #icyzp {
+      flex: 0 1 auto;
+    }
+
+    .text-content {
+      line-height: 20px;
+    }
+
+    .text-main-content {
+      line-height: 30px;
+      font-size: 1.2rem;
+    }
+
+    #iau9 {
+      font-family: Arial, Helvetica, sans-serif;
+      background-image: linear-gradient(rgb(18, 18, 18) 1%, rgb(18, 18, 18) 100%);
+      background-position: 0px 0px;
+      background-size: 100% 100%;
+      background-repeat: repeat;
+      background-attachment: scroll;
+      background-origin: padding-box;
+      color: #475569;
+    }
+
+    .gjs-grid-column.feature-item {
+      padding-top: 15px;
+      padding-right: 15px;
+      padding-bottom: 15px;
+      padding-left: 15px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      min-width: 30%;
+    }
+
+    .gjs-grid-column.testimonial-item {
+      padding-top: 15px;
+      padding-right: 15px;
+      padding-bottom: 15px;
+      padding-left: 15px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      min-width: 45%;
+      background-color: rgba(247, 247, 247, 0.23);
+      border-top-left-radius: 5px;
+      border-top-right-radius: 5px;
+      border-bottom-right-radius: 5px;
+      border-bottom-left-radius: 5px;
+      align-items: flex-start;
+      border-top-width: 1px;
+      border-right-width: 1px;
+      border-bottom-width: 1px;
+      border-left-width: 1px;
+      border-top-style: solid;
+      border-right-style: solid;
+      border-bottom-style: solid;
+      border-left-style: solid;
+      border-top-color: rgba(0, 0, 0, 0.06);
+      border-right-color: rgba(0, 0, 0, 0.06);
+      border-bottom-color: rgba(0, 0, 0, 0.06);
+      border-left-color: rgba(0, 0, 0, 0.06);
+    }
+
+    #ilriti {
+      max-width: 1200px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    #iv3be5 {
+      justify-content: center;
+      padding-top: 80px;
+      padding-left: 20px;
+      padding-right: 20px;
+      padding-bottom: 80px;
+    }
+
+    #it6g1v {
+      padding: 10px;
+      text-align: center;
+      font-size: 0.8rem;
+      margin-top: 20px;
+      opacity: 75%;
+      color: rgba(255, 255, 255, 1);
+      position: relative;
+      top: 299px;
+    }
+
+    .gjs-button {
+      vertical-align: top;
+      max-width: 100%;
+      display: inline-block;
+      text-decoration: none;
+      color: white;
+      padding-right: 15px;
+      padding-bottom: 10px;
+      padding-left: 15px;
+      background-color: rgb(36, 99, 235);
+      border-top-left-radius: 5px;
+      border-top-right-radius: 5px;
+      border-bottom-right-radius: 5px;
+      border-bottom-left-radius: 5px;
+      padding-top: 10px;
+      font-size: 1.1rem;
+      text-align: center;
+    }
+
+    .gjs-text-blue {
+      color: rgb(36, 99, 235);
+    }
+
+    .gjs-link:hover {
+      color: rgb(36, 99, 235);
+      text-decoration: underline;
+    }
+
+    .gjs-icon.gjs-feature-icon {
+      padding-top: 10px;
+      padding-right: 10px;
+      padding-bottom: 10px;
+      padding-left: 10px;
+      background-color: rgb(36, 99, 235);
+      color: white;
+      border-top-left-radius: 10px;
+      border-top-right-radius: 10px;
+      border-bottom-right-radius: 10px;
+      border-bottom-left-radius: 10px;
+    }
+
+    #infmy1 {
+      padding: 10px;
+      font-family: Arial, Helvetica, sans-serif;
+      padding-left: 20px;
+      padding-right: 20px;
+      color: rgba(255, 255, 255, 1);
+    }
+
+    #i88iz-2 {
+      padding: 10px;
+      font-family: Arial, Helvetica, sans-serif;
+      padding-left: 20px;
+      padding-right: 20px;
+      color: rgba(255, 255, 255, 1);
+    }
+
+    #i88iz-2-2 {
+      padding: 10px;
+      font-family: Arial, Helvetica, sans-serif;
+      padding-left: 20px;
+      padding-right: 20px;
+      color: rgba(255, 255, 255, 1);
+    }
+
+    #i88iz-2-2-2 {
+      padding: 10px;
+      font-family: Arial, Helvetica, sans-serif;
+      padding-left: 20px;
+      padding-right: 20px;
+      color: rgba(255, 255, 255, 1);
+    }
+
+    #ish3v {
+      color: black;
+      position: fixed;
+      left: 653px;
+      width: 645px;
+      top: 93px;
+    }
+
+    #i04dj {
+      padding: 10px;
+      color: rgba(255, 255, 255, 1);
+      position: relative;
+      width: 120px;
+      left: 912px;
+      top: -153px;
+      font-size: 21px;
+    }
+
+    #i6nno {
+      padding: 10px;
+      color: rgba(255, 255, 255, 1);
+      position: relative;
+      width: 58px;
+      left: 845px;
+      top: -190px;
+      font-size: 16px;
+      padding-top: 10px;
+      padding-right: 10px;
+      padding-bottom: 10px;
+      padding-left: 10px;
+    }
+
+    #i990b {
+      padding: 10px;
+      color: rgba(255, 255, 255, 1);
+      position: relative;
+      width: 120px;
+      left: 904px;
+      top: -227px;
+      font-size: 16px;
+      padding-top: 10px;
+      padding-right: 10px;
+      padding-bottom: 10px;
+      padding-left: 10px;
+    }
+
+    #irkff {
+      padding: 10px;
+      color: rgba(255, 255, 255, 1);
+      position: relative;
+      width: 120px;
+      left: 1032px;
+      top: -265px;
+      font-size: 16px;
+      padding-top: 10px;
+      padding-right: 10px;
+      padding-bottom: 10px;
+      padding-left: 10px;
+    }
+
+    #ixhj8 {
+      padding: 10px;
+      color: rgba(255, 255, 255, 1);
+      position: relative;
+      width: 120px;
+      left: 1130px;
+      top: -304px;
+      font-size: 16px;
+      padding-top: 10px;
+      padding-right: 10px;
+      padding-bottom: 10px;
+      padding-left: 10px;
+    }
+
+    #i99sx {
+      padding: 10px;
+      width: 120px;
+      color: rgba(255, 255, 255, 1);
+      font-size: 21px;
+      position: relative;
+      top: -286px;
+      left: 912px;
+    }
+
+    #it6nj {
+      padding: 10px;
+      color: rgba(255, 255, 255, 1);
+      position: relative;
+      width: 82px;
+      left: 761px;
+      top: -153px;
+      font-size: 16px;
+      padding-top: 10px;
+      padding-right: 10px;
+      padding-bottom: 10px;
+      padding-left: 10px;
+    }
+
+    #ih2cw {
+      padding: 10px;
+      width: 82px;
+      position: relative;
+      color: rgba(255, 255, 255, 1);
+      font-size: 16px;
+      top: -296px;
+      left: 684px;
+    }
+
+    #ih2cw-2 {
+      padding: 10px;
+      width: 146px;
+      position: relative;
+      color: rgba(255, 255, 255, 1);
+      font-size: 16px;
+      top: -334px;
+      left: 745px;
+    }
+
+    #ih2cw-2-2 {
+      padding: 10px;
+      width: 95px;
+      position: relative;
+      color: rgba(255, 255, 255, 1);
+      font-size: 16px;
+      top: -372px;
+      left: 883px;
+    }
+
+    #ih2cw-2-2-2 {
+      padding: 10px;
+      width: 95px;
+      position: relative;
+      color: rgba(255, 255, 255, 1);
+      font-size: 16px;
+      top: -409px;
+      left: 969px;
+    }
+
+    #ih2cw-2-2-2-2 {
+      padding: 10px;
+      width: 110px;
+      position: relative;
+      color: rgba(255, 255, 255, 1);
+      font-size: 16px;
+      top: -448px;
+      left: 1055px;
+    }
+
+    #ih2cw-2-2-2-2-2 {
+      padding: 10px;
+      width: 110px;
+      position: relative;
+      color: rgba(255, 255, 255, 1);
+      font-size: 16px;
+      top: -487px;
+      left: 1158px;
+    }
+
+    #ih2cw-2-2-2-2-2-2 {
+      padding: 10px;
+      width: 110px;
+      position: relative;
+      color: rgba(255, 255, 255, 1);
+      font-size: 16px;
+      top: -525px;
+      left: 1258px;
+    }
+
+    #ih2cw-2-2-2-2-2-2-2 {
+      padding: 10px;
+      width: 118px;
+      position: relative;
+      color: rgba(255, 255, 255, 1);
+      font-size: 16px;
+      top: -525px;
+      left: 705px;
+    }
+
+    #ih2cw-2-2-2-2-2-2-2-2 {
+      padding: 10px;
+      width: 94px;
+      position: relative;
+      color: rgba(255, 255, 255, 1);
+      font-size: 16px;
+      top: -563px;
+      left: 812px;
+    }
+
+    #ih2cw-2-2-2-2-2-2-2-2-2 {
+      padding: 10px;
+      width: 143px;
+      position: relative;
+      color: rgba(255, 255, 255, 1);
+      font-size: 16px;
+      top: -600px;
+      left: 896px;
+    }
+
+    #ih2cw-2-2-2-2-2-2-2-2-2-2 {
+      padding: 10px;
+      width: 117px;
+      position: relative;
+      color: rgba(255, 255, 255, 1);
+      font-size: 16px;
+      top: -638px;
+      left: 1029px;
+    }
+
+    #ih2cw-2-2-2-2-2-2-2-2-2-2-2 {
+      padding: 10px;
+      width: 114px;
+      position: relative;
+      color: rgba(255, 255, 255, 1);
+      font-size: 16px;
+      top: -677px;
+      left: 1135px;
+    }
+
+    #ih2cw-2-2-2-2-2-2-2-2-2-2-2-2 {
+      padding: 10px;
+      width: 143px;
+      position: relative;
+      color: rgba(255, 255, 255, 1);
+      font-size: 16px;
+      top: -716px;
+      left: 1237px;
+    }
+
+    #ipb9w {
+      color: black;
+      position: relative;
+      top: -1043px;
+      width: 53px;
+      left: 1495px;
+    }
+
+    @media (max-width: 992px) {
+      .gjs-grid-row {
+        flex-direction: column;
+      }
+
+      #iyd2 {
+        flex-direction: row;
+      }
+
+      #it00l {
+        flex-direction: row;
+      }
+    }
+
+    @media (max-width: 768px) {
+      #iffs {
+        display: none;
+      }
+    }
+  </style>
+</head>
+
+<body id="iau9">
+  <div id="i6po" class="gjs-grid-row">
+    <div id="itjq" class="gjs-grid-column">
+      <div id="iyd2" class="gjs-grid-row">
+        <div id="iffs" class="gjs-grid-column">
+          <div id="it00l" class="gjs-grid-row">
+            <div id="irtfd" class="gjs-grid-column"><a id="icfyb" href="https://encantia.lat/index.html"
+                class="gjs-link">Inicio</a><a href="https://encantia.lat/contact.html" id="infmy1"
+                class="gjs-link">Contacto</a></div>
+            <div id="icyzp" class="gjs-grid-column"><a id="i88iz" href="https://discord.gg/jqedHwcHPP"
+                class="gjs-link">Discord</a><a id="i88iz-2" href="https://encantia.lat/sgc2.html"
+                class="gjs-link">SGC</a><a id="i88iz-2-2" href="https://stats.uptimerobot.com/KFEwDpFYx9"
+                class="gjs-link">Status</a><a id="i88iz-2-2-2" href="https://encantia.lat/dev.html"
+                class="gjs-link">Desarolladores</a></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div><img id="ish3v" src="https://i.ibb.co/PGJq2gt2/fg2dev.png"/>
+  <div id="iv3be5" class="gjs-grid-row">
+    <div id="ilriti" class="gjs-grid-column">
+      <div id="it6g1v" class="gjs-text-blue">Copyright © 2025 Encantia</div>
+    </div>
+  </div>
+  <div id="i04dj">Creadores:</div>
+  <div id="it6nj">mralexxd_</div>
+  <div id="i6nno">igu1lle</div>
+  <div id="i990b">gabriel0808_fmg</div>
+  <div id="irkff">lopeztu_888</div>
+  <div id="ixhj8">ipalitoo</div>
+  <div id="i99sx">Ayudantes:</div>
+  <div id="ih2cw">fabitxo.</div>
+  <div id="ih2cw-2">alexgamer227176</div>
+  <div id="ih2cw-2-2">byedgar_x</div>
+  <div id="ih2cw-2-2-2">gatiuseuko</div>
+  <div id="ih2cw-2-2-2-2">xiomara3190</div>
+  <div id="ih2cw-2-2-2-2-2">proyectillo10</div>
+  <div id="ih2cw-2-2-2-2-2-2">the_ballonxd_</div>
+  <div id="ih2cw-2-2-2-2-2-2-2">winterfox7089</div>
+  <div id="ih2cw-2-2-2-2-2-2-2-2">maruin560</div>
+  <div id="ih2cw-2-2-2-2-2-2-2-2-2">milanga_0_37631</div>
+  <div id="ih2cw-2-2-2-2-2-2-2-2-2-2">pocoloco0133</div>
+  <div id="ih2cw-2-2-2-2-2-2-2-2-2-2-2">samuelberna</div>
+  <div id="ih2cw-2-2-2-2-2-2-2-2-2-2-2-2">santixd20906</div><img id="ipb9w" src="https://i.ibb.co/H9WH6c9/Sin-t-tlo.png"/>
+</body>
+
+</html>
