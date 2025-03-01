@@ -19,7 +19,7 @@ export default function Auth() {
             if (error) throw error;
 
             
-            router.push("/user-area"); 
+            router.push("https://encantia.lat/"); 
         } catch (e) {
             setErrorMessage(e.message);
         }
