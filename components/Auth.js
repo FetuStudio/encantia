@@ -88,7 +88,7 @@ export default function Auth() {
                     </div>
 
                     <button
-                        className="w-full p-3 mt-5 rounded-lg bg-black text-white hover:bg-gray-950 transition-colors"
+                        className="w-full p-3 mt-5 rounded-lg bg-black text-white hover:bg-gray-900 transition-colors"
                         onClick={isSignUp ? handleSignUp : handleSignIn} // Usar la función correspondiente según el estado
                     >
                         {isSignUp ? 'Sign Up' : 'Sign In'}
