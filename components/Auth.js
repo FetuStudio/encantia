@@ -67,7 +67,7 @@ export default function Auth() {
                         <input
                             type="email"
                             name="email"
-                            className="w-full p-3 mt-1 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-white"
+                            className="w-full p-3 mt-1 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none text-white"
                             onChange={(e) => setEmail(e.target.value)}
                             value={email}
                             placeholder="Email"
@@ -80,7 +80,7 @@ export default function Auth() {
                             type="password" 
                             name="password"
                             id="password"
-                            className="w-full p-3 mt-1 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-white"
+                            className="w-full p-3 mt-1 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none text-white"
                             onChange={(e) => setPassword(e.target.value)}
                             value={password}
                             placeholder="Password"
@@ -123,4 +123,3 @@ export default function Auth() {
         </div>
     );
 }
-
