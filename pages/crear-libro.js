@@ -92,102 +92,151 @@ export default function CrearLibros() {
     };
 
     return (
-        <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900 text-white p-4">
-            <h1 className="text-2xl font-bold mb-4">Crear Libro</h1>
+        <div className="min-h-screen bg-gray-900 text-white">
 
-            {!isLinkMode ? (
-                <>
-                    <input 
-                        className="p-2 mb-2 w-full max-w-md bg-gray-800 border border-gray-700 rounded"
-                        placeholder="Título"
-                        value={title}
-                        onChange={(e) => setTitle(e.target.value)}
+            {/* Navbar */}
+            <div className="flex justify-between items-center p-4 bg-gray-800">
+                <div className="flex items-center">
+                    <img 
+                        src="https://i.ibb.co/933TjLds/encantia-logo-2025.webp" 
+                        alt="Logo" 
+                        className="h-12"
                     />
-                    <input 
-                        className="p-2 mb-2 w-full max-w-md bg-gray-800 border border-gray-700 rounded"
-                        placeholder="Descripción"
-                        value={description}
-                        onChange={(e) => setDescription(e.target.value)}
-                    />
-                    <input 
-                        className="p-2 mb-2 w-full max-w-md bg-gray-800 border border-gray-700 rounded"
-                        placeholder="URL de la portada"
-                        value={coverUrl}
-                        onChange={(e) => setCoverUrl(e.target.value)}
-                    />
+                </div>
 
-                    <h2 className="text-lg font-bold mt-4">Capítulos</h2>
-                    {chapters.map((chap, index) => (
-                        <div key={index} className="mb-2 w-full max-w-md">
-                            <label className="block text-sm mb-1">Capítulo {chap.number}</label>
-                            <textarea
-                                className="p-2 w-full h-20 bg-gray-800 border border-gray-700 rounded"
-                                placeholder={`Contenido del capítulo ${chap.number}`}
-                                value={chap.content}
-                                onChange={(e) => handleChapterChange(index, e.target.value)}
-                            />
+                <div className="flex gap-4">
+                    {/* Botón de "Inicio" */}
+                    <button
+                        onClick={() => window.location.href = "https://encantia.lat/"}
+                        className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
+                    >
+                        Inicio
+                    </button>
+
+                    {/* Botón de "Chat" */}
+                    <button
+                        onClick={() => router.push('/chat')}
+                        className="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-400 transition-colors"
+                    >
+                        Chat
+                    </button>
+
+                    {/* Botón de "Libros" */}
+                    <button
+                        className="p-2 bg-gray-700 text-white rounded"
+                        onClick={() => router.push('/libros')}
+                    >
+                        Libros
+                    </button>
+
+                    {/* Botón de "Crear Libro" */}
+                    <button
+                        className="p-2 bg-green-600 text-white rounded"
+                        onClick={() => router.push('/crear-libro')}
+                    >
+                        Crear Libro
+                    </button>
+                </div>
+            </div>
+
+            {/* Crear libro */}
+            <div className="flex flex-col items-center justify-center p-4">
+                <h1 className="text-2xl font-bold mb-4">Crear Libro</h1>
+
+                {!isLinkMode ? (
+                    <>
+                        <input 
+                            className="p-2 mb-2 w-full max-w-md bg-gray-800 border border-gray-700 rounded"
+                            placeholder="Título"
+                            value={title}
+                            onChange={(e) => setTitle(e.target.value)}
+                        />
+                        <input 
+                            className="p-2 mb-2 w-full max-w-md bg-gray-800 border border-gray-700 rounded"
+                            placeholder="Descripción"
+                            value={description}
+                            onChange={(e) => setDescription(e.target.value)}
+                        />
+                        <input 
+                            className="p-2 mb-2 w-full max-w-md bg-gray-800 border border-gray-700 rounded"
+                            placeholder="URL de la portada"
+                            value={coverUrl}
+                            onChange={(e) => setCoverUrl(e.target.value)}
+                        />
+
+                        <h2 className="text-lg font-bold mt-4">Capítulos</h2>
+                        {chapters.map((chap, index) => (
+                            <div key={index} className="mb-2 w-full max-w-md">
+                                <label className="block text-sm mb-1">Capítulo {chap.number}</label>
+                                <textarea
+                                    className="p-2 w-full h-20 bg-gray-800 border border-gray-700 rounded"
+                                    placeholder={`Contenido del capítulo ${chap.number}`}
+                                    value={chap.content}
+                                    onChange={(e) => handleChapterChange(index, e.target.value)}
+                                />
+                            </div>
+                        ))}
+                        <button 
+                            className="p-2 bg-blue-500 hover:bg-blue-600 text-white rounded mb-4"
+                            onClick={handleAddChapter}
+                        >
+                            + Agregar Capítulo
+                        </button>
+
+                        <button className="p-2 bg-green-500 hover:bg-green-600 text-white rounded"
+                            onClick={handleCreateBook}
+                        >
+                            Guardar Libro
+                        </button>
+                    </>
+                ) : (
+                    <>
+                        <input 
+                            className="p-2 mb-2 w-full max-w-md bg-gray-800 border border-gray-700 rounded"
+                            placeholder="Link del libro"
+                            value={bookLink}
+                            onChange={(e) => setBookLink(e.target.value)}
+                        />
+                        <input 
+                            className="p-2 mb-2 w-full max-w-md bg-gray-800 border border-gray-700 rounded"
+                            placeholder="Título del libro"
+                            value={bookTitle}
+                            onChange={(e) => setBookTitle(e.target.value)}
+                        />
+                        <button className="p-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded"
+                            onClick={handleLinkSubmit}
+                        >
+                            Subir Libro
+                        </button>
+                    </>
+                )}
+
+                <button 
+                    className="mt-4 p-2 bg-blue-500 hover:bg-blue-600 text-white rounded"
+                    onClick={() => setIsLinkMode(!isLinkMode)}
+                >
+                    {isLinkMode ? "Crear un nuevo libro" : "¿Ya tienes un libro creado? Ponga el link del libro"}
+                </button>
+
+                <h2 className="text-xl font-bold mt-6">Libros Disponibles</h2>
+                <div className="w-full max-w-md">
+                    {books.map((book) => (
+                        <div key={book.id} className="p-4 bg-gray-800 border border-gray-700 rounded mb-2 flex flex-col items-center">
+                            {book.cover_url && (
+                                <img src={book.cover_url} alt="Portada" className="w-32 h-48 object-cover mb-2 rounded" />
+                            )}
+                            <h3 className="font-bold">{book.title}</h3>
+                            <p className="text-sm">{book.description}</p>
+                            <button 
+                                className="p-2 bg-red-500 hover:bg-red-600 text-white rounded mt-2"
+                                onClick={() => handleDeleteBook(book.id)}
+                            >
+                                Eliminar
+                            </button>
+                            <a href={book.cover_url} target="_blank" className="text-blue-500 mt-2">Ver el libro</a>
                         </div>
                     ))}
-                    <button 
-                        className="p-2 bg-blue-500 hover:bg-blue-600 text-white rounded mb-4"
-                        onClick={handleAddChapter}
-                    >
-                        + Agregar Capítulo
-                    </button>
-
-                    <button className="p-2 bg-green-500 hover:bg-green-600 text-white rounded"
-                        onClick={handleCreateBook}
-                    >
-                        Guardar Libro
-                    </button>
-                </>
-            ) : (
-                <>
-                    <input 
-                        className="p-2 mb-2 w-full max-w-md bg-gray-800 border border-gray-700 rounded"
-                        placeholder="Link del libro"
-                        value={bookLink}
-                        onChange={(e) => setBookLink(e.target.value)}
-                    />
-                    <input 
-                        className="p-2 mb-2 w-full max-w-md bg-gray-800 border border-gray-700 rounded"
-                        placeholder="Título del libro"
-                        value={bookTitle}
-                        onChange={(e) => setBookTitle(e.target.value)}
-                    />
-                    <button className="p-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded"
-                        onClick={handleLinkSubmit}
-                    >
-                        Subir Libro
-                    </button>
-                </>
-            )}
-
-            <button 
-                className="mt-4 p-2 bg-blue-500 hover:bg-blue-600 text-white rounded"
-                onClick={() => setIsLinkMode(!isLinkMode)}
-            >
-                {isLinkMode ? "Crear un nuevo libro" : "¿Ya tienes un libro creado? Ponga el link del libro"}
-            </button>
-
-            <h2 className="text-xl font-bold mt-6">Libros Disponibles</h2>
-            <div className="w-full max-w-md">
-                {books.map((book) => (
-                    <div key={book.id} className="p-4 bg-gray-800 border border-gray-700 rounded mb-2 flex flex-col items-center">
-                        {book.cover_url && (
-                            <img src={book.cover_url} alt="Portada" className="w-32 h-48 object-cover mb-2 rounded" />
-                        )}
-                        <h3 className="font-bold">{book.title}</h3>
-                        <p className="text-sm">{book.description}</p>
-                        <button 
-                            className="p-2 bg-red-500 hover:bg-red-600 text-white rounded mt-2"
-                            onClick={() => handleDeleteBook(book.id)}
-                        >
-                            Eliminar
-                        </button>
-                        <a href={book.cover_url} target="_blank" className="text-blue-500 mt-2">Ver el libro</a>
-                    </div>
-                ))}
+                </div>
             </div>
         </div>
     );
