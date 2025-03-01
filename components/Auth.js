@@ -8,6 +8,7 @@ export default function Auth() {
     const [password, setPassword] = useState('');
     const [errorMessage, setErrorMessage] = useState(null); 
     const [isSignUp, setIsSignUp] = useState(false); // Para alternar entre registro e inicio de sesión
+    const [isRegistered, setIsRegistered] = useState(false); // Estado para verificar si el usuario está registrado pero necesita confirmar su correo
 
     // Función para manejar el inicio de sesión
     const handleSignIn = async () => {
@@ -36,8 +37,8 @@ export default function Auth() {
 
             if (error) throw error;
 
-            // Enviar al usuario a la página principal después del registro
-            router.push("https://encantia.lat/"); 
+            // Después del registro exitoso, indicamos que el correo necesita ser verificado
+            setIsRegistered(true);
         } catch (e) {
             setErrorMessage(e.message);
         }
@@ -49,6 +50,13 @@ export default function Auth() {
 
             {/* Mostrar el mensaje de error si existe */}
             {errorMessage && <div className="text-red-500 text-center">{errorMessage}</div>}
+
+            {/* Mostrar mensaje de confirmación de correo si es necesario */}
+            {isRegistered && (
+                <div className="text-yellow-500 text-center mb-4">
+                    A verification email has been sent to {email}. Please check your inbox and confirm your email address.
+                </div>
+            )}
 
             <div className="field mt-3">
                 <label htmlFor="email" className="text-gray-800 w-full block text-sm">Email</label>
