@@ -7,8 +7,9 @@ export default function Auth() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [errorMessage, setErrorMessage] = useState(null); 
+    const [isSignUp, setIsSignUp] = useState(false); // Para alternar entre registro e inicio de sesión
 
-    
+    // Función para manejar el inicio de sesión
     const handleSignIn = async () => {
         try {
             const { user, session, error } = await supabase.auth.signInWithPassword({
@@ -18,7 +19,24 @@ export default function Auth() {
 
             if (error) throw error;
 
-            
+            // Redirigir siempre a la página principal después del inicio de sesión
+            router.push("https://encantia.lat/"); 
+        } catch (e) {
+            setErrorMessage(e.message);
+        }
+    };
+
+    // Función para manejar el registro de un nuevo usuario
+    const handleSignUp = async () => {
+        try {
+            const { user, error } = await supabase.auth.signUp({
+                email,
+                password,
+            });
+
+            if (error) throw error;
+
+            // Enviar al usuario a la página principal después del registro
             router.push("https://encantia.lat/"); 
         } catch (e) {
             setErrorMessage(e.message);
@@ -27,7 +45,7 @@ export default function Auth() {
 
     return (
         <div className="sigin max-w-sm m-auto border border-gray-500 rounded p-4 mt-4">
-            <h1 className="text-center">Sign In</h1>
+            <h1 className="text-center">{isSignUp ? 'Sign Up' : 'Sign In'}</h1>
 
             {/* Mostrar el mensaje de error si existe */}
             {errorMessage && <div className="text-red-500 text-center">{errorMessage}</div>}
@@ -57,10 +75,35 @@ export default function Auth() {
 
             <button
                 className="border p-2 w-full mt-5 rounded bg-black text-white"
-                onClick={handleSignIn}
+                onClick={isSignUp ? handleSignUp : handleSignIn} // Usar la función correspondiente según el estado
             >
-                Sign In
+                {isSignUp ? 'Sign Up' : 'Sign In'}
             </button>
+
+            {/* Enlace para cambiar entre Sign In y Sign Up */}
+            <div className="mt-3 text-center">
+                {isSignUp ? (
+                    <p>
+                        Already have an account?{' '}
+                        <span 
+                            onClick={() => setIsSignUp(false)} 
+                            className="text-blue-500 cursor-pointer"
+                        >
+                            Sign In
+                        </span>
+                    </p>
+                ) : (
+                    <p>
+                        Don't have an account?{' '}
+                        <span 
+                            onClick={() => setIsSignUp(true)} 
+                            className="text-blue-500 cursor-pointer"
+                        >
+                            Sign Up
+                        </span>
+                    </p>
+                )}
+            </div>
         </div>
     );
 }
