@@ -46,7 +46,7 @@ export default function Auth() {
 
     return (
         <div className="flex items-center justify-center min-h-screen bg-gray-900 text-white">
-            <div className="bg-gray-800 p-8 rounded-lg shadow-xl w-full max-w-md">
+            <div className="bg-gray-800 p-8 rounded-lg shadow-xl w-full max-w-md border-4 border-transparent hover:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300">
                 <h1 className="text-2xl font-semibold text-center mb-6">
                     {isSignUp ? 'Sign Up' : 'Sign In'}
                 </h1>
