@@ -20,6 +20,6 @@
     "tailwindcss": "^4.0.9"
   },
   "engines": {
-    "node": "16.x"
+    "node": "22.x"
   }
 }
