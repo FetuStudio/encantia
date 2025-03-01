@@ -36,7 +36,8 @@ export default function UserArea() {
 
     const handleLogout = async () => {
         await supabase.auth.signOut();
-        router.push('/login'); // Redirige a la página de login después de cerrar sesión
+        // Redirigir siempre a https://www.encantia.lat
+        router.push("https://encantia.lat/"); 
     };
 
     return (
@@ -99,3 +100,4 @@ export default function UserArea() {
         </div>
     );
 }
+
