@@ -45,73 +45,82 @@ export default function Auth() {
     };
 
     return (
-        <div className="sigin max-w-sm m-auto border border-gray-500 rounded p-4 mt-4">
-            <h1 className="text-center">{isSignUp ? 'Sign Up' : 'Sign In'}</h1>
+        <div className="flex items-center justify-center min-h-screen bg-gray-900 text-white">
+            <div className="bg-gray-800 p-8 rounded-lg shadow-xl w-full max-w-md">
+                <h1 className="text-2xl font-semibold text-center mb-6">
+                    {isSignUp ? 'Sign Up' : 'Sign In'}
+                </h1>
 
-            {/* Mostrar el mensaje de error si existe */}
-            {errorMessage && <div className="text-red-500 text-center">{errorMessage}</div>}
+                {/* Mostrar el mensaje de error si existe */}
+                {errorMessage && <div className="text-red-500 text-center mb-4">{errorMessage}</div>}
 
-            {/* Mostrar mensaje de confirmación de correo si es necesario */}
-            {isRegistered && (
-                <div className="text-yellow-500 text-center mb-4">
-                    A verification email has been sent to {email}. Please check your inbox and confirm your email address.
-                </div>
-            )}
-
-            <div className="field mt-3">
-                <label htmlFor="email" className="text-gray-800 w-full block text-sm">Email</label>
-                <input
-                    type="email"
-                    name="email"
-                    className="p-1 border border-gray-500 w-full rounded"
-                    onChange={(e) => setEmail(e.target.value)}
-                    value={email}
-                />
-            </div>
-
-            <div className="field mt-3">
-                <label htmlFor="password" className="text-gray-800 w-full block text-sm">Password</label>
-                <input
-                    type="password" 
-                    name="password"
-                    id="password"
-                    className="p-1 border border-gray-500 w-full rounded"
-                    onChange={(e) => setPassword(e.target.value)}
-                    value={password}
-                />
-            </div>
-
-            <button
-                className="border p-2 w-full mt-5 rounded bg-black text-white"
-                onClick={isSignUp ? handleSignUp : handleSignIn} // Usar la función correspondiente según el estado
-            >
-                {isSignUp ? 'Sign Up' : 'Sign In'}
-            </button>
-
-            {/* Enlace para cambiar entre Sign In y Sign Up */}
-            <div className="mt-3 text-center">
-                {isSignUp ? (
-                    <p>
-                        Already have an account?{' '}
-                        <span 
-                            onClick={() => setIsSignUp(false)} 
-                            className="text-blue-500 cursor-pointer"
-                        >
-                            Sign In
-                        </span>
-                    </p>
-                ) : (
-                    <p>
-                        Don't have an account?{' '}
-                        <span 
-                            onClick={() => setIsSignUp(true)} 
-                            className="text-blue-500 cursor-pointer"
-                        >
-                            Sign Up
-                        </span>
-                    </p>
+                {/* Mostrar mensaje de confirmación de correo si es necesario */}
+                {isRegistered && (
+                    <div className="text-yellow-500 text-center mb-4">
+                        A verification email has been sent to {email}. Please check your inbox and confirm your email address.
+                    </div>
                 )}
+
+                <div className="space-y-4">
+                    <div className="field">
+                        <label htmlFor="email" className="text-sm">Email</label>
+                        <input
+                            type="email"
+                            name="email"
+                            className="w-full p-3 mt-1 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-white"
+                            onChange={(e) => setEmail(e.target.value)}
+                            value={email}
+                            placeholder="Email"
+                        />
+                    </div>
+
+                    <div className="field">
+                        <label htmlFor="password" className="text-sm">Password</label>
+                        <input
+                            type="password" 
+                            name="password"
+                            id="password"
+                            className="w-full p-3 mt-1 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-white"
+                            onChange={(e) => setPassword(e.target.value)}
+                            value={password}
+                            placeholder="Password"
+                        />
+                    </div>
+
+                    <button
+                        className="w-full p-3 mt-5 rounded-lg bg-black text-white hover:bg-gray-800 transition-colors"
+                        onClick={isSignUp ? handleSignUp : handleSignIn} // Usar la función correspondiente según el estado
+                    >
+                        {isSignUp ? 'Sign Up' : 'Sign In'}
+                    </button>
+
+                    {/* Enlace para cambiar entre Sign In y Sign Up */}
+                    <div className="text-center mt-3 text-sm">
+                        {isSignUp ? (
+                            <p>
+                                Already have an account?{' '}
+                                <span 
+                                    onClick={() => setIsSignUp(false)} 
+                                    className="text-blue-500 cursor-pointer"
+                                >
+                                    Sign In
+                                </span>
+                            </p>
+                        ) : (
+                            <p>
+                                Don't have an account?{' '}
+                                <span 
+                                    onClick={() => setIsSignUp(true)} 
+                                    className="text-blue-500 cursor-pointer"
+                                >
+                                    Sign Up
+                                </span>
+                            </p>
+                        )}
+                    </div>
+                </div>
             </div>
         </div>
     );
 }
+
