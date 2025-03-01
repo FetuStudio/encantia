@@ -46,7 +46,7 @@ export default function Auth() {
 
     return (
         <div className="flex items-center justify-center min-h-screen bg-gray-900 text-white">
-            <div className="bg-gray-800 p-8 rounded-lg shadow-xl w-full max-w-md border-4 border-transparent hover:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300">
+            <div className="bg-gray-800 p-8 rounded-lg shadow-xl w-full max-w-md border-4 border-blue-500 bg-opacity-20 glow-border">
                 <h1 className="text-2xl font-semibold text-center mb-6">
                     {isSignUp ? 'Sign Up' : 'Sign In'}
                 </h1>
@@ -67,7 +67,7 @@ export default function Auth() {
                         <input
                             type="email"
                             name="email"
-                            className="w-full p-3 mt-1 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none text-white"
+                            className="w-full p-3 mt-1 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none text-white glow-input"
                             onChange={(e) => setEmail(e.target.value)}
                             value={email}
                             placeholder="Email"
@@ -80,7 +80,7 @@ export default function Auth() {
                             type="password" 
                             name="password"
                             id="password"
-                            className="w-full p-3 mt-1 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none text-white"
+                            className="w-full p-3 mt-1 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none text-white glow-input"
                             onChange={(e) => setPassword(e.target.value)}
                             value={password}
                             placeholder="Password"
