@@ -48,7 +48,7 @@ export default function UserArea() {
                     <img
                         src="https://i.ibb.co/933TjLds/encantia-logo-2025.webp"
                         alt="Logo"
-                        className="h-12"
+                        className="h-22"
                     />
                 </div>
 
