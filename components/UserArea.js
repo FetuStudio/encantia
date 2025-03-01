@@ -34,6 +34,11 @@ export default function UserArea() {
         fetchUserProfile();
     }, []);
 
+    const handleLogout = async () => {
+        await supabase.auth.signOut();
+        router.push('/login'); // Redirige a la página de login después de cerrar sesión
+    };
+
     return (
         <div className="flex flex-col h-screen p-4 bg-gray-900 text-white">
             {/* Barra de navegación superior con "Inicio", "Chat" y "Libros" */}
@@ -83,6 +88,14 @@ export default function UserArea() {
             </div>
 
             {/* Aquí puedes agregar más contenido si lo deseas */}
+
+            {/* Botón de Logout en la parte inferior izquierda */}
+            <button
+                onClick={handleLogout}
+                className="fixed bottom-4 left-4 px-6 py-2 bg-black text-white rounded-full hover:bg-gray-800 transition-colors"
+            >
+                Logout
+            </button>
         </div>
     );
 }
