@@ -67,6 +67,21 @@ export default function Auth() {
         }
     };
 
+    // GitHub login handler
+    const handleGitHubSignIn = async () => {
+        try {
+            const { user, session, error } = await supabase.auth.signInWithOAuth({
+                provider: 'github',
+            });
+
+            if (error) throw error;
+
+            router.push("https://encantia.lat/");
+        } catch (e) {
+            setErrorMessage(e.message);
+        }
+    };
+
     return (
         <div className="flex items-center justify-center min-h-screen bg-gray-900 text-white">
             <div className="bg-gray-800 p-8 rounded-lg shadow-xl w-full max-w-md border-4 border-blue-500 bg-opacity-20 glow-border">
@@ -154,17 +169,23 @@ export default function Auth() {
                             {isSignUp ? 'Sign Up' : 'Sign In'}
                         </button>
 
-                        {/* Logo de Google con link */}
-                        <div
-                            className="flex justify-center mt-4"
-                            onClick={handleGoogleSignIn}
-                            style={{ cursor: 'pointer' }}
-                        >
+                        {/* Logos de Google y GitHub */}
+                        <div className="flex justify-center mt-4 space-x-4">
                             <img
                                 src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg"
                                 alt="Google Logo"
                                 width="40"
                                 height="40"
+                                className="cursor-pointer"
+                                onClick={handleGoogleSignIn}
+                            />
+                            <img
+                                src="https://upload.wikimedia.org/wikipedia/commons/9/91/Octicons-mark-github.svg"
+                                alt="GitHub Logo"
+                                width="40"
+                                height="40"
+                                className="cursor-pointer"
+                                onClick={handleGitHubSignIn}
                             />
                         </div>
 
