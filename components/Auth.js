@@ -1,38 +1,27 @@
-import { useState } from 'react';
+import { useState } from 'react'; 
 import { supabase } from '../utils/supabaseClient';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/router'; 
 
 export default function Auth() {
-    const router = useRouter();
-    const [emailOrPhone, setEmailOrPhone] = useState('');
+    const router = useRouter(); 
+    const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [otp, setOtp] = useState('');
-    const [errorMessage, setErrorMessage] = useState(null);
+    const [errorMessage, setErrorMessage] = useState(null); 
     const [isSignUp, setIsSignUp] = useState(false);
+    const [isRegistered, setIsRegistered] = useState(false);
     const [resetMessage, setResetMessage] = useState(null);
     const [isResettingPassword, setIsResettingPassword] = useState(false);
-    const [isPhoneSignIn, setIsPhoneSignIn] = useState(false);
-
-    // Detect if input is an email or phone number
-    const isPhoneNumber = (input) => {
-        const phoneRegex = /^\+?[1-9]\d{1,14}$/; // Basic phone number format regex
-        return phoneRegex.test(input);
-    };
 
     const handleSignIn = async () => {
         try {
-            if (isPhoneNumber(emailOrPhone)) {
-                await handlePhoneSignIn();  // Sign in using OTP for phone
-            } else {
-                const { user, session, error } = await supabase.auth.signInWithPassword({
-                    email: emailOrPhone,
-                    password,
-                });
+            const { user, session, error } = await supabase.auth.signInWithPassword({
+                email,
+                password,
+            });
 
-                if (error) throw error;
+            if (error) throw error;
 
-                router.push("https://encantia.lat/");
-            }
+            router.push("https://encantia.lat/"); 
         } catch (e) {
             setErrorMessage(e.message);
         }
@@ -40,25 +29,14 @@ export default function Auth() {
 
     const handleSignUp = async () => {
         try {
-            if (isPhoneNumber(emailOrPhone)) {
-                const { data, error } = await supabase.auth.signUp({
-                    phone: emailOrPhone,  // Register using phone number
-                    password,
-                });
+            const { user, error } = await supabase.auth.signUp({
+                email,
+                password,
+            });
 
-                if (error) throw error;
+            if (error) throw error;
 
-                setIsPhoneSignIn(true);  // Trigger OTP for phone verification
-            } else {
-                const { user, error } = await supabase.auth.signUp({
-                    email: emailOrPhone,
-                    password,
-                });
-
-                if (error) throw error;
-
-                router.push("https://encantia.lat/");
-            }
+            setIsRegistered(true);
         } catch (e) {
             setErrorMessage(e.message);
         }
@@ -66,40 +44,9 @@ export default function Auth() {
 
     const handlePasswordReset = async () => {
         try {
-            const { error } = await supabase.auth.resetPasswordForEmail(emailOrPhone);
+            const { error } = await supabase.auth.resetPasswordForEmail(email);
             if (error) throw error;
             setResetMessage("Se ha enviado un correo para restablecer tu contraseña.");
-        } catch (e) {
-            setErrorMessage(e.message);
-        }
-    };
-
-    // Phone sign in handler (using OTP)
-    const handlePhoneSignIn = async () => {
-        try {
-            const { data, error } = await supabase.auth.signInWithOtp({
-                phone: emailOrPhone,
-            });
-
-            if (error) throw error;
-
-            setIsPhoneSignIn(true);  // Show OTP input after phone sign-in
-        } catch (e) {
-            setErrorMessage(e.message);
-        }
-    };
-
-    // Verify OTP
-    const handleOtpVerification = async () => {
-        try {
-            const { user, session, error } = await supabase.auth.verifyOtp({
-                phone: emailOrPhone,
-                token: otp,
-            });
-
-            if (error) throw error;
-
-            router.push("https://encantia.lat/");
         } catch (e) {
             setErrorMessage(e.message);
         }
@@ -109,23 +56,29 @@ export default function Auth() {
         <div className="flex items-center justify-center min-h-screen bg-gray-900 text-white">
             <div className="bg-gray-800 p-8 rounded-lg shadow-xl w-full max-w-md border-4 border-blue-500 bg-opacity-20 glow-border">
                 <h1 className="text-2xl font-semibold text-center mb-6">
-                    {isResettingPassword ? 'Restablecer Contraseña' : isSignUp ? 'Registrarse' : 'Iniciar Sesión'}
+                    {isResettingPassword ? 'Restablecer Contraseña' : isSignUp ? 'Sign Up' : 'Sign In'}
                 </h1>
 
                 {errorMessage && <div className="text-red-500 text-center mb-4">{errorMessage}</div>}
                 {resetMessage && <div className="text-green-500 text-center mb-4">{resetMessage}</div>}
 
+                {isRegistered && (
+                    <div className="text-yellow-500 text-center mb-4">
+                        A verification email has been sent to {email}. Please check your inbox and confirm your email address.
+                    </div>
+                )}
+
                 {isResettingPassword ? (
                     <div className="space-y-4">
                         <div className="field">
-                            <label htmlFor="reset-email" className="text-sm">Email or Phone</label>
+                            <label htmlFor="reset-email" className="text-sm">Email</label>
                             <input
-                                type="text"
+                                type="email"
                                 name="reset-email"
                                 className="w-full p-3 mt-1 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none text-white glow-input"
-                                onChange={(e) => setEmailOrPhone(e.target.value)}
-                                value={emailOrPhone}
-                                placeholder="Email or Phone"
+                                onChange={(e) => setEmail(e.target.value)}
+                                value={email}
+                                placeholder="Email"
                             />
                         </div>
                         <button
@@ -135,8 +88,8 @@ export default function Auth() {
                             Restablecer Contraseña
                         </button>
                         <div className="text-center mt-3 text-sm">
-                            <span
-                                onClick={() => setIsResettingPassword(false)}
+                            <span 
+                                onClick={() => setIsResettingPassword(false)} 
                                 className="text-blue-500 cursor-pointer"
                             >
                                 Volver al inicio de sesión
@@ -146,49 +99,32 @@ export default function Auth() {
                 ) : (
                     <div className="space-y-4">
                         <div className="field">
-                            <label htmlFor="emailOrPhone" className="text-sm">Email or Phone</label>
+                            <label htmlFor="email" className="text-sm">Email</label>
                             <input
-                                type="text"
-                                name="emailOrPhone"
+                                type="email"
+                                name="email"
                                 className="w-full p-3 mt-1 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none text-white glow-input"
-                                onChange={(e) => setEmailOrPhone(e.target.value)}
-                                value={emailOrPhone}
-                                placeholder="Email or Phone"
+                                onChange={(e) => setEmail(e.target.value)}
+                                value={email}
+                                placeholder="Email"
                             />
                         </div>
 
-                        {!isPhoneSignIn && !isSignUp && (
-                            <div className="field">
-                                <label htmlFor="password" className="text-sm">Contraseña</label>
-                                <input
-                                    type="password"
-                                    name="password"
-                                    id="password"
-                                    className="w-full p-3 mt-1 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none text-white glow-input"
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    value={password}
-                                    placeholder="Contraseña"
-                                />
-                            </div>
-                        )}
-
-                        {isSignUp && (
-                            <div className="field">
-                                <label htmlFor="password" className="text-sm">Contraseña</label>
-                                <input
-                                    type="password"
-                                    name="password"
-                                    id="password"
-                                    className="w-full p-3 mt-1 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none text-white glow-input"
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    value={password}
-                                    placeholder="Contraseña"
-                                />
-                            </div>
-                        )}
+                        <div className="field">
+                            <label htmlFor="password" className="text-sm">Password</label>
+                            <input
+                                type="password" 
+                                name="password"
+                                id="password"
+                                className="w-full p-3 mt-1 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none text-white glow-input"
+                                onChange={(e) => setPassword(e.target.value)}
+                                value={password}
+                                placeholder="Password"
+                            />
+                        </div>
 
                         <div className="text-right text-sm">
-                            <span
+                            <span 
                                 className="text-blue-500 cursor-pointer hover:underline"
                                 onClick={() => setIsResettingPassword(true)}
                             >
@@ -200,63 +136,28 @@ export default function Auth() {
                             className="w-full p-3 mt-5 rounded-lg bg-black text-white hover:bg-gray-700 transition-colors"
                             onClick={isSignUp ? handleSignUp : handleSignIn}
                         >
-                            {isSignUp ? 'Registrarse' : 'Iniciar Sesión'}
+                            {isSignUp ? 'Sign Up' : 'Sign In'}
                         </button>
-
-                        <div className="flex justify-center mt-4 space-x-4">
-                            <img
-                                src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg"
-                                alt="Google Logo"
-                                width="30"
-                                height="30"
-                                className="cursor-pointer"
-                                onClick={handleGoogleSignIn}
-                            />
-                            <img
-                                src="https://upload.wikimedia.org/wikipedia/commons/9/91/Octicons-mark-github.svg"
-                                alt="GitHub Logo"
-                                width="30"
-                                height="30"
-                                className="cursor-pointer"
-                                onClick={handleGitHubSignIn}
-                            />
-                            <img
-                                src="https://upload.wikimedia.org/wikipedia/commons/5/56/Discord_logo_2015.svg"
-                                alt="Discord Logo"
-                                width="30"
-                                height="30"
-                                className="cursor-pointer"
-                                onClick={handleDiscordSignIn}
-                            />
-                            <img
-                                src="https://upload.wikimedia.org/wikipedia/commons/6/6b/Twitch_logo_2019.svg"
-                                alt="Twitch Logo"
-                                width="30"
-                                height="30"
-                                className="cursor-pointer"
-                                onClick={handleTwitchSignIn}
-                            />
-                        </div>
 
                         <div className="text-center mt-3 text-sm">
                             {isSignUp ? (
                                 <p>
-                                    ¿Ya tienes cuenta?{' '}
-                                    <span
-                                        onClick={() => setIsSignUp(false)}
+                                    Already have an account?{' '}
+                                    <span 
+                                        onClick={() => setIsSignUp(false)} 
                                         className="text-blue-500 cursor-pointer"
                                     >
-                                        Iniciar sesión
+                                        Sign In
                                     </span>
                                 </p>
                             ) : (
                                 <p>
-                                    ¿No tienes cuenta?{' '}
-                                    <span
-                                        onClick={() => setIsSignUp(true)}
+                                    Don't have an account?{' '}
+                                    <span 
+                                        onClick={() => setIsSignUp(true)} 
                                         className="text-blue-500 cursor-pointer"
                                     >
-                                        Regístrate
+                                        Sign Up
                                     </span>
                                 </p>
                             )}
