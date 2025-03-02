@@ -161,7 +161,7 @@ export default function Auth() {
                             style={{ cursor: 'pointer' }}
                         >
                             <img
-                                src="https://upload.wikimedia.org/wikipedia/commons/4/4e/Google_2015_logo.svg"
+                                src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg"
                                 alt="Google Logo"
                                 width="40"
                                 height="40"
