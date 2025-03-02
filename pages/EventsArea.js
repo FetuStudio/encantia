@@ -91,6 +91,14 @@ export default function EventsArea() {
                         Libros
                     </button>
 
+                    {/* Botón de "Discord" */}
+                    <button
+                        onClick={() => window.open("https://discord.gg/dxcX8S3mrF", "_blank")}
+                        className="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-400 transition-colors"
+                    >
+                        Discord
+                    </button>
+
                     {/* Botón de "Crear Libro" visible solo para los usuarios con rol "owner" */}
                     {userRole === 'owner' && (
                         <button
