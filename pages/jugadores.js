@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { supabase } from "../supabaseClient"; // Importamos la instancia de Supabase
+import { supabase } from "../utils/supabaseClient";
 
 const Jugadores = () => {
   const [jugadores, setJugadores] = useState([]);
