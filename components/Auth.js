@@ -13,16 +13,26 @@ export default function Auth() {
     const [isResettingPassword, setIsResettingPassword] = useState(false);
     const [isPhoneSignIn, setIsPhoneSignIn] = useState(false);
 
+    // Detect if input is an email or phone number
+    const isPhoneNumber = (input) => {
+        const phoneRegex = /^\+?[1-9]\d{1,14}$/; // Basic phone number format regex
+        return phoneRegex.test(input);
+    };
+
     const handleSignIn = async () => {
         try {
-            const { user, session, error } = await supabase.auth.signInWithPassword({
-                email: emailOrPhone,
-                password,
-            });
+            if (isPhoneNumber(emailOrPhone)) {
+                await handlePhoneSignIn();  // Sign in using OTP for phone
+            } else {
+                const { user, session, error } = await supabase.auth.signInWithPassword({
+                    email: emailOrPhone,
+                    password,
+                });
 
-            if (error) throw error;
+                if (error) throw error;
 
-            router.push("https://encantia.lat/");
+                router.push("https://encantia.lat/");
+            }
         } catch (e) {
             setErrorMessage(e.message);
         }
@@ -30,14 +40,25 @@ export default function Auth() {
 
     const handleSignUp = async () => {
         try {
-            const { user, error } = await supabase.auth.signUp({
-                email: emailOrPhone,
-                password,
-            });
+            if (isPhoneNumber(emailOrPhone)) {
+                const { data, error } = await supabase.auth.signUp({
+                    phone: emailOrPhone,  // Register using phone number
+                    password,
+                });
 
-            if (error) throw error;
+                if (error) throw error;
 
-            router.push("https://encantia.lat/");
+                setIsPhoneSignIn(true);  // Trigger OTP for phone verification
+            } else {
+                const { user, error } = await supabase.auth.signUp({
+                    email: emailOrPhone,
+                    password,
+                });
+
+                if (error) throw error;
+
+                router.push("https://encantia.lat/");
+            }
         } catch (e) {
             setErrorMessage(e.message);
         }
@@ -53,66 +74,6 @@ export default function Auth() {
         }
     };
 
-    // Google login handler
-    const handleGoogleSignIn = async () => {
-        try {
-            const { user, session, error } = await supabase.auth.signInWithOAuth({
-                provider: 'google',
-            });
-
-            if (error) throw error;
-
-            router.push("https://encantia.lat/");
-        } catch (e) {
-            setErrorMessage(e.message);
-        }
-    };
-
-    // GitHub login handler
-    const handleGitHubSignIn = async () => {
-        try {
-            const { user, session, error } = await supabase.auth.signInWithOAuth({
-                provider: 'github',
-            });
-
-            if (error) throw error;
-
-            router.push("https://encantia.lat/");
-        } catch (e) {
-            setErrorMessage(e.message);
-        }
-    };
-
-    // Discord login handler
-    const handleDiscordSignIn = async () => {
-        try {
-            const { user, session, error } = await supabase.auth.signInWithOAuth({
-                provider: 'discord',
-            });
-
-            if (error) throw error;
-
-            router.push("https://encantia.lat/");
-        } catch (e) {
-            setErrorMessage(e.message);
-        }
-    };
-
-    // Twitch login handler
-    const handleTwitchSignIn = async () => {
-        try {
-            const { user, session, error } = await supabase.auth.signInWithOAuth({
-                provider: 'twitch',
-            });
-
-            if (error) throw error;
-
-            router.push("https://encantia.lat/");
-        } catch (e) {
-            setErrorMessage(e.message);
-        }
-    };
-
     // Phone sign in handler (using OTP)
     const handlePhoneSignIn = async () => {
         try {
@@ -122,7 +83,7 @@ export default function Auth() {
 
             if (error) throw error;
 
-            setIsPhoneSignIn(true);
+            setIsPhoneSignIn(true);  // Show OTP input after phone sign-in
         } catch (e) {
             setErrorMessage(e.message);
         }
@@ -134,7 +95,6 @@ export default function Auth() {
             const { user, session, error } = await supabase.auth.verifyOtp({
                 phone: emailOrPhone,
                 token: otp,
-                type: 'sms', // Tipo de verificación
             });
 
             if (error) throw error;
@@ -238,12 +198,11 @@ export default function Auth() {
 
                         <button
                             className="w-full p-3 mt-5 rounded-lg bg-black text-white hover:bg-gray-700 transition-colors"
-                            onClick={isSignUp ? handleSignUp : (isPhoneSignIn ? handleOtpVerification : handlePhoneSignIn)}
+                            onClick={isSignUp ? handleSignUp : handleSignIn}
                         >
-                            {isSignUp ? 'Registrarse' : (isPhoneSignIn ? 'Verificar OTP' : 'Iniciar Sesión')}
+                            {isSignUp ? 'Registrarse' : 'Iniciar Sesión'}
                         </button>
 
-                        {/* Logos de Google, GitHub, Discord, Twitch */}
                         <div className="flex justify-center mt-4 space-x-4">
                             <img
                                 src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg"
