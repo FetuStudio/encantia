@@ -92,15 +92,14 @@ export default function CrearLibros() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-900 text-white">
-
-            {/* Navbar */}
-            <div className="flex justify-between items-center p-4 bg-gray-900">
-                <div className="flex items-center">
-                    <img 
-                        src="https://i.ibb.co/933TjLds/encantia-logo-2025.webp" 
-                        alt="Logo" 
-                        className="h-12"
+         <div className="flex flex-col h-screen p-4 bg-gray-900 text-white">
+            {/* Barra de navegación superior con "Inicio", "Chat" y "Libros" */}
+            <div className="flex justify-between items-center mb-4">
+                <div>
+                    <img
+                        src="https://i.ibb.co/933TjLds/encantia-logo-2025.webp"
+                        alt="Logo"
+                        className="h-16"
                     />
                 </div>
 
@@ -138,13 +137,13 @@ export default function CrearLibros() {
                         Libros
                     </button>
 
-                    {/* Botón de "Crear Libro" */}
-                    <button
-                        className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
-                        onClick={() => router.push('/crear-libro')}
-                    >
-                        Crear Libro
-                    </button>
+                    {role === 'owner' && (
+                        <button
+                            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
+                            onClick={() => router.push('/crear-libro')}
+                        >
+                            Crear Libro
+                        </button>
 
                     {role === 'owner, admin' && (
                         <button
@@ -153,7 +152,8 @@ export default function CrearLibros() {
                         >
                             Crear Evento
                         </button>
-                            
+                     
+                    )}
                 </div>
             </div>
 
