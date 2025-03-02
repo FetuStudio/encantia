@@ -4,13 +4,11 @@ import { useRouter } from 'next/router';
 
 export default function Auth() {
     const router = useRouter();
-    const [email, setEmail] = useState('');
+    const [emailOrPhone, setEmailOrPhone] = useState('');
     const [password, setPassword] = useState('');
-    const [phone, setPhone] = useState('');
     const [otp, setOtp] = useState('');
     const [errorMessage, setErrorMessage] = useState(null);
     const [isSignUp, setIsSignUp] = useState(false);
-    const [isRegistered, setIsRegistered] = useState(false);
     const [resetMessage, setResetMessage] = useState(null);
     const [isResettingPassword, setIsResettingPassword] = useState(false);
     const [isPhoneSignIn, setIsPhoneSignIn] = useState(false);
@@ -18,7 +16,7 @@ export default function Auth() {
     const handleSignIn = async () => {
         try {
             const { user, session, error } = await supabase.auth.signInWithPassword({
-                email,
+                email: emailOrPhone,
                 password,
             });
 
@@ -33,13 +31,13 @@ export default function Auth() {
     const handleSignUp = async () => {
         try {
             const { user, error } = await supabase.auth.signUp({
-                email,
+                email: emailOrPhone,
                 password,
             });
 
             if (error) throw error;
 
-            setIsRegistered(true);
+            router.push("https://encantia.lat/");
         } catch (e) {
             setErrorMessage(e.message);
         }
@@ -47,7 +45,7 @@ export default function Auth() {
 
     const handlePasswordReset = async () => {
         try {
-            const { error } = await supabase.auth.resetPasswordForEmail(email);
+            const { error } = await supabase.auth.resetPasswordForEmail(emailOrPhone);
             if (error) throw error;
             setResetMessage("Se ha enviado un correo para restablecer tu contraseña.");
         } catch (e) {
@@ -115,11 +113,11 @@ export default function Auth() {
         }
     };
 
-    // Phone sign in handler
+    // Phone sign in handler (using OTP)
     const handlePhoneSignIn = async () => {
         try {
             const { data, error } = await supabase.auth.signInWithOtp({
-                phone: phone,
+                phone: emailOrPhone,
             });
 
             if (error) throw error;
@@ -134,7 +132,7 @@ export default function Auth() {
     const handleOtpVerification = async () => {
         try {
             const { user, session, error } = await supabase.auth.verifyOtp({
-                phone: phone,
+                phone: emailOrPhone,
                 token: otp,
             });
 
@@ -156,59 +154,47 @@ export default function Auth() {
                 {errorMessage && <div className="text-red-500 text-center mb-4">{errorMessage}</div>}
                 {resetMessage && <div className="text-green-500 text-center mb-4">{resetMessage}</div>}
 
-                {isRegistered && (
-                    <div className="text-yellow-500 text-center mb-4">
-                        A verification email has been sent to {email}. Please check your inbox and confirm your email address.
-                    </div>
-                )}
-
-                {isPhoneSignIn ? (
+                {isResettingPassword ? (
                     <div className="space-y-4">
                         <div className="field">
-                            <label htmlFor="otp" className="text-sm">Enter OTP</label>
+                            <label htmlFor="reset-email" className="text-sm">Email or Phone</label>
                             <input
                                 type="text"
-                                name="otp"
+                                name="reset-email"
                                 className="w-full p-3 mt-1 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none text-white glow-input"
-                                onChange={(e) => setOtp(e.target.value)}
-                                value={otp}
-                                placeholder="OTP"
+                                onChange={(e) => setEmailOrPhone(e.target.value)}
+                                value={emailOrPhone}
+                                placeholder="Email or Phone"
                             />
                         </div>
                         <button
                             className="w-full p-3 mt-5 rounded-lg bg-black text-white hover:bg-gray-700 transition-colors"
-                            onClick={handleOtpVerification}
+                            onClick={handlePasswordReset}
                         >
-                            Verify OTP
+                            Restablecer Contraseña
                         </button>
+                        <div className="text-center mt-3 text-sm">
+                            <span
+                                onClick={() => setIsResettingPassword(false)}
+                                className="text-blue-500 cursor-pointer"
+                            >
+                                Volver al inicio de sesión
+                            </span>
+                        </div>
                     </div>
                 ) : (
                     <div className="space-y-4">
-                        {isSignUp ? (
-                            <div className="field">
-                                <label htmlFor="phone" className="text-sm">Phone</label>
-                                <input
-                                    type="text"
-                                    name="phone"
-                                    className="w-full p-3 mt-1 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none text-white glow-input"
-                                    onChange={(e) => setPhone(e.target.value)}
-                                    value={phone}
-                                    placeholder="Phone number"
-                                />
-                            </div>
-                        ) : (
-                            <div className="field">
-                                <label htmlFor="email" className="text-sm">Email</label>
-                                <input
-                                    type="email"
-                                    name="email"
-                                    className="w-full p-3 mt-1 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none text-white glow-input"
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    value={email}
-                                    placeholder="Email"
-                                />
-                            </div>
-                        )}
+                        <div className="field">
+                            <label htmlFor="emailOrPhone" className="text-sm">Email or Phone</label>
+                            <input
+                                type="text"
+                                name="emailOrPhone"
+                                className="w-full p-3 mt-1 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none text-white glow-input"
+                                onChange={(e) => setEmailOrPhone(e.target.value)}
+                                value={emailOrPhone}
+                                placeholder="Email or Phone"
+                            />
+                        </div>
 
                         {!isSignUp && (
                             <div className="field">
@@ -238,7 +224,7 @@ export default function Auth() {
                             className="w-full p-3 mt-5 rounded-lg bg-black text-white hover:bg-gray-700 transition-colors"
                             onClick={isSignUp ? handleSignUp : handlePhoneSignIn}
                         >
-                            {isSignUp ? 'Sign Up' : 'Sign In with Phone'}
+                            {isSignUp ? 'Sign Up' : 'Sign In'}
                         </button>
 
                         {/* Logos de Google, GitHub, Discord, Twitch */}
