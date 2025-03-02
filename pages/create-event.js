@@ -42,7 +42,7 @@ export default function UserArea() {
 
     return (
         <div className="flex flex-col h-screen p-4 bg-gray-900 text-white">
-            {/* Barra de navegación superior con "Inicio", "Chat" y "Libros" */}
+            {/* Barra de navegación superior con "Inicio", "Eventos", "Chat", y "Libros" */}
             <div className="flex justify-between items-center mb-4">
                 <div>
                     <img
@@ -61,14 +61,13 @@ export default function UserArea() {
                         Inicio
                     </button>
 
-                            {/* Botón de "Eventos" */}
+                    {/* Botón de "Eventos" */}
                     <button
                         onClick={() => router.push('/EventsArea')}
                         className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
                     >
                         Eventos
                     </button>
-
 
                     {/* Botón de "Chat" */}
                     <button
@@ -86,6 +85,7 @@ export default function UserArea() {
                         Libros
                     </button>
 
+                    {/* Mostrar el botón "Crear Libro" si el rol es 'owner' */}
                     {role === 'owner' && (
                         <button
                             className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
@@ -93,7 +93,9 @@ export default function UserArea() {
                         >
                             Crear Libro
                         </button>
+                    )}
 
+                    {/* Mostrar el botón "Crear Evento" si el rol es 'owner' o 'admin' */}
                     {(role === 'owner' || role === 'admin') && (
                         <button
                             className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
@@ -101,7 +103,6 @@ export default function UserArea() {
                         >
                             Crear Evento
                         </button>
-
                     )}
                 </div>
             </div>
@@ -118,4 +119,3 @@ export default function UserArea() {
         </div>
     );
 }
-
