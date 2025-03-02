@@ -113,6 +113,121 @@ export default function Auth() {
         }
     };
 
+    // Phone sign in handler (using OTP)import { useState } from 'react';
+import { supabase } from '../utils/supabaseClient';
+import { useRouter } from 'next/router';
+
+export default function Auth() {
+    const router = useRouter();
+    const [emailOrPhone, setEmailOrPhone] = useState('');
+    const [password, setPassword] = useState('');
+    const [otp, setOtp] = useState('');
+    const [errorMessage, setErrorMessage] = useState(null);
+    const [isSignUp, setIsSignUp] = useState(false);
+    const [resetMessage, setResetMessage] = useState(null);
+    const [isResettingPassword, setIsResettingPassword] = useState(false);
+    const [isPhoneSignIn, setIsPhoneSignIn] = useState(false);
+
+    const handleSignIn = async () => {
+        try {
+            const { user, session, error } = await supabase.auth.signInWithPassword({
+                email: emailOrPhone,
+                password,
+            });
+
+            if (error) throw error;
+
+            router.push("https://encantia.lat/");
+        } catch (e) {
+            setErrorMessage(e.message);
+        }
+    };
+
+    const handleSignUp = async () => {
+        try {
+            const { user, error } = await supabase.auth.signUp({
+                email: emailOrPhone,
+                password,
+            });
+
+            if (error) throw error;
+
+            router.push("https://encantia.lat/");
+        } catch (e) {
+            setErrorMessage(e.message);
+        }
+    };
+
+    const handlePasswordReset = async () => {
+        try {
+            const { error } = await supabase.auth.resetPasswordForEmail(emailOrPhone);
+            if (error) throw error;
+            setResetMessage("Se ha enviado un correo para restablecer tu contraseña.");
+        } catch (e) {
+            setErrorMessage(e.message);
+        }
+    };
+
+    // Google login handler
+    const handleGoogleSignIn = async () => {
+        try {
+            const { user, session, error } = await supabase.auth.signInWithOAuth({
+                provider: 'google',
+            });
+
+            if (error) throw error;
+
+            router.push("https://encantia.lat/");
+        } catch (e) {
+            setErrorMessage(e.message);
+        }
+    };
+
+    // GitHub login handler
+    const handleGitHubSignIn = async () => {
+        try {
+            const { user, session, error } = await supabase.auth.signInWithOAuth({
+                provider: 'github',
+            });
+
+            if (error) throw error;
+
+            router.push("https://encantia.lat/");
+        } catch (e) {
+            setErrorMessage(e.message);
+        }
+    };
+
+    // Discord login handler
+    const handleDiscordSignIn = async () => {
+        try {
+            const { user, session, error } = await supabase.auth.signInWithOAuth({
+                provider: 'discord',
+            });
+
+            if (error) throw error;
+
+            router.push("https://encantia.lat/");
+        } catch (e) {
+            setErrorMessage(e.message);
+        }
+    };
+
+    // Twitch login handler
+    const handleTwitchSignIn = async () => {
+        try {
+            const { user, session, error } = await supabase.auth.signInWithOAuth({
+                provider: 'twitch',
+            });
+
+            if (error) throw error;
+
+            router.push("https://encantia.lat/");
+        } catch (e) {
+            setErrorMessage(e.message);
+        }
+    };
+
     // Phone sign in handler (using OTP)
     const handlePhoneSignIn = async () => {
         try {
@@ -148,7 +263,7 @@ export default function Auth() {
         <div className="flex items-center justify-center min-h-screen bg-gray-900 text-white">
             <div className="bg-gray-800 p-8 rounded-lg shadow-xl w-full max-w-md border-4 border-blue-500 bg-opacity-20 glow-border">
                 <h1 className="text-2xl font-semibold text-center mb-6">
-                    {isResettingPassword ? 'Restablecer Contraseña' : isSignUp ? 'Sign Up' : 'Sign In'}
+                    {isResettingPassword ? 'Restablecer Contraseña' : isSignUp ? 'Registrarse' : 'Iniciar Sesión'}
                 </h1>
 
                 {errorMessage && <div className="text-red-500 text-center mb-4">{errorMessage}</div>}
@@ -196,9 +311,9 @@ export default function Auth() {
                             />
                         </div>
 
-                        {!isSignUp && (
+                        {isSignUp && (
                             <div className="field">
-                                <label htmlFor="password" className="text-sm">Password</label>
+                                <label htmlFor="password" className="text-sm">Contraseña</label>
                                 <input
                                     type="password"
                                     name="password"
@@ -206,7 +321,7 @@ export default function Auth() {
                                     className="w-full p-3 mt-1 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none text-white glow-input"
                                     onChange={(e) => setPassword(e.target.value)}
                                     value={password}
-                                    placeholder="Password"
+                                    placeholder="Contraseña"
                                 />
                             </div>
                         )}
@@ -224,7 +339,7 @@ export default function Auth() {
                             className="w-full p-3 mt-5 rounded-lg bg-black text-white hover:bg-gray-700 transition-colors"
                             onClick={isSignUp ? handleSignUp : handlePhoneSignIn}
                         >
-                            {isSignUp ? 'Sign Up' : 'Sign In'}
+                            {isSignUp ? 'Registrarse' : 'Iniciar Sesión'}
                         </button>
 
                         {/* Logos de Google, GitHub, Discord, Twitch */}
@@ -266,22 +381,22 @@ export default function Auth() {
                         <div className="text-center mt-3 text-sm">
                             {isSignUp ? (
                                 <p>
-                                    Already have an account?{' '}
+                                    ¿Ya tienes cuenta?{' '}
                                     <span
                                         onClick={() => setIsSignUp(false)}
                                         className="text-blue-500 cursor-pointer"
                                     >
-                                        Sign In
+                                        Iniciar sesión
                                     </span>
                                 </p>
                             ) : (
                                 <p>
-                                    Don't have an account?{' '}
+                                    ¿No tienes cuenta?{' '}
                                     <span
                                         onClick={() => setIsSignUp(true)}
                                         className="text-blue-500 cursor-pointer"
                                     >
-                                        Sign Up
+                                        Regístrate
                                     </span>
                                 </p>
                             )}
