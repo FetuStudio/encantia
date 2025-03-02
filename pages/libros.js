@@ -47,6 +47,12 @@ export default function Libros() {
                     >
                         Chat
                     </button>
+                    <button
+                        className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors"
+                        onClick={() => router.push('/login')}
+                    >
+                        Login
+                    </button>
                 </div>
             </div>
 
@@ -55,7 +61,7 @@ export default function Libros() {
                 {books.map((book) => (
                     <div
                         key={book.id}
-                        className="bg-gray-800 p-4 rounded-lg cursor-pointer"
+                        className="bg-gray-800 p-4 rounded-lg cursor-pointer hover:bg-gray-700 transition-colors"
                     >
                         <img
                             src={book.cover_url}
