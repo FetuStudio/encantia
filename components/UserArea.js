@@ -52,7 +52,7 @@ export default function Libros() {
     };
 
     return (
-        <div className="relative flex flex-col h-screen p-4 bg-gray-900 text-white">
+        <div className={`relative flex flex-col h-screen p-4 bg-gray-900 text-white ${showLogoutModal ? 'backdrop-blur-md' : ''}`}>
             <div className="flex justify-between items-center mb-4">
                 <div>
                     <img
@@ -112,8 +112,8 @@ export default function Libros() {
             </button>
 
             {showLogoutModal && (
-                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-md">
-                    <div className="bg-white text-black p-6 rounded-lg shadow-lg animate-bounce">
+                <div className="fixed inset-0 flex items-center justify-center">
+                    <div className="bg-white text-black p-6 rounded-lg shadow-lg">
                         <p className="text-lg font-bold mb-4">¿Estás seguro que quieres cerrar sesión?</p>
                         <div className="flex justify-center gap-4">
                             <button
