@@ -1,12 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { supabase } from '../utils/supabaseClient';
 import { useRouter } from 'next/router';
 
-export default function CreateEvent() {
-    const [eventName, setEventName] = useState('');
-    const [eventDate, setEventDate] = useState('');
-    const [eventDescription, setEventDescription] = useState('');
-    const [events, setEvents] = useState([]);
+export default function UserArea() {
+    const [user, setUser] = useState(null);
     const [role, setRole] = useState(null);
     const router = useRouter();
 
@@ -17,6 +14,7 @@ export default function CreateEvent() {
                 console.error('Error fetching user:', error);
                 return;
             }
+            setUser(user);
 
             if (user) {
                 const { data, error: roleError } = await supabase
@@ -29,118 +27,86 @@ export default function CreateEvent() {
                     console.error('Error fetching role:', roleError);
                     return;
                 }
-
-                setRole(data?.role); 
-            }
-        };
-
-        const fetchEvents = async () => {
-            const { data, error } = await supabase.from('events').select('*');
-            if (error) {
-                console.error('Error fetching events:', error);
-            } else {
-                setEvents(data);
+                setRole(data?.role);
             }
         };
 
         fetchUserProfile();
-        fetchEvents();
     }, []);
 
-    const handleCreateEvent = async (e) => {
-        e.preventDefault();
-
-        const { data, error } = await supabase
-            .from('events')
-            .insert([
-                {
-                    name: eventName,
-                    date: eventDate,
-                    description: eventDescription,
-                },
-            ]);
-
-        if (error) {
-            alert('Error creating event: ' + error.message);
-        } else {
-            router.push('/'); 
-        }
-    };
-
-    const handleDeleteEvent = async (eventId) => {
-        const { error } = await supabase
-            .from('events')
-            .delete()
-            .eq('id', eventId);
-
-        if (error) {
-            alert('Error deleting event: ' + error.message);
-        } else {
-            setEvents(events.filter((event) => event.id !== eventId));
-        }
+    const handleLogout = async () => {
+        await supabase.auth.signOut();
+        // Redirigir siempre a https://www.encantia.lat
+        router.push("https://encantia.lat/"); 
     };
 
     return (
-        <div className="flex flex-col h-screen px-6 bg-gray-900 text-white dark:bg-gray-900 dark:text-white">
-            <div className="flex flex-col items-center justify-center space-y-6">
-                {/* Título y formulario */}
-                <h1 className="text-3xl font-semibold mb-4">Crear Evento</h1>
-                <form onSubmit={handleCreateEvent} className="w-full max-w-md space-y-4 mb-8">
-                    <input
-                        type="text"
-                        placeholder="Nombre del Evento"
-                        value={eventName}
-                        onChange={(e) => setEventName(e.target.value)}
-                        className="w-full p-3 bg-gray-700 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-green-500"
+        <div className="flex flex-col h-screen p-4 bg-gray-900 text-white">
+            {/* Barra de navegación superior con "Inicio", "Chat" y "Libros" */}
+            <div className="flex justify-between items-center mb-4">
+                <div>
+                    <img
+                        src="https://i.ibb.co/933TjLds/encantia-logo-2025.webp"
+                        alt="Logo"
+                        className="h-16"
                     />
-                    <input
-                        type="datetime-local"
-                        value={eventDate}
-                        onChange={(e) => setEventDate(e.target.value)}
-                        className="w-full p-3 bg-gray-700 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-green-500"
-                    />
-                    <textarea
-                        placeholder="Descripción del Evento"
-                        value={eventDescription}
-                        onChange={(e) => setEventDescription(e.target.value)}
-                        className="w-full p-3 bg-gray-700 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-green-500"
-                    />
-                    <button
-                        type="submit"
-                        className="w-full py-3 bg-green-600 text-white rounded-md shadow-md hover:bg-green-700 transition-all"
-                    >
-                        Crear Evento
-                    </button>
-                </form>
+                </div>
 
-                {/* Mostrar los eventos creados */}
-                <div className="w-full max-w-md space-y-4">
-                    <h2 className="text-xl font-semibold">Eventos Actuales</h2>
-                    {events.length === 0 ? (
-                        <div className="text-center text-gray-400">No hay eventos disponibles.</div>
-                    ) : (
-                        events.map((event) => (
-                            <div
-                                key={event.id}
-                                className="bg-gray-800 p-4 rounded-md shadow-md"
-                            >
-                                <h3 className="text-lg font-semibold">{event.name}</h3>
-                                <p className="text-sm text-gray-400">{event.date}</p>
-                                <p className="mt-2">{event.description}</p>
-                                {/* Solo los admins pueden eliminar eventos */}
-                                {role === 'admin' && (
-                                    <button
-                                        onClick={() => handleDeleteEvent(event.id)}
-                                        className="mt-2 text-red-600 hover:text-red-800"
-                                    >
-                                        Eliminar Evento
-                                    </button>
-                                )}
-                            </div>
-                        ))
+                <div className="flex gap-4">
+                    {/* Botón de "Inicio" */}
+                    <button
+                        onClick={() => window.location.href = "https://encantia.lat/"}
+                        className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
+                    >
+                        Inicio
+                    </button>
+
+                            {/* Botón de "Eventos" */}
+                    <button
+                        onClick={() => router.push('/EventsArea')}
+                        className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
+                    >
+                        Eventos
+                    </button>
+
+
+                    {/* Botón de "Chat" */}
+                    <button
+                        onClick={() => router.push('/chat')}
+                        className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
+                    >
+                        Chat
+                    </button>
+
+                    {/* Botón de "Libros" */}
+                    <button
+                        className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
+                        onClick={() => router.push('/libros')}
+                    >
+                        Libros
+                    </button>
+
+                    {role === 'owner' && (
+                        <button
+                            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
+                            onClick={() => router.push('/crear-libro')}
+                        >
+                            Crear Libro
+                        </button>
                     )}
                 </div>
             </div>
+
+            {/* Aquí puedes agregar más contenido si lo deseas */}
+
+            {/* Botón de Logout en la parte inferior izquierda */}
+            <button
+                onClick={handleLogout}
+                className="fixed bottom-4 left-4 px-6 py-2 bg-black text-white rounded-full hover:bg-gray-800 transition-colors"
+            >
+                Logout
+            </button>
         </div>
     );
 }
+
