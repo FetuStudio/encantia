@@ -113,6 +113,15 @@ export default function CrearLibros() {
                         Inicio
                     </button>
 
+                            {/* Botón de "Eventos" */}
+                    <button
+                        onClick={() => router.push('/EventsArea')}
+                        className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
+                    >
+                        Eventos
+                    </button>
+
+
                     {/* Botón de "Chat" */}
                     <button
                         onClick={() => router.push('/chat')}
