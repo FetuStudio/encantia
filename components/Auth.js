@@ -82,6 +82,36 @@ export default function Auth() {
         }
     };
 
+    // Discord login handler
+    const handleDiscordSignIn = async () => {
+        try {
+            const { user, session, error } = await supabase.auth.signInWithOAuth({
+                provider: 'discord',
+            });
+
+            if (error) throw error;
+
+            router.push("https://encantia.lat/");
+        } catch (e) {
+            setErrorMessage(e.message);
+        }
+    };
+
+    // Twitch login handler
+    const handleTwitchSignIn = async () => {
+        try {
+            const { user, session, error } = await supabase.auth.signInWithOAuth({
+                provider: 'twitch',
+            });
+
+            if (error) throw error;
+
+            router.push("https://encantia.lat/");
+        } catch (e) {
+            setErrorMessage(e.message);
+        }
+    };
+
     return (
         <div className="flex items-center justify-center min-h-screen bg-gray-900 text-white">
             <div className="bg-gray-800 p-8 rounded-lg shadow-xl w-full max-w-md border-4 border-blue-500 bg-opacity-20 glow-border">
@@ -169,7 +199,7 @@ export default function Auth() {
                             {isSignUp ? 'Sign Up' : 'Sign In'}
                         </button>
 
-                        {/* Logos de Google y GitHub */}
+                        {/* Logos de Google, GitHub, Discord, Twitch */}
                         <div className="flex justify-center mt-4 space-x-4">
                             <img
                                 src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg"
@@ -186,6 +216,22 @@ export default function Auth() {
                                 height="30"
                                 className="cursor-pointer"
                                 onClick={handleGitHubSignIn}
+                            />
+                            <img
+                                src="https://upload.wikimedia.org/wikipedia/commons/5/56/Discord_logo_2015.svg"
+                                alt="Discord Logo"
+                                width="30"
+                                height="30"
+                                className="cursor-pointer"
+                                onClick={handleDiscordSignIn}
+                            />
+                            <img
+                                src="https://upload.wikimedia.org/wikipedia/commons/6/6b/Twitch_logo_2019.svg"
+                                alt="Twitch Logo"
+                                width="30"
+                                height="30"
+                                className="cursor-pointer"
+                                onClick={handleTwitchSignIn}
                             />
                         </div>
 
