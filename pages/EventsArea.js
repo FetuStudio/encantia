@@ -27,7 +27,7 @@ export default function EventsArea() {
 
             // Buscar el rol del usuario en la base de datos (en la tabla de 'profiles' o donde tengas el rol)
             const { data, error } = await supabase
-                .from('profiles')  // Cambia esta tabla por la correcta donde tengas los roles
+                .from('user_roles')  // Cambia esta tabla por la correcta donde tengas los roles
                 .select('role')
                 .eq('id', user.id)
                 .single();
