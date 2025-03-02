@@ -10,6 +10,7 @@ export default function Auth() {
     const [isSignUp, setIsSignUp] = useState(false);
     const [isRegistered, setIsRegistered] = useState(false);
     const [resetMessage, setResetMessage] = useState(null);
+    const [isResettingPassword, setIsResettingPassword] = useState(false);
 
     const handleSignIn = async () => {
         try {
@@ -55,7 +56,7 @@ export default function Auth() {
         <div className="flex items-center justify-center min-h-screen bg-gray-900 text-white">
             <div className="bg-gray-800 p-8 rounded-lg shadow-xl w-full max-w-md border-4 border-blue-500 bg-opacity-20 glow-border">
                 <h1 className="text-2xl font-semibold text-center mb-6">
-                    {isSignUp ? 'Sign Up' : 'Sign In'}
+                    {isResettingPassword ? 'Restablecer Contraseña' : isSignUp ? 'Sign Up' : 'Sign In'}
                 </h1>
 
                 {errorMessage && <div className="text-red-500 text-center mb-4">{errorMessage}</div>}
@@ -67,72 +68,102 @@ export default function Auth() {
                     </div>
                 )}
 
-                <div className="space-y-4">
-                    <div className="field">
-                        <label htmlFor="email" className="text-sm">Email</label>
-                        <input
-                            type="email"
-                            name="email"
-                            className="w-full p-3 mt-1 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none text-white glow-input"
-                            onChange={(e) => setEmail(e.target.value)}
-                            value={email}
-                            placeholder="Email"
-                        />
-                    </div>
-
-                    <div className="field">
-                        <label htmlFor="password" className="text-sm">Password</label>
-                        <input
-                            type="password" 
-                            name="password"
-                            id="password"
-                            className="w-full p-3 mt-1 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none text-white glow-input"
-                            onChange={(e) => setPassword(e.target.value)}
-                            value={password}
-                            placeholder="Password"
-                        />
-                    </div>
-
-                    <div className="text-right text-sm">
-                        <span 
-                            className="text-blue-500 cursor-pointer hover:underline"
+                {isResettingPassword ? (
+                    <div className="space-y-4">
+                        <div className="field">
+                            <label htmlFor="reset-email" className="text-sm">Email</label>
+                            <input
+                                type="email"
+                                name="reset-email"
+                                className="w-full p-3 mt-1 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none text-white glow-input"
+                                onChange={(e) => setEmail(e.target.value)}
+                                value={email}
+                                placeholder="Email"
+                            />
+                        </div>
+                        <button
+                            className="w-full p-3 mt-5 rounded-lg bg-black text-white hover:bg-gray-700 transition-colors"
                             onClick={handlePasswordReset}
                         >
-                            ¿Se te olvidó la contraseña?
-                        </span>
+                            Restablecer Contraseña
+                        </button>
+                        <div className="text-center mt-3 text-sm">
+                            <span 
+                                onClick={() => setIsResettingPassword(false)} 
+                                className="text-blue-500 cursor-pointer"
+                            >
+                                Volver al inicio de sesión
+                            </span>
+                        </div>
                     </div>
+                ) : (
+                    <div className="space-y-4">
+                        <div className="field">
+                            <label htmlFor="email" className="text-sm">Email</label>
+                            <input
+                                type="email"
+                                name="email"
+                                className="w-full p-3 mt-1 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none text-white glow-input"
+                                onChange={(e) => setEmail(e.target.value)}
+                                value={email}
+                                placeholder="Email"
+                            />
+                        </div>
 
-                    <button
-                        className="w-full p-3 mt-5 rounded-lg bg-black text-white hover:bg-gray-700 transition-colors"
-                        onClick={isSignUp ? handleSignUp : handleSignIn}
-                    >
-                        {isSignUp ? 'Sign Up' : 'Sign In'}
-                    </button>
+                        <div className="field">
+                            <label htmlFor="password" className="text-sm">Password</label>
+                            <input
+                                type="password" 
+                                name="password"
+                                id="password"
+                                className="w-full p-3 mt-1 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none text-white glow-input"
+                                onChange={(e) => setPassword(e.target.value)}
+                                value={password}
+                                placeholder="Password"
+                            />
+                        </div>
 
-                    <div className="text-center mt-3 text-sm">
-                        {isSignUp ? (
-                            <p>
-                                Already have an account?{' '}
-                                <span 
-                                    onClick={() => setIsSignUp(false)} 
-                                    className="text-blue-500 cursor-pointer"
-                                >
-                                    Sign In
-                                </span>
-                            </p>
-                        ) : (
-                            <p>
-                                Don't have an account?{' '}
-                                <span 
-                                    onClick={() => setIsSignUp(true)} 
-                                    className="text-blue-500 cursor-pointer"
-                                >
-                                    Sign Up
-                                </span>
-                            </p>
-                        )}
+                        <div className="text-right text-sm">
+                            <span 
+                                className="text-blue-500 cursor-pointer hover:underline"
+                                onClick={() => setIsResettingPassword(true)}
+                            >
+                                ¿Se te olvidó la contraseña?
+                            </span>
+                        </div>
+
+                        <button
+                            className="w-full p-3 mt-5 rounded-lg bg-black text-white hover:bg-gray-700 transition-colors"
+                            onClick={isSignUp ? handleSignUp : handleSignIn}
+                        >
+                            {isSignUp ? 'Sign Up' : 'Sign In'}
+                        </button>
+
+                        <div className="text-center mt-3 text-sm">
+                            {isSignUp ? (
+                                <p>
+                                    Already have an account?{' '}
+                                    <span 
+                                        onClick={() => setIsSignUp(false)} 
+                                        className="text-blue-500 cursor-pointer"
+                                    >
+                                        Sign In
+                                    </span>
+                                </p>
+                            ) : (
+                                <p>
+                                    Don't have an account?{' '}
+                                    <span 
+                                        onClick={() => setIsSignUp(true)} 
+                                        className="text-blue-500 cursor-pointer"
+                                    >
+                                        Sign Up
+                                    </span>
+                                </p>
+                            )}
+                        </div>
                     </div>
-                </div>
+                )}
             </div>
         </div>
     );
