@@ -52,7 +52,7 @@ export default function EventsArea() {
             <div className="flex justify-between items-center mb-6">
                 <div>
                     <img
-                        src="https://i.ibb.co/933TjLds/encantia-logo-2025.webp" // Logo
+                        src="https://images.encantia.lat/encantia-logo-2025.webp" // Logo
                         alt="Logo"
                         className="h-16"
                     />
