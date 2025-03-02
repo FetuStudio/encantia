@@ -97,9 +97,9 @@ export default function UserArea() {
                     {(role === 'owner' || role === 'admin') && (
                         <button
                             className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
-                            onClick={() => router.push('/crear-libro')}
+                            onClick={() => router.push('/create-events')}
                         >
-                            Crear Libro
+                            Crear Evento
                         </button>
                      
                     )}
