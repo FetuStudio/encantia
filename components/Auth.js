@@ -196,6 +196,21 @@ export default function Auth() {
                             />
                         </div>
 
+                        {!isPhoneSignIn && !isSignUp && (
+                            <div className="field">
+                                <label htmlFor="password" className="text-sm">Contraseña</label>
+                                <input
+                                    type="password"
+                                    name="password"
+                                    id="password"
+                                    className="w-full p-3 mt-1 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none text-white glow-input"
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    value={password}
+                                    placeholder="Contraseña"
+                                />
+                            </div>
+                        )}
+
                         {isSignUp && (
                             <div className="field">
                                 <label htmlFor="password" className="text-sm">Contraseña</label>
