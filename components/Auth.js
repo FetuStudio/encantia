@@ -1,12 +1,12 @@
-import { useState } from 'react'; 
+import { useState } from 'react';
 import { supabase } from '../utils/supabaseClient';
-import { useRouter } from 'next/router'; 
+import { useRouter } from 'next/router';
 
 export default function Auth() {
-    const router = useRouter(); 
+    const router = useRouter();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [errorMessage, setErrorMessage] = useState(null); 
+    const [errorMessage, setErrorMessage] = useState(null);
     const [isSignUp, setIsSignUp] = useState(false);
     const [isRegistered, setIsRegistered] = useState(false);
     const [resetMessage, setResetMessage] = useState(null);
@@ -21,7 +21,7 @@ export default function Auth() {
 
             if (error) throw error;
 
-            router.push("https://encantia.lat/"); 
+            router.push("https://encantia.lat/");
         } catch (e) {
             setErrorMessage(e.message);
         }
@@ -47,6 +47,21 @@ export default function Auth() {
             const { error } = await supabase.auth.resetPasswordForEmail(email);
             if (error) throw error;
             setResetMessage("Se ha enviado un correo para restablecer tu contraseña.");
+        } catch (e) {
+            setErrorMessage(e.message);
+        }
+    };
+
+    // Google login handler
+    const handleGoogleSignIn = async () => {
+        try {
+            const { user, session, error } = await supabase.auth.signInWithOAuth({
+                provider: 'google',
+            });
+
+            if (error) throw error;
+
+            router.push("https://encantia.lat/");
         } catch (e) {
             setErrorMessage(e.message);
         }
@@ -88,8 +103,8 @@ export default function Auth() {
                             Restablecer Contraseña
                         </button>
                         <div className="text-center mt-3 text-sm">
-                            <span 
-                                onClick={() => setIsResettingPassword(false)} 
+                            <span
+                                onClick={() => setIsResettingPassword(false)}
                                 className="text-blue-500 cursor-pointer"
                             >
                                 Volver al inicio de sesión
@@ -113,7 +128,7 @@ export default function Auth() {
                         <div className="field">
                             <label htmlFor="password" className="text-sm">Password</label>
                             <input
-                                type="password" 
+                                type="password"
                                 name="password"
                                 id="password"
                                 className="w-full p-3 mt-1 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none text-white glow-input"
@@ -124,7 +139,7 @@ export default function Auth() {
                         </div>
 
                         <div className="text-right text-sm">
-                            <span 
+                            <span
                                 className="text-blue-500 cursor-pointer hover:underline"
                                 onClick={() => setIsResettingPassword(true)}
                             >
@@ -139,12 +154,19 @@ export default function Auth() {
                             {isSignUp ? 'Sign Up' : 'Sign In'}
                         </button>
 
+                        <button
+                            className="w-full p-3 mt-5 rounded-lg bg-red-600 text-white hover:bg-red-500 transition-colors"
+                            onClick={handleGoogleSignIn}
+                        >
+                            Iniciar sesión con Google
+                        </button>
+
                         <div className="text-center mt-3 text-sm">
                             {isSignUp ? (
                                 <p>
                                     Already have an account?{' '}
-                                    <span 
-                                        onClick={() => setIsSignUp(false)} 
+                                    <span
+                                        onClick={() => setIsSignUp(false)}
                                         className="text-blue-500 cursor-pointer"
                                     >
                                         Sign In
@@ -153,8 +175,8 @@ export default function Auth() {
                             ) : (
                                 <p>
                                     Don't have an account?{' '}
-                                    <span 
-                                        onClick={() => setIsSignUp(true)} 
+                                    <span
+                                        onClick={() => setIsSignUp(true)}
                                         className="text-blue-500 cursor-pointer"
                                     >
                                         Sign Up
