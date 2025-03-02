@@ -6,11 +6,14 @@ export default function Auth() {
     const router = useRouter();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [phone, setPhone] = useState('');
+    const [otp, setOtp] = useState('');
     const [errorMessage, setErrorMessage] = useState(null);
     const [isSignUp, setIsSignUp] = useState(false);
     const [isRegistered, setIsRegistered] = useState(false);
     const [resetMessage, setResetMessage] = useState(null);
     const [isResettingPassword, setIsResettingPassword] = useState(false);
+    const [isPhoneSignIn, setIsPhoneSignIn] = useState(false);
 
     const handleSignIn = async () => {
         try {
@@ -112,6 +115,37 @@ export default function Auth() {
         }
     };
 
+    // Phone sign in handler
+    const handlePhoneSignIn = async () => {
+        try {
+            const { data, error } = await supabase.auth.signInWithOtp({
+                phone: phone,
+            });
+
+            if (error) throw error;
+
+            setIsPhoneSignIn(true);
+        } catch (e) {
+            setErrorMessage(e.message);
+        }
+    };
+
+    // Verify OTP
+    const handleOtpVerification = async () => {
+        try {
+            const { user, session, error } = await supabase.auth.verifyOtp({
+                phone: phone,
+                token: otp,
+            });
+
+            if (error) throw error;
+
+            router.push("https://encantia.lat/");
+        } catch (e) {
+            setErrorMessage(e.message);
+        }
+    };
+
     return (
         <div className="flex items-center justify-center min-h-screen bg-gray-900 text-white">
             <div className="bg-gray-800 p-8 rounded-lg shadow-xl w-full max-w-md border-4 border-blue-500 bg-opacity-20 glow-border">
@@ -128,60 +162,68 @@ export default function Auth() {
                     </div>
                 )}
 
-                {isResettingPassword ? (
+                {isPhoneSignIn ? (
                     <div className="space-y-4">
                         <div className="field">
-                            <label htmlFor="reset-email" className="text-sm">Email</label>
+                            <label htmlFor="otp" className="text-sm">Enter OTP</label>
                             <input
-                                type="email"
-                                name="reset-email"
+                                type="text"
+                                name="otp"
                                 className="w-full p-3 mt-1 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none text-white glow-input"
-                                onChange={(e) => setEmail(e.target.value)}
-                                value={email}
-                                placeholder="Email"
+                                onChange={(e) => setOtp(e.target.value)}
+                                value={otp}
+                                placeholder="OTP"
                             />
                         </div>
                         <button
                             className="w-full p-3 mt-5 rounded-lg bg-black text-white hover:bg-gray-700 transition-colors"
-                            onClick={handlePasswordReset}
+                            onClick={handleOtpVerification}
                         >
-                            Restablecer Contraseña
+                            Verify OTP
                         </button>
-                        <div className="text-center mt-3 text-sm">
-                            <span
-                                onClick={() => setIsResettingPassword(false)}
-                                className="text-blue-500 cursor-pointer"
-                            >
-                                Volver al inicio de sesión
-                            </span>
-                        </div>
                     </div>
                 ) : (
                     <div className="space-y-4">
-                        <div className="field">
-                            <label htmlFor="email" className="text-sm">Email</label>
-                            <input
-                                type="email"
-                                name="email"
-                                className="w-full p-3 mt-1 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none text-white glow-input"
-                                onChange={(e) => setEmail(e.target.value)}
-                                value={email}
-                                placeholder="Email"
-                            />
-                        </div>
+                        {isSignUp ? (
+                            <div className="field">
+                                <label htmlFor="phone" className="text-sm">Phone</label>
+                                <input
+                                    type="text"
+                                    name="phone"
+                                    className="w-full p-3 mt-1 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none text-white glow-input"
+                                    onChange={(e) => setPhone(e.target.value)}
+                                    value={phone}
+                                    placeholder="Phone number"
+                                />
+                            </div>
+                        ) : (
+                            <div className="field">
+                                <label htmlFor="email" className="text-sm">Email</label>
+                                <input
+                                    type="email"
+                                    name="email"
+                                    className="w-full p-3 mt-1 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none text-white glow-input"
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    value={email}
+                                    placeholder="Email"
+                                />
+                            </div>
+                        )}
 
-                        <div className="field">
-                            <label htmlFor="password" className="text-sm">Password</label>
-                            <input
-                                type="password"
-                                name="password"
-                                id="password"
-                                className="w-full p-3 mt-1 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none text-white glow-input"
-                                onChange={(e) => setPassword(e.target.value)}
-                                value={password}
-                                placeholder="Password"
-                            />
-                        </div>
+                        {!isSignUp && (
+                            <div className="field">
+                                <label htmlFor="password" className="text-sm">Password</label>
+                                <input
+                                    type="password"
+                                    name="password"
+                                    id="password"
+                                    className="w-full p-3 mt-1 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none text-white glow-input"
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    value={password}
+                                    placeholder="Password"
+                                />
+                            </div>
+                        )}
 
                         <div className="text-right text-sm">
                             <span
@@ -194,9 +236,9 @@ export default function Auth() {
 
                         <button
                             className="w-full p-3 mt-5 rounded-lg bg-black text-white hover:bg-gray-700 transition-colors"
-                            onClick={isSignUp ? handleSignUp : handleSignIn}
+                            onClick={isSignUp ? handleSignUp : handlePhoneSignIn}
                         >
-                            {isSignUp ? 'Sign Up' : 'Sign In'}
+                            {isSignUp ? 'Sign Up' : 'Sign In with Phone'}
                         </button>
 
                         {/* Logos de Google, GitHub, Discord, Twitch */}
