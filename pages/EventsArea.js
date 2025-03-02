@@ -4,6 +4,7 @@ import { useRouter } from 'next/router';
 
 export default function EventsArea() {
     const [events, setEvents] = useState([]);
+    const [userRole, setUserRole] = useState(null); // Estado para almacenar el rol del usuario
     const router = useRouter();
 
     useEffect(() => {
@@ -16,7 +17,30 @@ export default function EventsArea() {
             }
         };
 
+        const fetchUserRole = async () => {
+            // Obtener el usuario autenticado
+            const { data: { user }, error: authError } = await supabase.auth.getUser();
+            if (authError) {
+                console.error('Error fetching user:', authError);
+                return;
+            }
+
+            // Buscar el rol del usuario en la base de datos (en la tabla de 'profiles' o donde tengas el rol)
+            const { data, error } = await supabase
+                .from('profiles')  // Cambia esta tabla por la correcta donde tengas los roles
+                .select('role')
+                .eq('id', user.id)
+                .single();
+
+            if (error) {
+                console.error('Error fetching user role:', error);
+            } else {
+                setUserRole(data?.role); // Establecer el rol del usuario
+            }
+        };
+
         fetchEvents();
+        fetchUserRole();
     }, []);
 
     return (
@@ -63,6 +87,16 @@ export default function EventsArea() {
                     >
                         Libros
                     </button>
+
+                    {/* Botón de "Crear Libro" visible solo para los usuarios con rol "owner" */}
+                    {userRole === 'owner' && (
+                        <button
+                            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
+                            onClick={() => router.push('/crear-libro')}
+                        >
+                            Crear Libro
+                        </button>
+                    )}
                 </div>
             </div>
 
@@ -93,3 +127,4 @@ export default function EventsArea() {
         </div>
     );
 }
+
