@@ -4,6 +4,7 @@ import { useRouter } from "next/router";
 
 export default function Libros() {
     const [books, setBooks] = useState([]); 
+    const [role, setRole] = useState("");  // Asegúrate de que el rol se obtiene correctamente
     const router = useRouter(); 
 
     useEffect(() => { 
@@ -14,6 +15,10 @@ export default function Libros() {
         };
 
         fetchBooks();
+        
+        // Aquí deberías configurar cómo obtener el rol del usuario
+        // Ejemplo:
+        // setRole('admin');  // Asignar un rol de ejemplo
     }, []);
 
     return (
@@ -37,14 +42,13 @@ export default function Libros() {
                         Inicio
                     </button>
 
-                            {/* Botón de "Eventos" */}
+                    {/* Botón de "Eventos" */}
                     <button
                         onClick={() => router.push('/EventsArea')}
                         className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
                     >
                         Eventos
                     </button>
-
 
                     {/* Botón de "Chat" */}
                     <button
@@ -62,6 +66,7 @@ export default function Libros() {
                         Libros
                     </button>
 
+                    {/* Mostrar botones para "Crear Libro" y "Crear Evento" si el rol es 'owner' o 'admin' */}
                     {role === 'owner' && (
                         <button
                             className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
@@ -69,6 +74,7 @@ export default function Libros() {
                         >
                             Crear Libro
                         </button>
+                    )}
 
                     {(role === 'owner' || role === 'admin') && (
                         <button
@@ -77,7 +83,6 @@ export default function Libros() {
                         >
                             Crear Evento
                         </button>
-
                     )}
                 </div>
             </div>
