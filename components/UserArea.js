@@ -1,48 +1,58 @@
-import { useEffect, useState } from 'react';
-import { supabase } from '../utils/supabaseClient';
-import { useRouter } from 'next/router';
+import { useState, useEffect } from "react"; 
+import { supabase } from "../utils/supabaseClient"; 
+import { useRouter } from "next/router"; 
 
-export default function UserArea() {
-    const [user, setUser] = useState(null);
-    const [role, setRole] = useState(null);
-    const router = useRouter();
+export default function Libros() {
+    const [books, setBooks] = useState([]); 
+    const [role, setRole] = useState("");  // Estado para almacenar el rol del usuario
+    const [showLogoutModal, setShowLogoutModal] = useState(false);
+    const router = useRouter(); 
 
     useEffect(() => {
-        const fetchUserProfile = async () => {
-            const { data: { user }, error } = await supabase.auth.getUser();
+        const fetchBooks = async () => {
+            const { data, error } = await supabase.from("books").select("*");
             if (error) {
-                console.error('Error fetching user:', error);
+                console.error("Error al obtener libros:", error);
+            } else {
+                setBooks(data);
+            }
+        };
+
+        const fetchUserRole = async () => {
+            const { data: { user }, error: authError } = await supabase.auth.getUser();
+            if (authError || !user) {
+                console.error("Error al obtener usuario:", authError);
                 return;
             }
-            setUser(user);
 
-            if (user) {
-                const { data, error: roleError } = await supabase
-                    .from('user_roles')
-                    .select('role')
-                    .eq('user_id', user.id)
-                    .single();
+            const { data, error } = await supabase
+                .from('user_roles')
+                .select('role')
+                .eq('user_id', user.id)
+                .single();
 
-                if (roleError) {
-                    console.error('Error fetching role:', roleError);
-                    return;
-                }
+            if (error) {
+                console.error("Error al obtener el rol del usuario:", error);
+            } else {
                 setRole(data?.role);
             }
         };
 
-        fetchUserProfile();
+        fetchBooks();
+        fetchUserRole();
     }, []);
 
     const handleLogout = async () => {
+        setShowLogoutModal(true);
+    };
+
+    const confirmLogout = async () => {
         await supabase.auth.signOut();
-        // Redirigir siempre a https://www.encantia.lat
-        router.push("https://encantia.lat/"); 
+        router.push("/");
     };
 
     return (
-        <div className="flex flex-col h-screen p-4 bg-gray-900 text-white">
-            {/* Barra de navegación superior con "Inicio", "Chat" y "Libros" */}
+        <div className="relative flex flex-col h-screen p-4 bg-gray-900 text-white">
             <div className="flex justify-between items-center mb-4">
                 <div>
                     <img
@@ -53,47 +63,36 @@ export default function UserArea() {
                 </div>
 
                 <div className="flex gap-4">
-                    {/* Botón de "Inicio" */}
                     <button
                         onClick={() => window.location.href = "https://encantia.lat/"}
                         className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
                     >
                         Inicio
                     </button>
-
-                            {/* Botón de "Eventos" */}
                     <button
                         onClick={() => router.push('/EventsArea')}
                         className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
                     >
                         Eventos
                     </button>
-
-
-                    {/* Botón de "Chat" */}
                     <button
                         onClick={() => router.push('/chat')}
                         className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
                     >
                         Chat
                     </button>
-
-                    {/* Botón de "Libros" */}
                     <button
                         className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
                         onClick={() => router.push('/libros')}
                     >
                         Libros
                     </button>
-
-                    {/* Botón de "Discord" */}
                     <button
                         onClick={() => window.open("https://discord.gg/dxcX8S3mrF", "_blank")}
                         className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
                     >
                         Discord
                     </button>
-
                     {role === 'owner' && (
                         <button
                             className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
@@ -101,21 +100,38 @@ export default function UserArea() {
                         >
                             Crear Libro
                         </button>
-                                
                     )}
                 </div>
             </div>
 
-            {/* Aquí puedes agregar más contenido si lo deseas */}
-
-            {/* Botón de Logout en la parte inferior izquierda */}
             <button
                 onClick={handleLogout}
                 className="fixed bottom-4 left-4 px-6 py-2 bg-black text-white rounded-full hover:bg-gray-800 transition-colors"
             >
                 Logout
             </button>
+
+            {showLogoutModal && (
+                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-md">
+                    <div className="bg-white text-black p-6 rounded-lg shadow-lg animate-bounce">
+                        <p className="text-lg font-bold mb-4">¿Estás seguro que quieres cerrar sesión?</p>
+                        <div className="flex justify-center gap-4">
+                            <button
+                                onClick={confirmLogout}
+                                className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-400 transition-colors"
+                            >
+                                Sí
+                            </button>
+                            <button
+                                onClick={() => setShowLogoutModal(false)}
+                                className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-400 transition-colors"
+                            >
+                                No
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
-
