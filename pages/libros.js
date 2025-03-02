@@ -88,6 +88,14 @@ export default function Libros() {
                         Libros
                     </button>
 
+                    {/* Botón de "Discord" */}
+                    <button
+                        onClick={() => window.open("https://discord.gg/dxcX8S3mrF", "_blank")}
+                        className="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-400 transition-colors"
+                    >
+                        Discord
+                    </button>
+
                     {/* Mostrar botones para "Crear Libro" si el rol es 'owner' */}
                     {role === 'owner' && (
                         <button
