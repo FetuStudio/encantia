@@ -1,7 +1,24 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { supabase } from "../supabaseClient"; // Importamos la instancia de Supabase
 
 const Jugadores = () => {
-  const jugadores = Array.from({ length: 90 }, (_, i) => `Jugador ${i + 1}`);
+  const [jugadores, setJugadores] = useState([]);
+
+  useEffect(() => {
+    const fetchJugadores = async () => {
+      const { data, error } = await supabase
+        .from("fg2players")
+        .select("Numero, Nickname"); // Seleccionamos las columnas
+
+      if (error) {
+        console.error("Error al obtener jugadores:", error);
+      } else {
+        setJugadores(data);
+      }
+    };
+
+    fetchJugadores();
+  }, []);
 
   return (
     <div className="bg-gray-900 min-h-screen text-white">
@@ -18,11 +35,16 @@ const Jugadores = () => {
       
       {/* Cuadros de Jugadores */}
       <div className="grid grid-cols-10 gap-4 p-4 justify-center">
-        {jugadores.map((jugador, index) => (
-          <div key={index} className="bg-gray-700 p-4 text-center rounded-lg shadow-md">
-            {jugador}
-          </div>
-        ))}
+        {jugadores.length > 0 ? (
+          jugadores.map((jugador, index) => (
+            <div key={index} className="bg-gray-700 p-4 text-center rounded-lg shadow-md">
+              <p className="text-lg font-bold">{jugador.Numero}</p>
+              <p className="text-sm">{jugador.Nickname}</p>
+            </div>
+          ))
+        ) : (
+          <p className="text-center text-gray-400">Cargando jugadores...</p>
+        )}
       </div>
     </div>
   );
