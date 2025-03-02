@@ -10,6 +10,7 @@ export default function Chat() {
     const [searchEmail, setSearchEmail] = useState('');
     const [user, setUser] = useState(null);
     const [error, setError] = useState(null);
+    const [role, setRole] = useState('');
     const router = useRouter();
 
     useEffect(() => {
@@ -29,8 +30,29 @@ export default function Chat() {
         if (user) {
             fetchContacts();
             fetchChatMessages();
+            fetchUserRole(); // Get the user's role
         }
     }, [user]);
+
+    const fetchUserRole = async () => {
+        const { data: { user }, error } = await supabase.auth.getUser();
+        if (error) {
+            console.error('Error fetching user role:', error);
+            return;
+        }
+
+        const { data, error: roleError } = await supabase
+            .from('user_roles')
+            .select('role')
+            .eq('user_id', user.id)
+            .single();
+
+        if (roleError) {
+            console.error('Error fetching role:', roleError);
+            return;
+        }
+        setRole(data?.role);  // Asignamos el rol del usuario
+    };
 
     const fetchContacts = async () => {
         const { data, error } = await supabase
@@ -118,7 +140,7 @@ export default function Chat() {
     };
 
     return (
-         <div className="flex flex-col h-screen p-4 bg-gray-900 text-white">
+        <div className="flex flex-col h-screen p-4 bg-gray-900 text-white">
             {/* Barra de navegación superior con "Inicio", "Chat" y "Libros" */}
             <div className="flex justify-between items-center mb-4">
                 <div>
@@ -130,7 +152,6 @@ export default function Chat() {
                 </div>
 
                 <div className="flex gap-4">
-                    {/* Botón de "Inicio" */}
                     <button
                         onClick={() => window.location.href = "https://encantia.lat/"}
                         className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
@@ -138,7 +159,6 @@ export default function Chat() {
                         Inicio
                     </button>
 
-                            {/* Botón de "Eventos" */}
                     <button
                         onClick={() => router.push('/EventsArea')}
                         className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
@@ -146,8 +166,6 @@ export default function Chat() {
                         Eventos
                     </button>
 
-
-                    {/* Botón de "Chat" */}
                     <button
                         onClick={() => router.push('/chat')}
                         className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
@@ -155,7 +173,6 @@ export default function Chat() {
                         Chat
                     </button>
 
-                    {/* Botón de "Libros" */}
                     <button
                         className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
                         onClick={() => router.push('/libros')}
@@ -170,6 +187,7 @@ export default function Chat() {
                         >
                             Crear Libro
                         </button>
+                    )}
 
                     {(role === 'owner' || role === 'admin') && (
                         <button
@@ -178,11 +196,10 @@ export default function Chat() {
                         >
                             Crear Evento
                         </button>
-                     
                     )}
                 </div>
             </div>
-                    
+
             <div className="flex gap-6">
                 {/* Barra lateral con la lista de contactos y búsqueda */}
                 <div className="w-1/3 bg-gray-800 p-4 rounded-lg">
@@ -261,3 +278,4 @@ export default function Chat() {
         </div>
     );
 }
+
