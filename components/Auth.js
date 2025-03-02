@@ -1,219 +1,170 @@
-import { useState } from 'react';
+import { useState } from 'react'; 
 import { supabase } from '../utils/supabaseClient';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/router'; 
 
 export default function Auth() {
-  const router = useRouter();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [errorMessage, setErrorMessage] = useState(null);
-  const [isSignUp, setIsSignUp] = useState(false);
-  const [isRegistered, setIsRegistered] = useState(false);
-  const [resetMessage, setResetMessage] = useState(null);
-  const [isResettingPassword, setIsResettingPassword] = useState(false);
+    const router = useRouter(); 
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [errorMessage, setErrorMessage] = useState(null); 
+    const [isSignUp, setIsSignUp] = useState(false);
+    const [isRegistered, setIsRegistered] = useState(false);
+    const [resetMessage, setResetMessage] = useState(null);
+    const [isResettingPassword, setIsResettingPassword] = useState(false);
 
-  // Función para iniciar sesión con Discord
-  const handleDiscordSignIn = async () => {
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'discord',
-        options: {
-          redirectTo: 'http://tu-sitio.com/auth/callback', // URL de redirección después de la autenticación
-        },
-      });
+    const handleSignIn = async () => {
+        try {
+            const { user, session, error } = await supabase.auth.signInWithPassword({
+                email,
+                password,
+            });
 
-      if (error) throw error;
-    } catch (error) {
-      setErrorMessage(error.message);
-    }
-  };
+            if (error) throw error;
 
-  // Función para iniciar sesión con email y contraseña
-  const handleSignIn = async () => {
-    try {
-      const { user, session, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+            router.push("https://encantia.lat/"); 
+        } catch (e) {
+            setErrorMessage(e.message);
+        }
+    };
 
-      if (error) throw error;
+    const handleSignUp = async () => {
+        try {
+            const { user, error } = await supabase.auth.signUp({
+                email,
+                password,
+            });
 
-      router.push("https://encantia.lat/");
-    } catch (e) {
-      setErrorMessage(e.message);
-    }
-  };
+            if (error) throw error;
 
-  const handleSignUp = async () => {
-    try {
-      const { user, error } = await supabase.auth.signUp({
-        email,
-        password,
-      });
+            setIsRegistered(true);
+        } catch (e) {
+            setErrorMessage(e.message);
+        }
+    };
 
-      if (error) throw error;
+    const handlePasswordReset = async () => {
+        try {
+            const { error } = await supabase.auth.resetPasswordForEmail(email);
+            if (error) throw error;
+            setResetMessage("Se ha enviado un correo para restablecer tu contraseña.");
+        } catch (e) {
+            setErrorMessage(e.message);
+        }
+    };
 
-      setIsRegistered(true);
-    } catch (e) {
-      setErrorMessage(e.message);
-    }
-  };
+    return (
+        <div className="flex items-center justify-center min-h-screen bg-gray-900 text-white">
+            <div className="bg-gray-800 p-8 rounded-lg shadow-xl w-full max-w-md border-4 border-blue-500 bg-opacity-20 glow-border">
+                <h1 className="text-2xl font-semibold text-center mb-6">
+                    {isResettingPassword ? 'Restablecer Contraseña' : isSignUp ? 'Sign Up' : 'Sign In'}
+                </h1>
 
-  const handlePasswordReset = async () => {
-    try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email);
-      if (error) throw error;
-      setResetMessage("Se ha enviado un correo para restablecer tu contraseña.");
-    } catch (e) {
-      setErrorMessage(e.message);
-    }
-  };
+                {errorMessage && <div className="text-red-500 text-center mb-4">{errorMessage}</div>}
+                {resetMessage && <div className="text-green-500 text-center mb-4">{resetMessage}</div>}
 
-  // Función para cerrar sesión
-  const handleSignOut = async () => {
-    try {
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
-      router.push('/');
-    } catch (e) {
-      setErrorMessage(e.message);
-    }
-  };
+                {isRegistered && (
+                    <div className="text-yellow-500 text-center mb-4">
+                        A verification email has been sent to {email}. Please check your inbox and confirm your email address.
+                    </div>
+                )}
 
-  return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-900 text-white">
-      <div className="bg-gray-800 p-8 rounded-lg shadow-xl w-full max-w-md border-4 border-blue-500 bg-opacity-20 glow-border">
-        <h1 className="text-2xl font-semibold text-center mb-6">
-          {isResettingPassword ? 'Restablecer Contraseña' : isSignUp ? 'Sign Up' : 'Sign In'}
-        </h1>
+                {isResettingPassword ? (
+                    <div className="space-y-4">
+                        <div className="field">
+                            <label htmlFor="reset-email" className="text-sm">Email</label>
+                            <input
+                                type="email"
+                                name="reset-email"
+                                className="w-full p-3 mt-1 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none text-white glow-input"
+                                onChange={(e) => setEmail(e.target.value)}
+                                value={email}
+                                placeholder="Email"
+                            />
+                        </div>
+                        <button
+                            className="w-full p-3 mt-5 rounded-lg bg-black text-white hover:bg-gray-700 transition-colors"
+                            onClick={handlePasswordReset}
+                        >
+                            Restablecer Contraseña
+                        </button>
+                        <div className="text-center mt-3 text-sm">
+                            <span 
+                                onClick={() => setIsResettingPassword(false)} 
+                                className="text-blue-500 cursor-pointer"
+                            >
+                                Volver al inicio de sesión
+                            </span>
+                        </div>
+                    </div>
+                ) : (
+                    <div className="space-y-4">
+                        <div className="field">
+                            <label htmlFor="email" className="text-sm">Email</label>
+                            <input
+                                type="email"
+                                name="email"
+                                className="w-full p-3 mt-1 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none text-white glow-input"
+                                onChange={(e) => setEmail(e.target.value)}
+                                value={email}
+                                placeholder="Email"
+                            />
+                        </div>
 
-        {errorMessage && <div className="text-red-500 text-center mb-4">{errorMessage}</div>}
-        {resetMessage && <div className="text-green-500 text-center mb-4">{resetMessage}</div>}
+                        <div className="field">
+                            <label htmlFor="password" className="text-sm">Password</label>
+                            <input
+                                type="password" 
+                                name="password"
+                                id="password"
+                                className="w-full p-3 mt-1 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none text-white glow-input"
+                                onChange={(e) => setPassword(e.target.value)}
+                                value={password}
+                                placeholder="Password"
+                            />
+                        </div>
 
-        {isRegistered && (
-          <div className="text-yellow-500 text-center mb-4">
-            A verification email has been sent to {email}. Please check your inbox and confirm your email address.
-          </div>
-        )}
+                        <div className="text-right text-sm">
+                            <span 
+                                className="text-blue-500 cursor-pointer hover:underline"
+                                onClick={() => setIsResettingPassword(true)}
+                            >
+                                ¿Se te olvidó la contraseña?
+                            </span>
+                        </div>
 
-        {isResettingPassword ? (
-          <div className="space-y-4">
-            <div className="field">
-              <label htmlFor="reset-email" className="text-sm">Email</label>
-              <input
-                type="email"
-                name="reset-email"
-                className="w-full p-3 mt-1 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none text-white glow-input"
-                onChange={(e) => setEmail(e.target.value)}
-                value={email}
-                placeholder="Email"
-              />
+                        <button
+                            className="w-full p-3 mt-5 rounded-lg bg-black text-white hover:bg-gray-700 transition-colors"
+                            onClick={isSignUp ? handleSignUp : handleSignIn}
+                        >
+                            {isSignUp ? 'Sign Up' : 'Sign In'}
+                        </button>
+
+                        <div className="text-center mt-3 text-sm">
+                            {isSignUp ? (
+                                <p>
+                                    Already have an account?{' '}
+                                    <span 
+                                        onClick={() => setIsSignUp(false)} 
+                                        className="text-blue-500 cursor-pointer"
+                                    >
+                                        Sign In
+                                    </span>
+                                </p>
+                            ) : (
+                                <p>
+                                    Don't have an account?{' '}
+                                    <span 
+                                        onClick={() => setIsSignUp(true)} 
+                                        className="text-blue-500 cursor-pointer"
+                                    >
+                                        Sign Up
+                                    </span>
+                                </p>
+                            )}
+                        </div>
+                    </div>
+                )}
             </div>
-            <button
-              className="w-full p-3 mt-5 rounded-lg bg-black text-white hover:bg-gray-700 transition-colors"
-              onClick={handlePasswordReset}
-            >
-              Restablecer Contraseña
-            </button>
-            <div className="text-center mt-3 text-sm">
-              <span 
-                onClick={() => setIsResettingPassword(false)} 
-                className="text-blue-500 cursor-pointer"
-              >
-                Volver al inicio de sesión
-              </span>
-            </div>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            <div className="field">
-              <label htmlFor="email" className="text-sm">Email</label>
-              <input
-                type="email"
-                name="email"
-                className="w-full p-3 mt-1 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none text-white glow-input"
-                onChange={(e) => setEmail(e.target.value)}
-                value={email}
-                placeholder="Email"
-              />
-            </div>
-
-            <div className="field">
-              <label htmlFor="password" className="text-sm">Password</label>
-              <input
-                type="password" 
-                name="password"
-                id="password"
-                className="w-full p-3 mt-1 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none text-white glow-input"
-                onChange={(e) => setPassword(e.target.value)}
-                value={password}
-                placeholder="Password"
-              />
-            </div>
-
-            <div className="text-right text-sm">
-              <span 
-                className="text-blue-500 cursor-pointer hover:underline"
-                onClick={() => setIsResettingPassword(true)}
-              >
-                ¿Se te olvidó la contraseña?
-              </span>
-            </div>
-
-            <button
-              className="w-full p-3 mt-5 rounded-lg bg-black text-white hover:bg-gray-700 transition-colors"
-              onClick={isSignUp ? handleSignUp : handleSignIn}
-            >
-              {isSignUp ? 'Sign Up' : 'Sign In'}
-            </button>
-
-            <div className="text-center mt-3 text-sm">
-              {isSignUp ? (
-                <p>
-                  Already have an account?{' '}
-                  <span 
-                    onClick={() => setIsSignUp(false)} 
-                    className="text-blue-500 cursor-pointer"
-                  >
-                    Sign In
-                  </span>
-                </p>
-              ) : (
-                <p>
-                  Don't have an account?{' '}
-                  <span 
-                    onClick={() => setIsSignUp(true)} 
-                    className="text-blue-500 cursor-pointer"
-                  >
-                    Sign Up
-                  </span>
-                </p>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* Botón para iniciar sesión con Discord */}
-        <div className="text-center mt-4">
-          <button 
-            onClick={handleDiscordSignIn} 
-            className="w-full p-3 mt-5 rounded-lg bg-blue-700 text-white hover:bg-blue-600 transition-colors"
-          >
-            <img src="/discord-logo.svg" alt="Discord logo" className="inline mr-2" />
-            Iniciar sesión con Discord
-          </button>
         </div>
-
-        {/* Botón de cerrar sesión */}
-        <div className="text-center mt-4">
-          <button 
-            onClick={handleSignOut} 
-            className="w-full p-3 mt-5 rounded-lg bg-red-700 text-white hover:bg-red-600 transition-colors"
-          >
-            Cerrar sesión
-          </button>
-        </div>
-      </div>
-    </div>
-  );
+    );
 }
