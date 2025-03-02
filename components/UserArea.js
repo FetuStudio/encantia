@@ -113,7 +113,7 @@ export default function Libros() {
 
             {showLogoutModal && (
                 <div className="fixed inset-0 flex items-center justify-center">
-                    <div className="bg-white text-black p-6 rounded-lg shadow-lg">
+                    <div className="bg-gray-500 text-white p-6 rounded-lg shadow-lg">
                         <p className="text-lg font-bold mb-4">¿Estás seguro que quieres cerrar sesión?</p>
                         <div className="flex justify-center gap-4">
                             <button
