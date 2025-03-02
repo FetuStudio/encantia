@@ -92,10 +92,10 @@ export default function CrearLibros() {
     };
 
     return (
-        <div className="min-h-screen bg-blue-900 text-white">
+        <div className="min-h-screen bg-gray-900 text-white">
 
             {/* Navbar */}
-            <div className="flex justify-between items-center p-4 bg-gray-800">
+            <div className="flex justify-between items-center p-4 bg-gray-900">
                 <div className="flex items-center">
                     <img 
                         src="https://i.ibb.co/933TjLds/encantia-logo-2025.webp" 
