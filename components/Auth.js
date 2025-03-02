@@ -7,10 +7,10 @@ export default function Auth() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [errorMessage, setErrorMessage] = useState(null); 
-    const [isSignUp, setIsSignUp] = useState(false); // Para alternar entre registro e inicio de sesión
-    const [isRegistered, setIsRegistered] = useState(false); // Estado para verificar si el usuario está registrado pero necesita confirmar su correo
+    const [isSignUp, setIsSignUp] = useState(false);
+    const [isRegistered, setIsRegistered] = useState(false);
+    const [resetMessage, setResetMessage] = useState(null);
 
-    // Función para manejar el inicio de sesión
     const handleSignIn = async () => {
         try {
             const { user, session, error } = await supabase.auth.signInWithPassword({
@@ -20,14 +20,12 @@ export default function Auth() {
 
             if (error) throw error;
 
-            // Redirigir siempre a la página principal después del inicio de sesión
             router.push("https://encantia.lat/"); 
         } catch (e) {
             setErrorMessage(e.message);
         }
     };
 
-    // Función para manejar el registro de un nuevo usuario
     const handleSignUp = async () => {
         try {
             const { user, error } = await supabase.auth.signUp({
@@ -37,8 +35,17 @@ export default function Auth() {
 
             if (error) throw error;
 
-            // Después del registro exitoso, indicamos que el correo necesita ser verificado
             setIsRegistered(true);
+        } catch (e) {
+            setErrorMessage(e.message);
+        }
+    };
+
+    const handlePasswordReset = async () => {
+        try {
+            const { error } = await supabase.auth.resetPasswordForEmail(email);
+            if (error) throw error;
+            setResetMessage("Se ha enviado un correo para restablecer tu contraseña.");
         } catch (e) {
             setErrorMessage(e.message);
         }
@@ -51,10 +58,9 @@ export default function Auth() {
                     {isSignUp ? 'Sign Up' : 'Sign In'}
                 </h1>
 
-                {/* Mostrar el mensaje de error si existe */}
                 {errorMessage && <div className="text-red-500 text-center mb-4">{errorMessage}</div>}
+                {resetMessage && <div className="text-green-500 text-center mb-4">{resetMessage}</div>}
 
-                {/* Mostrar mensaje de confirmación de correo si es necesario */}
                 {isRegistered && (
                     <div className="text-yellow-500 text-center mb-4">
                         A verification email has been sent to {email}. Please check your inbox and confirm your email address.
@@ -87,14 +93,22 @@ export default function Auth() {
                         />
                     </div>
 
+                    <div className="text-right text-sm">
+                        <span 
+                            className="text-blue-500 cursor-pointer hover:underline"
+                            onClick={handlePasswordReset}
+                        >
+                            ¿Se te olvidó la contraseña?
+                        </span>
+                    </div>
+
                     <button
                         className="w-full p-3 mt-5 rounded-lg bg-black text-white hover:bg-gray-700 transition-colors"
-                        onClick={isSignUp ? handleSignUp : handleSignIn} // Usar la función correspondiente según el estado
+                        onClick={isSignUp ? handleSignUp : handleSignIn}
                     >
                         {isSignUp ? 'Sign Up' : 'Sign In'}
                     </button>
 
-                    {/* Enlace para cambiar entre Sign In y Sign Up */}
                     <div className="text-center mt-3 text-sm">
                         {isSignUp ? (
                             <p>
