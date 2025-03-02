@@ -1,6 +1,7 @@
 import { useState } from 'react'; 
 import { supabase } from '../utils/supabaseClient';
 import { useRouter } from 'next/router'; 
+import Image from 'next/image'; // Para cargar imágenes de forma optimizada
 
 export default function Auth() {
     const router = useRouter(); 
@@ -11,6 +12,22 @@ export default function Auth() {
     const [isRegistered, setIsRegistered] = useState(false);
     const [resetMessage, setResetMessage] = useState(null);
     const [isResettingPassword, setIsResettingPassword] = useState(false);
+
+    // Iniciar sesión con Discord a través de OAuth
+    const handleDiscordLogin = async () => {
+        try {
+            const { user, session, error } = await supabase.auth.signInWithOAuth({
+                provider: 'discord',
+            });
+
+            if (error) throw error;
+
+            // Redirigir al usuario después de la autenticación
+            router.push("https://encantia.lat/"); 
+        } catch (e) {
+            setErrorMessage(e.message);
+        }
+    };
 
     const handleSignIn = async () => {
         try {
@@ -164,6 +181,18 @@ export default function Auth() {
                         </div>
                     </div>
                 )}
+
+                {/* Botón para iniciar sesión con Discord */}
+                <div className="flex justify-center mt-6">
+                    <Image 
+                        src="/path_to_discord_logo.png" 
+                        alt="Discord Logo"
+                        width={50} 
+                        height={50} 
+                        className="cursor-pointer"
+                        onClick={handleDiscordLogin} 
+                    />
+                </div>
             </div>
         </div>
     );
