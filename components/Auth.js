@@ -134,6 +134,7 @@ export default function Auth() {
             const { user, session, error } = await supabase.auth.verifyOtp({
                 phone: emailOrPhone,
                 token: otp,
+                type: 'sms', // Tipo de verificación
             });
 
             if (error) throw error;
@@ -237,9 +238,9 @@ export default function Auth() {
 
                         <button
                             className="w-full p-3 mt-5 rounded-lg bg-black text-white hover:bg-gray-700 transition-colors"
-                            onClick={isSignUp ? handleSignUp : handlePhoneSignIn}
+                            onClick={isSignUp ? handleSignUp : (isPhoneSignIn ? handleOtpVerification : handlePhoneSignIn)}
                         >
-                            {isSignUp ? 'Registrarse' : 'Iniciar Sesión'}
+                            {isSignUp ? 'Registrarse' : (isPhoneSignIn ? 'Verificar OTP' : 'Iniciar Sesión')}
                         </button>
 
                         {/* Logos de Google, GitHub, Discord, Twitch */}
