@@ -49,7 +49,7 @@ export default function Libros() {
             <div className="flex justify-between items-center mb-4">
                 <div>
                     <img
-                        src="https://i.ibb.co/933TjLds/encantia-logo-2025.webp"
+                        src="https://images.encantia.lat/encantia-logo-2025.webp"
                         alt="Logo"
                         className="h-16"
                     />
