@@ -118,35 +118,49 @@ export default function Chat() {
     };
 
     return (
-        <div className="flex flex-col h-screen p-4 bg-gray-900 text-white">
-            {/* Barra de navegación */}
-            <div className="flex justify-between items-center mb-4">
-                <div>
-                    <img
-                        src="https://i.ibb.co/933TjLds/encantia-logo-2025.webp"
-                        alt="Logo"
+        <div className="min-h-screen bg-gray-900 text-white">
+
+            {/* Navbar */}
+            <div className="flex justify-between items-center p-4 bg-gray-900">
+                <div className="flex items-center">
+                    <img 
+                        src="https://i.ibb.co/933TjLds/encantia-logo-2025.webp" 
+                        alt="Logo" 
                         className="h-12"
                     />
                 </div>
 
                 <div className="flex gap-4">
+                    {/* Botón de "Inicio" */}
                     <button
                         onClick={() => window.location.href = "https://encantia.lat/"}
                         className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
                     >
                         Inicio
                     </button>
+
+                    {/* Botón de "Chat" */}
+                    <button
+                        onClick={() => router.push('/chat')}
+                        className="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-400 transition-colors"
+                    >
+                        Chat
+                    </button>
+
+                    {/* Botón de "Libros" */}
                     <button
                         className="p-2 bg-gray-700 text-white rounded"
                         onClick={() => router.push('/libros')}
                     >
                         Libros
                     </button>
+
+                    {/* Botón de "Crear Libro" */}
                     <button
-                        className="p-2 bg-purple-500 text-white rounded"
-                        onClick={() => router.push('/chat')}
+                        className="p-2 bg-green-600 text-white rounded"
+                        onClick={() => router.push('/crear-libro')}
                     >
-                        Chat
+                        Crear Libro
                     </button>
                 </div>
             </div>
