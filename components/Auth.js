@@ -174,16 +174,16 @@ export default function Auth() {
                             <img
                                 src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg"
                                 alt="Google Logo"
-                                width="40"
-                                height="40"
+                                width="30"
+                                height="30"
                                 className="cursor-pointer"
                                 onClick={handleGoogleSignIn}
                             />
                             <img
                                 src="https://upload.wikimedia.org/wikipedia/commons/9/91/Octicons-mark-github.svg"
                                 alt="GitHub Logo"
-                                width="40"
-                                height="40"
+                                width="30"
+                                height="30"
                                 className="cursor-pointer"
                                 onClick={handleGitHubSignIn}
                             />
