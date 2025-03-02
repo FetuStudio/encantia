@@ -20,12 +20,12 @@ export default function EventsArea() {
     }, []);
 
     return (
-        <div className="flex flex-col h-screen p-4 bg-gray-900 text-white">
-            {/* Barra de navegación superior con "Inicio", "Chat" y "Libros" */}
-            <div className="flex justify-between items-center mb-4">
+        <div className="flex flex-col h-screen px-6 bg-gray-900 text-white dark:bg-gray-900 dark:text-white">
+            {/* Barra de navegación */}
+            <div className="flex justify-between items-center mb-6">
                 <div>
                     <img
-                        src="https://i.ibb.co/933TjLds/encantia-logo-2025.webp"
+                        src="https://i.ibb.co/933TjLds/encantia-logo-2025.webp" // Logo
                         alt="Logo"
                         className="h-16"
                     />
@@ -63,17 +63,9 @@ export default function EventsArea() {
                     >
                         Libros
                     </button>
-
-                    {/* Mostrar botones para "Crear Libro" y "Crear Evento" si el rol es 'owner' o 'admin' */}
-                    {role === 'owner' && (
-                        <button
-                            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
-                            onClick={() => router.push('/crear-libro')}
-                        >
-                            Crear Libro
-                        </button>
                 </div>
             </div>
+
             {/* Título de los eventos */}
             <div className="text-center mt-10">
                 <h1 className="text-3xl font-semibold">Eventos Disponibles</h1>
