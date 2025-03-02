@@ -7,37 +7,29 @@ export default function EventsArea() {
     const [userRole, setUserRole] = useState(null); // Estado para almacenar el rol del usuario
     const router = useRouter();
 
-    useEffect(() => {
-        const fetchEvents = async () => {
-            const { data, error } = await supabase.from('events').select('*');
-            if (error) {
-                console.error('Error fetching events:', error);
-            } else {
-                setEvents(data);
-            }
-        };
+const fetchUserRole = async () => {
+    // Obtener el usuario autenticado
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+        console.error('Error fetching user:', authError);
+        return;
+    }
 
-        const fetchUserRole = async () => {
-            // Obtener el usuario autenticado
-            const { data: { user }, error: authError } = await supabase.auth.getUser();
-            if (authError) {
-                console.error('Error fetching user:', authError);
-                return;
-            }
+    // Buscar el rol del usuario en la tabla 'user_roles'
+    const { data, error } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id) // Usamos el ID del usuario para obtener su rol
+        .single(); // Asumimos que un usuario tiene solo un rol
 
-            // Buscar el rol del usuario en la base de datos (en la tabla de 'profiles' o donde tengas el rol)
-            const { data, error } = await supabase
-                .from('user_roles')  // Cambia esta tabla por la correcta donde tengas los roles
-                .select('role')
-                .eq('id', user.id)
-                .single();
+    if (error) {
+        console.error('Error fetching user role:', error);
+    } else {
+        console.log('Rol del usuario:', data?.role); // Verifica en la consola
+        setUserRole(data?.role); // Establece el rol del usuario
+    }
+};
 
-            if (error) {
-                console.error('Error fetching user role:', error);
-            } else {
-                setUserRole(data?.role); // Establecer el rol del usuario
-            }
-        };
 
         fetchEvents();
         fetchUserRole();
