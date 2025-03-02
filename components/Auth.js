@@ -155,19 +155,18 @@ export default function Auth() {
                         </button>
 
                         {/* Logo de Google con link */}
-                        <button
-                            className="w-full p-3 mt-5 flex items-center justify-center rounded-lg bg-white text-black hover:bg-gray-200 transition-colors"
+                        <div
+                            className="flex justify-center mt-4"
                             onClick={handleGoogleSignIn}
+                            style={{ cursor: 'pointer' }}
                         >
-                            <img 
-                                src="https://upload.wikimedia.org/wikipedia/commons/4/4e/Google_2015_logo.svg" 
+                            <img
+                                src="https://upload.wikimedia.org/wikipedia/commons/4/4e/Google_2015_logo.svg"
                                 alt="Google Logo"
-                                width="30"
-                                height="30"
-                                className="mr-2"
+                                width="40"
+                                height="40"
                             />
-                            Iniciar sesión con Google
-                        </button>
+                        </div>
 
                         <div className="text-center mt-3 text-sm">
                             {isSignUp ? (
