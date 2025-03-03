@@ -2,142 +2,149 @@ import { useState, useEffect } from "react";
 import { supabase } from "../utils/supabaseClient"; 
 import { useRouter } from "next/router"; 
 
-export default function Libros() {
-    const [books, setBooks] = useState([]); 
-    const [role, setRole] = useState("");  // Estado para almacenar el rol del usuario
-    const [showLogoutModal, setShowLogoutModal] = useState(false);
-    const router = useRouter(); 
+export default function Register() {
+    const [username, setUsername] = useState("");
+    const [displayName, setDisplayName] = useState(""); // Nombre para mostrar
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [error, setError] = useState("");
+    const [loading, setLoading] = useState(false);
+    const router = useRouter();
 
-    useEffect(() => {
-        const fetchBooks = async () => {
-            const { data, error } = await supabase.from("books").select("*");
-            if (error) {
-                console.error("Error al obtener libros:", error);
-            } else {
-                setBooks(data);
-            }
-        };
+    // Función para verificar que el nombre de usuario es único
+    const checkUsernameUnique = async (username) => {
+        const { data, error } = await supabase
+            .from("users") // Suponiendo que tienes una tabla "users" con una columna "username"
+            .select("id")
+            .eq("username", username);
 
-        const fetchUserRole = async () => {
-            const { data: { user }, error: authError } = await supabase.auth.getUser();
-            if (authError || !user) {
-                console.error("Error al obtener usuario:", authError);
-                return;
-            }
+        if (error) {
+            console.error("Error checking username:", error);
+            return false;
+        }
 
-            const { data, error } = await supabase
-                .from('user_roles')
-                .select('role')
-                .eq('user_id', user.id)
-                .single();
-
-            if (error) {
-                console.error("Error al obtener el rol del usuario:", error);
-            } else {
-                setRole(data?.role);
-            }
-        };
-
-        fetchBooks();
-        fetchUserRole();
-    }, []);
-
-    const handleLogout = async () => {
-        setShowLogoutModal(true);
+        return data.length === 0; // Si no hay usuarios con ese nombre, es único
     };
 
-    const confirmLogout = async () => {
-        await supabase.auth.signOut();
-        router.push("/");
+    // Función para verificar si el nombre para mostrar ya está en uso
+    const checkDisplayNameUnique = async (displayName) => {
+        const { data, error } = await supabase
+            .from("users") // Tabla donde guardas los usuarios
+            .select("id")
+            .eq("display_name", displayName);
+
+        if (error) {
+            console.error("Error checking display name:", error);
+            return false;
+        }
+
+        return data.length === 0; // Si no hay usuarios con ese display_name, es único
+    };
+
+    // Función para registrar un usuario
+    const handleRegister = async () => {
+        setError("");
+        setLoading(true);
+
+        // Validaciones: Nombre de usuario y Nombre para mostrar obligatorios
+        if (!username || !displayName) {
+            setError("El nombre de usuario y el nombre para mostrar son obligatorios.");
+            setLoading(false);
+            return;
+        }
+
+        // Verificar si el nombre de usuario es único
+        const isUsernameUnique = await checkUsernameUnique(username);
+        if (!isUsernameUnique) {
+            setError("El nombre de usuario ya está en uso.");
+            setLoading(false);
+            return;
+        }
+
+        // Verificar si el nombre para mostrar es único
+        const isDisplayNameUnique = await checkDisplayNameUnique(displayName);
+        if (!isDisplayNameUnique) {
+            setError("El nombre para mostrar ya está en uso.");
+            setLoading(false);
+            return;
+        }
+
+        // Crear usuario con email y password
+        const { user, error: signupError } = await supabase.auth.signUp({
+            email,
+            password,
+        });
+
+        if (signupError) {
+            setError(signupError.message);
+            setLoading(false);
+            return;
+        }
+
+        // Si el usuario se registró correctamente, almacenar el username y el display_name
+        const { error: insertError } = await supabase
+            .from("users")
+            .insert([{ id: user.id, username, display_name: displayName }]);
+
+        if (insertError) {
+            setError(insertError.message);
+            setLoading(false);
+            return;
+        }
+
+        // Redirigir al usuario a la página de inicio después del registro
+        router.push("/dashboard");
     };
 
     return (
-        <div className={`relative flex flex-col h-screen p-4 bg-gray-900 text-white ${showLogoutModal ? 'backdrop-blur-md' : ''}`}>
-            <div className="flex justify-between items-center mb-4">
-                <div>
-                    <img
-                        src="https://images.encantia.lat/encantia-logo-2025.webp"
-                        alt="Logo"
-                        className="h-16"
-                    />
-                </div>
+        <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900 text-white">
+            <h1 className="text-3xl mb-6">Registro</h1>
 
-                <div className="flex gap-4">
-                    <button
-                        onClick={() => window.location.href = "https://www.encantia.lat/"}
-                        className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
-                    >
-                        Inicio
-                    </button>
-                    <button
-                        onClick={() => router.push('/EventsArea')}
-                        className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
-                    >
-                        Eventos
-                    </button>
-                    <button
-                        onClick={() => router.push('/chat')}
-                        className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
-                    >
-                        Chat
-                    </button>
-                    <button
-                        className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
-                        onClick={() => router.push('/libros')}
-                    >
-                        Libros
-                    </button>
-                    <button
-                        onClick={() => window.open("https://discord.gg/dxcX8S3mrF", "_blank")}
-                        className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
-                    >
-                        Discord
-                    </button>
-                    <button
-                        className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
-                        onClick={() => router.push('/fg2')}
-                    >
-                        Fetu Games 2
-                    </button>
-                    {role === 'owner' && (
-                        <button
-                            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
-                            onClick={() => router.push('/crear-libro')}
-                        >
-                            Crear Libro
-                        </button>
-                    )}
-                </div>
+            <div className="w-full max-w-sm">
+                {error && <p className="text-red-500 text-center mb-4">{error}</p>}
+
+                {/* Campo para el nombre de usuario */}
+                <input
+                    type="text"
+                    placeholder="Nombre de usuario"
+                    className="mb-4 p-2 w-full rounded-lg"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                />
+                
+                {/* Campo para el nombre para mostrar */}
+                <input
+                    type="text"
+                    placeholder="Nombre para mostrar"
+                    className="mb-4 p-2 w-full rounded-lg"
+                    value={displayName}
+                    onChange={(e) => setDisplayName(e.target.value)}
+                />
+                
+                <input
+                    type="email"
+                    placeholder="Correo electrónico"
+                    className="mb-4 p-2 w-full rounded-lg"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                />
+                <input
+                    type="password"
+                    placeholder="Contraseña"
+                    className="mb-4 p-2 w-full rounded-lg"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                />
+
+                <button
+                    onClick={handleRegister}
+                    className="w-full py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
+                    disabled={loading}
+                >
+                    {loading ? "Registrando..." : "Registrarse"}
+                </button>
             </div>
-
-            <button
-                onClick={handleLogout}
-                className="fixed bottom-4 left-4 px-6 py-2 bg-red-800 text-white rounded-full hover:bg-gray-800 transition-colors"
-            >
-                Logout
-            </button>
-
-            {showLogoutModal && (
-                <div className="fixed inset-0 flex items-center justify-center">
-                    <div className="bg-gray-600 text-white p-6 rounded-lg shadow-lg">
-                        <p className="text-lg font-bold mb-4">¿Estás seguro que quieres cerrar sesión?</p>
-                        <div className="flex justify-center gap-4">
-                            <button
-                                onClick={confirmLogout}
-                                className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-400 transition-colors"
-                            >
-                                Sí
-                            </button>
-                            <button
-                                onClick={() => setShowLogoutModal(false)}
-                                className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-400 transition-colors"
-                            >
-                                No
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
         </div>
     );
 }
+
