@@ -10,30 +10,43 @@ export default function Profile() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    getUserEmail();
     getProfile();
   }, []);
+
+  async function getUserEmail() {
+    const { data: user, error } = await supabase.auth.getUser();
+    if (error) {
+      console.error("Error obteniendo el usuario:", error);
+      return;
+    }
+    setProfile((prevProfile) => ({ ...prevProfile, email: user?.user?.email || "" }));
+  }
 
   async function getProfile() {
     setLoading(true);
     const { data: user, error: userError } = await supabase.auth.getUser();
-    if (userError) console.error(userError);
+    if (userError) {
+      console.error("Error obteniendo el usuario:", userError);
+      return;
+    }
 
     const userId = user?.user?.id;
-    const email = user?.user?.email; // Obtener el correo del usuario autenticado
+    if (!userId) return;
 
     const { data, error } = await supabase
       .from("profiles")
-      .select("*")
+      .select("display_name, avatar_url")
       .eq("id", userId)
       .single();
 
-    if (error) console.error(error);
+    if (error) console.error("Error obteniendo perfil:", error);
     else
-      setProfile({
+      setProfile((prevProfile) => ({
+        ...prevProfile,
         displayName: data.display_name || "",
         avatarUrl: data.avatar_url || "",
-        email: email, // Mantener el correo siempre actualizado
-      });
+      }));
 
     setLoading(false);
   }
@@ -52,7 +65,7 @@ export default function Profile() {
       })
       .eq("id", user?.user?.id);
 
-    if (dbError) console.error(dbError);
+    if (dbError) console.error("Error actualizando perfil:", dbError);
     setLoading(false);
   }
 
