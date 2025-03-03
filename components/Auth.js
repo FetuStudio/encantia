@@ -21,7 +21,7 @@ export default function Auth() {
 
             if (error) throw error;
 
-            router.push("https://encantia.lat/"); 
+            router.push("https://www.encantia.lat/"); 
         } catch (e) {
             setErrorMessage(e.message);
         }
