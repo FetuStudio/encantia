@@ -1,169 +1,178 @@
-import { useState } from 'react'; 
-import { supabase } from '../utils/supabaseClient';
-import { useRouter } from 'next/router'; 
+import { useState } from "react"; 
+import { supabase } from "../utils/supabaseClient"; 
+import { useRouter } from "next/router"; 
 
-export default function Auth() {
-    const router = useRouter(); 
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [errorMessage, setErrorMessage] = useState(null); 
-    const [isSignUp, setIsSignUp] = useState(false);
-    const [isRegistered, setIsRegistered] = useState(false);
-    const [resetMessage, setResetMessage] = useState(null);
-    const [isResettingPassword, setIsResettingPassword] = useState(false);
+export default function Register() {
+    const [username, setUsername] = useState("");
+    const [displayName, setDisplayName] = useState(""); // Nombre para mostrar
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [error, setError] = useState("");
+    const [loading, setLoading] = useState(false);
+    const router = useRouter();
 
-    const handleSignIn = async () => {
-        try {
-            const { user, session, error } = await supabase.auth.signInWithPassword({
-                email,
-                password,
-            });
+    // Función para verificar que el nombre de usuario es único
+    const checkUsernameUnique = async (username) => {
+        const { data, error } = await supabase
+            .from("users") // Tabla de usuarios
+            .select("id")
+            .eq("username", username); // Comprobar si el nombre de usuario ya está en la base de datos
 
-            if (error) throw error;
-
-            router.push("https://www.encantia.lat/"); 
-        } catch (e) {
-            setErrorMessage(e.message);
+        if (error) {
+            console.error("Error checking username:", error);
+            return false;
         }
+
+        return data.length === 0; // Si no se encuentran resultados, el nombre de usuario es único
     };
 
-    const handleSignUp = async () => {
-        try {
-            const { user, error } = await supabase.auth.signUp({
-                email,
-                password,
-            });
+    // Función para verificar si el nombre para mostrar ya está en uso
+    const checkDisplayNameUnique = async (displayName) => {
+        const { data, error } = await supabase
+            .from("users") // Tabla de usuarios
+            .select("id")
+            .eq("display_name", displayName); // Comprobar si el nombre para mostrar ya está en la base de datos
 
-            if (error) throw error;
-
-            setIsRegistered(true);
-        } catch (e) {
-            setErrorMessage(e.message);
+        if (error) {
+            console.error("Error checking display name:", error);
+            return false;
         }
+
+        return data.length === 0; // Si no se encuentran resultados, el nombre para mostrar es único
     };
 
-    const handlePasswordReset = async () => {
-        try {
-            const { error } = await supabase.auth.resetPasswordForEmail(email);
-            if (error) throw error;
-            setResetMessage("Se ha enviado un correo para restablecer tu contraseña.");
-        } catch (e) {
-            setErrorMessage(e.message);
+    // Función para registrar un usuario
+    const handleRegister = async () => {
+        setError("");
+        setLoading(true);
+
+        // Validaciones: Nombre de usuario y Nombre para mostrar obligatorios
+        if (!username || !displayName) {
+            setError("El nombre de usuario y el nombre para mostrar son obligatorios.");
+            setLoading(false);
+            return;
         }
+
+        // Verificar si el nombre de usuario es único
+        const isUsernameUnique = await checkUsernameUnique(username);
+        if (!isUsernameUnique) {
+            setError("El nombre de usuario ya está en uso.");
+            setLoading(false);
+            return;
+        }
+
+        // Verificar si el nombre para mostrar es único
+        const isDisplayNameUnique = await checkDisplayNameUnique(displayName);
+        if (!isDisplayNameUnique) {
+            setError("El nombre para mostrar ya está en uso.");
+            setLoading(false);
+            return;
+        }
+
+        // Crear usuario con email y password en Supabase
+        const { user, error: signupError } = await supabase.auth.signUp({
+            email,
+            password,
+        });
+
+        if (signupError) {
+            setError(signupError.message);
+            setLoading(false);
+            return;
+        }
+
+        // Si el usuario se registró correctamente, almacenar el username y el display_name
+        const { error: insertError } = await supabase
+            .from("users")
+            .insert([{ id: user.id, username, display_name: displayName }]);
+
+        if (insertError) {
+            setError(insertError.message);
+            setLoading(false);
+            return;
+        }
+
+        // Si el registro es exitoso, redirigir al usuario
+        router.push("/dashboard");  // Redirige al dashboard o al lugar que quieras
+    };
+
+    // Función para intentar hacer login si el usuario ya existe
+    const handleLogin = async () => {
+        setError("");
+        setLoading(true);
+
+        const { user, error: loginError } = await supabase.auth.signIn({
+            email,
+            password,
+        });
+
+        if (loginError) {
+            setError(loginError.message);
+            setLoading(false);
+            return;
+        }
+
+        // Si el login es exitoso, redirigir al usuario
+        router.push("/dashboard");  // Redirige al dashboard o al lugar que quieras
     };
 
     return (
-        <div className="flex items-center justify-center min-h-screen bg-gray-900 text-white">
-            <div className="bg-gray-800 p-8 rounded-lg shadow-xl w-full max-w-md border-4 border-blue-500 bg-opacity-20 glow-border">
-                <h1 className="text-2xl font-semibold text-center mb-6">
-                    {isResettingPassword ? 'Restablecer Contraseña' : isSignUp ? 'Sign Up' : 'Sign In'}
-                </h1>
+        <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900 text-white">
+            <h1 className="text-3xl mb-6">Registro / Login</h1>
 
-                {errorMessage && <div className="text-red-500 text-center mb-4">{errorMessage}</div>}
-                {resetMessage && <div className="text-green-500 text-center mb-4">{resetMessage}</div>}
+            <div className="w-full max-w-sm">
+                {error && <p className="text-red-500 text-center mb-4">{error}</p>}
 
-                {isRegistered && (
-                    <div className="text-yellow-500 text-center mb-4">
-                        A verification email has been sent to {email}. Please check your inbox and confirm your email address.
-                    </div>
-                )}
+                {/* Campo para el nombre de usuario */}
+                <input
+                    type="text"
+                    placeholder="Nombre de usuario"
+                    className="mb-4 p-2 w-full rounded-lg"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                />
+                
+                {/* Campo para el nombre para mostrar */}
+                <input
+                    type="text"
+                    placeholder="Nombre para mostrar"
+                    className="mb-4 p-2 w-full rounded-lg"
+                    value={displayName}
+                    onChange={(e) => setDisplayName(e.target.value)}
+                />
+                
+                <input
+                    type="email"
+                    placeholder="Correo electrónico"
+                    className="mb-4 p-2 w-full rounded-lg"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                />
+                <input
+                    type="password"
+                    placeholder="Contraseña"
+                    className="mb-4 p-2 w-full rounded-lg"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                />
 
-                {isResettingPassword ? (
-                    <div className="space-y-4">
-                        <div className="field">
-                            <label htmlFor="reset-email" className="text-sm">Email</label>
-                            <input
-                                type="email"
-                                name="reset-email"
-                                className="w-full p-3 mt-1 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none text-white glow-input"
-                                onChange={(e) => setEmail(e.target.value)}
-                                value={email}
-                                placeholder="Email"
-                            />
-                        </div>
-                        <button
-                            className="w-full p-3 mt-5 rounded-lg bg-black text-white hover:bg-gray-700 transition-colors"
-                            onClick={handlePasswordReset}
-                        >
-                            Restablecer Contraseña
-                        </button>
-                        <div className="text-center mt-3 text-sm">
-                            <span 
-                                onClick={() => setIsResettingPassword(false)} 
-                                className="text-blue-500 cursor-pointer"
-                            >
-                                Volver al inicio de sesión
-                            </span>
-                        </div>
-                    </div>
-                ) : (
-                    <div className="space-y-4">
-                        <div className="field">
-                            <label htmlFor="email" className="text-sm">Email</label>
-                            <input
-                                type="email"
-                                name="email"
-                                className="w-full p-3 mt-1 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none text-white glow-input"
-                                onChange={(e) => setEmail(e.target.value)}
-                                value={email}
-                                placeholder="Email"
-                            />
-                        </div>
+                <button
+                    onClick={handleRegister}
+                    className="w-full py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
+                    disabled={loading}
+                >
+                    {loading ? "Registrando..." : "Registrarse"}
+                </button>
 
-                        <div className="field">
-                            <label htmlFor="password" className="text-sm">Password</label>
-                            <input
-                                type="password" 
-                                name="password"
-                                id="password"
-                                className="w-full p-3 mt-1 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none text-white glow-input"
-                                onChange={(e) => setPassword(e.target.value)}
-                                value={password}
-                                placeholder="Password"
-                            />
-                        </div>
-
-                        <div className="text-right text-sm">
-                            <span 
-                                className="text-blue-500 cursor-pointer hover:underline"
-                                onClick={() => setIsResettingPassword(true)}
-                            >
-                                ¿Se te olvidó la contraseña?
-                            </span>
-                        </div>
-
-                        <button
-                            className="w-full p-3 mt-5 rounded-lg bg-black text-white hover:bg-gray-700 transition-colors"
-                            onClick={isSignUp ? handleSignUp : handleSignIn}
-                        >
-                            {isSignUp ? 'Sign Up' : 'Sign In'}
-                        </button>
-
-                        <div className="text-center mt-3 text-sm">
-                            {isSignUp ? (
-                                <p>
-                                    Already have an account?{' '}
-                                    <span 
-                                        onClick={() => setIsSignUp(false)} 
-                                        className="text-blue-500 cursor-pointer"
-                                    >
-                                        Sign In
-                                    </span>
-                                </p>
-                            ) : (
-                                <p>
-                                    Don't have an account?{' '}
-                                    <span 
-                                        onClick={() => setIsSignUp(true)} 
-                                        className="text-blue-500 cursor-pointer"
-                                    >
-                                        Sign Up
-                                    </span>
-                                </p>
-                            )}
-                        </div>
-                    </div>
-                )}
+                <div className="text-center mt-4">
+                    <span>¿Ya tienes una cuenta?</span>
+                    <button
+                        onClick={handleLogin}
+                        className="text-blue-500 hover:text-blue-400"
+                    >
+                        Iniciar sesión
+                    </button>
+                </div>
             </div>
         </div>
     );
