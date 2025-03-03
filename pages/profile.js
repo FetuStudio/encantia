@@ -34,19 +34,56 @@ export default function Profile() {
     const userId = user?.user?.id;
     if (!userId) return;
 
+    // Buscar si el perfil ya existe
     const { data, error } = await supabase
       .from("profiles")
       .select("display_name, avatar_url")
       .eq("id", userId)
       .single();
 
-    if (error) console.error("Error obteniendo perfil:", error);
-    else
+    if (error) {
+      // Si no existe el perfil, lo creamos
+      if (error.code === "PGRST116") {
+        console.log("Perfil no encontrado, creando nuevo...");
+        await createProfile(userId);
+        return;
+      }
+      console.error("Error obteniendo perfil:", error);
+      return;
+    }
+
+    // Si el perfil existe, actualizamos el estado
+    setProfile((prevProfile) => ({
+      ...prevProfile,
+      displayName: data.display_name || "",
+      avatarUrl: data.avatar_url || "",
+    }));
+
+    setLoading(false);
+  }
+
+  async function createProfile(userId) {
+    const { data, error } = await supabase
+      .from("profiles")
+      .insert([
+        {
+          id: userId,
+          display_name: "Nuevo Usuario", // Valor por defecto
+          avatar_url: "https://via.placeholder.com/150", // Avatar por defecto
+        },
+      ])
+      .single();
+
+    if (error) {
+      console.error("Error creando perfil:", error);
+    } else {
+      console.log("Perfil creado con éxito:", data);
       setProfile((prevProfile) => ({
         ...prevProfile,
-        displayName: data.display_name || "",
-        avatarUrl: data.avatar_url || "",
+        displayName: "Nuevo Usuario",
+        avatarUrl: "https://via.placeholder.com/150",
       }));
+    }
 
     setLoading(false);
   }
@@ -65,7 +102,10 @@ export default function Profile() {
       })
       .eq("id", user?.user?.id);
 
-    if (dbError) console.error("Error actualizando perfil:", dbError);
+    if (dbError) {
+      console.error("Error actualizando perfil:", dbError);
+    }
+
     setLoading(false);
   }
 
