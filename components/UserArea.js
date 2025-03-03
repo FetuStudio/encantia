@@ -106,7 +106,7 @@ export default function Libros() {
 
             <button
                 onClick={handleLogout}
-                className="fixed bottom-4 left-4 px-6 py-2 bg-black text-white rounded-full hover:bg-gray-800 transition-colors"
+                className="fixed bottom-4 left-4 px-6 py-2 bg-red-800 text-white rounded-full hover:bg-gray-800 transition-colors"
             >
                 Logout
             </button>
