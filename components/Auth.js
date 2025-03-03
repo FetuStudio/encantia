@@ -1,178 +1,120 @@
-import { useState } from "react"; 
-import { supabase } from "../utils/supabaseClient"; 
-import { useRouter } from "next/router"; 
+import { useState } from 'react'; 
+import { supabase } from '../utils/supabaseClient';
+import { useRouter } from 'next/router'; 
 
-export default function Register() {
-    const [username, setUsername] = useState("");
-    const [displayName, setDisplayName] = useState(""); // Nombre para mostrar
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [error, setError] = useState("");
+export default function Auth() {
+    const router = useRouter(); 
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [errorMessage, setErrorMessage] = useState(null); 
     const [loading, setLoading] = useState(false);
-    const router = useRouter();
+    const [isSignUp, setIsSignUp] = useState(false); // Controla si estamos en el registro o en el inicio de sesión
 
-    // Función para verificar que el nombre de usuario es único
-    const checkUsernameUnique = async (username) => {
-        const { data, error } = await supabase
-            .from("users") // Tabla de usuarios
-            .select("id")
-            .eq("username", username); // Comprobar si el nombre de usuario ya está en la base de datos
-
-        if (error) {
-            console.error("Error checking username:", error);
-            return false;
-        }
-
-        return data.length === 0; // Si no se encuentran resultados, el nombre de usuario es único
-    };
-
-    // Función para verificar si el nombre para mostrar ya está en uso
-    const checkDisplayNameUnique = async (displayName) => {
-        const { data, error } = await supabase
-            .from("users") // Tabla de usuarios
-            .select("id")
-            .eq("display_name", displayName); // Comprobar si el nombre para mostrar ya está en la base de datos
-
-        if (error) {
-            console.error("Error checking display name:", error);
-            return false;
-        }
-
-        return data.length === 0; // Si no se encuentran resultados, el nombre para mostrar es único
-    };
-
-    // Función para registrar un usuario
-    const handleRegister = async () => {
-        setError("");
+    // Función para manejar el inicio de sesión
+    const handleSignIn = async () => {
         setLoading(true);
+        setErrorMessage(null);
 
-        // Validaciones: Nombre de usuario y Nombre para mostrar obligatorios
-        if (!username || !displayName) {
-            setError("El nombre de usuario y el nombre para mostrar son obligatorios.");
+        try {
+            const { user, session, error } = await supabase.auth.signInWithPassword({
+                email,
+                password,
+            });
+
+            if (error) throw error;
+
+            // Verificar si el usuario necesita verificar el correo
+            if (user && !user.email_confirmed_at) {
+                await supabase.auth.api.sendMagicLinkEmail(email);
+                setErrorMessage("Te hemos enviado un enlace de verificación a tu correo.");
+                return;
+            }
+
+            // Redirigir a la URL externa después del inicio de sesión exitoso
+            window.location.href = "https://www.encantia.lat"; 
+        } catch (e) {
+            setErrorMessage(e.message);
+        } finally {
             setLoading(false);
-            return;
         }
-
-        // Verificar si el nombre de usuario es único
-        const isUsernameUnique = await checkUsernameUnique(username);
-        if (!isUsernameUnique) {
-            setError("El nombre de usuario ya está en uso.");
-            setLoading(false);
-            return;
-        }
-
-        // Verificar si el nombre para mostrar es único
-        const isDisplayNameUnique = await checkDisplayNameUnique(displayName);
-        if (!isDisplayNameUnique) {
-            setError("El nombre para mostrar ya está en uso.");
-            setLoading(false);
-            return;
-        }
-
-        // Crear usuario con email y password en Supabase
-        const { user, error: signupError } = await supabase.auth.signUp({
-            email,
-            password,
-        });
-
-        if (signupError) {
-            setError(signupError.message);
-            setLoading(false);
-            return;
-        }
-
-        // Si el usuario se registró correctamente, almacenar el username y el display_name
-        const { error: insertError } = await supabase
-            .from("users")
-            .insert([{ id: user.id, username, display_name: displayName }]);
-
-        if (insertError) {
-            setError(insertError.message);
-            setLoading(false);
-            return;
-        }
-
-        // Si el registro es exitoso, redirigir al usuario
-        router.push("/dashboard");  // Redirige al dashboard o al lugar que quieras
     };
 
-    // Función para intentar hacer login si el usuario ya existe
-    const handleLogin = async () => {
-        setError("");
+    // Función para manejar el registro de usuario
+    const handleSignUp = async () => {
         setLoading(true);
+        setErrorMessage(null);
 
-        const { user, error: loginError } = await supabase.auth.signIn({
-            email,
-            password,
-        });
+        try {
+            const { user, error } = await supabase.auth.signUp({
+                email,
+                password,
+            });
 
-        if (loginError) {
-            setError(loginError.message);
+            if (error) throw error;
+
+            setErrorMessage('Te hemos enviado un enlace de verificación a tu correo.');
+            // Puedes redirigir a la página de inicio de sesión o mostrar un mensaje adicional
+            setIsSignUp(false);
+
+            // Redirigir a la URL externa después del registro exitoso
+            window.location.href = "https://www.encantia.lat"; 
+        } catch (e) {
+            setErrorMessage(e.message);
+        } finally {
             setLoading(false);
-            return;
         }
-
-        // Si el login es exitoso, redirigir al usuario
-        router.push("/dashboard");  // Redirige al dashboard o al lugar que quieras
     };
 
     return (
-        <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900 text-white">
-            <h1 className="text-3xl mb-6">Registro / Login</h1>
+        <div className="sigin max-w-sm m-auto border border-gray-700 rounded p-6 mt-6 bg-gray-800">
+            <h1 className="text-center text-white text-2xl">{isSignUp ? 'Sign Up' : 'Sign In'}</h1>
 
-            <div className="w-full max-w-sm">
-                {error && <p className="text-red-500 text-center mb-4">{error}</p>}
+            {/* Mostrar el mensaje de error si existe */}
+            {errorMessage && <div className="text-red-500 text-center mt-2">{errorMessage}</div>}
 
-                {/* Campo para el nombre de usuario */}
-                <input
-                    type="text"
-                    placeholder="Nombre de usuario"
-                    className="mb-4 p-2 w-full rounded-lg"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                />
-                
-                {/* Campo para el nombre para mostrar */}
-                <input
-                    type="text"
-                    placeholder="Nombre para mostrar"
-                    className="mb-4 p-2 w-full rounded-lg"
-                    value={displayName}
-                    onChange={(e) => setDisplayName(e.target.value)}
-                />
-                
+            <div className="field mt-4">
+                <label htmlFor="email" className="text-white w-full block text-sm">Email</label>
                 <input
                     type="email"
-                    placeholder="Correo electrónico"
-                    className="mb-4 p-2 w-full rounded-lg"
-                    value={email}
+                    name="email"
+                    className="p-2 border border-gray-600 w-full rounded bg-gray-700 text-white placeholder-gray-400"
                     onChange={(e) => setEmail(e.target.value)}
+                    value={email}
+                    placeholder="Email"
                 />
+            </div>
+
+            <div className="field mt-4">
+                <label htmlFor="password" className="text-white w-full block text-sm">Password</label>
                 <input
-                    type="password"
-                    placeholder="Contraseña"
-                    className="mb-4 p-2 w-full rounded-lg"
-                    value={password}
+                    type="password" 
+                    name="password"
+                    id="password"
+                    className="p-2 border border-gray-600 w-full rounded bg-gray-700 text-white placeholder-gray-400"
                     onChange={(e) => setPassword(e.target.value)}
+                    value={password}
+                    placeholder="Password"
                 />
+            </div>
 
-                <button
-                    onClick={handleRegister}
-                    className="w-full py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
-                    disabled={loading}
-                >
-                    {loading ? "Registrando..." : "Registrarse"}
-                </button>
+            <button
+                className={`border p-2 w-full mt-5 rounded ${loading ? 'bg-gray-500' : 'bg-blue-600'} text-white`}
+                onClick={isSignUp ? handleSignUp : handleSignIn}
+                disabled={loading}
+            >
+                {loading ? (isSignUp ? 'Signing Up...' : 'Signing In...') : (isSignUp ? 'Sign Up' : 'Sign In')}
+            </button>
 
-                <div className="text-center mt-4">
-                    <span>¿Ya tienes una cuenta?</span>
-                    <button
-                        onClick={handleLogin}
-                        className="text-blue-500 hover:text-blue-400"
-                    >
-                        Iniciar sesión
-                    </button>
-                </div>
+            <div className="mt-4 text-center text-white">
+                {isSignUp ? (
+                    <>
+                        <p>¿Ya tienes cuenta? <button className="text-blue-400" onClick={() => setIsSignUp(false)}>Inicia sesión</button></p>
+                    </>
+                ) : (
+                    <>
+                        <p>¿Eres nuevo? <button className="text-blue-400" onClick={() => setIsSignUp(true)}>Regístrate</button></p>
+                    </>
+                )}
             </div>
         </div>
     );
