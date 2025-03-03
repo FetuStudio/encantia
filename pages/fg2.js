@@ -3,22 +3,12 @@ import { supabase } from "../utils/supabaseClient";
 import { useRouter } from "next/router"; 
 
 export default function Libros() {
-    const [books, setBooks] = useState([]); 
     const [role, setRole] = useState("");  // Estado para almacenar el rol del usuario
     const [event, setEvent] = useState(null);  // Estado para almacenar el evento
     const [timeLeft, setTimeLeft] = useState("");  // Estado para almacenar el tiempo restante
     const router = useRouter(); 
 
     useEffect(() => {
-        const fetchBooks = async () => {
-            const { data, error } = await supabase.from("books").select("*");
-            if (error) {
-                console.error("Error al obtener libros:", error);
-            } else {
-                setBooks(data);
-            }
-        };
-
         const fetchUserRole = async () => {
             const { data: { user }, error: authError } = await supabase.auth.getUser();
             if (authError || !user) {
@@ -55,10 +45,18 @@ export default function Libros() {
             }
         };
 
-        fetchBooks();
         fetchUserRole();
         fetchEvent();
-    }, []);
+
+        const intervalId = setInterval(() => {
+            if (event) {
+                calculateTimeLeft(event?.event_date);
+            }
+        }, 1000); // Actualiza el contador cada segundo
+
+        return () => clearInterval(intervalId); // Limpiar el intervalo al desmontar el componente
+
+    }, [event]);
 
     const calculateTimeLeft = (eventDate) => {
         const eventTime = new Date(eventDate).getTime();
@@ -68,10 +66,12 @@ export default function Libros() {
         if (timeDiff <= 0) {
             setTimeLeft("El evento ya ha comenzado o ha pasado");
         } else {
-            const hours = Math.floor(timeDiff / (1000 * 60 * 60));
+            const months = Math.floor(timeDiff / (1000 * 60 * 60 * 24 * 30)); // Aproximado a 30 días por mes
+            const days = Math.floor((timeDiff % (1000 * 60 * 60 * 24 * 30)) / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
             const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
             const seconds = Math.floor((timeDiff % (1000 * 60)) / 1000);
-            setTimeLeft(`${hours}h ${minutes}m ${seconds}s`);
+            setTimeLeft(`${months} mes(es) ${days} día(s) ${hours}h ${minutes}m ${seconds}s`);
         }
     };
 
@@ -141,16 +141,6 @@ export default function Libros() {
                     <p className="text-xl">Faltan: {timeLeft}</p>
                 </div>
             )}
-
-            {/* Mostrar los libros */}
-            <div className="mt-4">
-                <h3 className="text-xl font-bold mb-4">Libros</h3>
-                <ul>
-                    {books.map((book) => (
-                        <li key={book.id} className="mb-2">{book.title}</li>
-                    ))}
-                </ul>
-            </div>
         </div>
     );
 }
