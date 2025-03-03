@@ -55,7 +55,7 @@ export default function Profile() {
     // Si se encontró el perfil, lo actualizamos
     setProfile({
       displayName: data.display_name || "",
-      avatarUrl: data.avatar_url || "",
+      avatarUrl: data.avatar_url || "https://i.ibb.co/CKGTKcmh/perfildef.png", // URL actualizada aquí
       email: profile.email, // Ya tenemos el correo electrónico
     });
 
@@ -70,7 +70,7 @@ export default function Profile() {
         {
           id: userId,
           display_name: "Nuevo Usuario", // Valor por defecto
-          avatar_url: "https://via.placeholder.com/150", // Avatar por defecto
+          avatar_url: "https://i.ibb.co/CKGTKcmh/perfildef.png", // Avatar por defecto actualizado
         },
       ]);
 
@@ -80,7 +80,7 @@ export default function Profile() {
       console.log("Perfil creado con éxito");
       setProfile({
         displayName: "Nuevo Usuario",
-        avatarUrl: "https://via.placeholder.com/150",
+        avatarUrl: "https://i.ibb.co/CKGTKcmh/perfildef.png", // Avatar por defecto actualizado
         email: profile.email, // Mantener el correo
       });
     }
@@ -116,7 +116,7 @@ export default function Profile() {
 
         <div className="flex flex-col items-center">
           <img
-            src={profile.avatarUrl || "https://via.placeholder.com/150"}
+            src={profile.avatarUrl || "https://i.ibb.co/CKGTKcmh/perfildef.png"} // Foto predeterminada actualizada
             alt="Avatar"
             className="w-24 h-24 rounded-full border border-gray-300 shadow-sm"
           />
@@ -165,3 +165,4 @@ export default function Profile() {
     </div>
   );
 }
+
