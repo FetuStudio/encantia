@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react"; 
 import { supabase } from "../utils/supabaseClient"; 
 import { useRouter } from "next/router"; 
@@ -6,7 +5,8 @@ import { useRouter } from "next/router";
 export default function Libros() {
     const [books, setBooks] = useState([]); 
     const [role, setRole] = useState("");  // Estado para almacenar el rol del usuario
-    const [showLogoutModal, setShowLogoutModal] = useState(false);
+    const [event, setEvent] = useState(null);  // Estado para almacenar el evento
+    const [timeLeft, setTimeLeft] = useState("");  // Estado para almacenar el tiempo restante
     const router = useRouter(); 
 
     useEffect(() => {
@@ -39,21 +39,44 @@ export default function Libros() {
             }
         };
 
+        const fetchEvent = async () => {
+            const { data, error } = await supabase
+                .from("events_fg2")
+                .select("*")
+                .order("event_date", { ascending: true })
+                .limit(1)
+                .single();
+
+            if (error) {
+                console.error("Error al obtener el evento:", error);
+            } else {
+                setEvent(data);
+                calculateTimeLeft(data?.event_date);
+            }
+        };
+
         fetchBooks();
         fetchUserRole();
+        fetchEvent();
     }, []);
 
-    const handleLogout = async () => {
-        setShowLogoutModal(true);
-    };
+    const calculateTimeLeft = (eventDate) => {
+        const eventTime = new Date(eventDate).getTime();
+        const currentTime = new Date().getTime();
+        const timeDiff = eventTime - currentTime;
 
-    const confirmLogout = async () => {
-        await supabase.auth.signOut();
-        router.push("/");
+        if (timeDiff <= 0) {
+            setTimeLeft("El evento ya ha comenzado o ha pasado");
+        } else {
+            const hours = Math.floor(timeDiff / (1000 * 60 * 60));
+            const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((timeDiff % (1000 * 60)) / 1000);
+            setTimeLeft(`${hours}h ${minutes}m ${seconds}s`);
+        }
     };
 
     return (
-        <div className={`relative flex flex-col h-screen p-4 bg-gray-900 text-white ${showLogoutModal ? 'backdrop-blur-md' : ''}`}>
+        <div className="relative flex flex-col h-screen p-4 bg-gray-900 text-white">
             <div className="flex justify-between items-center mb-4">
                 <div>
                     <img
@@ -111,34 +134,23 @@ export default function Libros() {
                 </div>
             </div>
 
-            <button
-                onClick={handleLogout}
-                className="fixed bottom-4 left-4 px-6 py-2 bg-red-800 text-white rounded-full hover:bg-gray-800 transition-colors"
-            >
-                Logout
-            </button>
-
-            {showLogoutModal && (
-                <div className="fixed inset-0 flex items-center justify-center">
-                    <div className="bg-gray-600 text-white p-6 rounded-lg shadow-lg">
-                        <p className="text-lg font-bold mb-4">¿Estás seguro que quieres cerrar sesión?</p>
-                        <div className="flex justify-center gap-4">
-                            <button
-                                onClick={confirmLogout}
-                                className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-400 transition-colors"
-                            >
-                                Sí
-                            </button>
-                            <button
-                                onClick={() => setShowLogoutModal(false)}
-                                className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-400 transition-colors"
-                            >
-                                No
-                            </button>
-                        </div>
-                    </div>
+            {/* Mostrar el evento y el contador de tiempo */}
+            {event && (
+                <div className="text-center">
+                    <h2 className="text-2xl font-bold mb-2">Evento: {event.event_name}</h2>
+                    <p className="text-xl">Faltan: {timeLeft}</p>
                 </div>
             )}
+
+            {/* Mostrar los libros */}
+            <div className="mt-4">
+                <h3 className="text-xl font-bold mb-4">Libros</h3>
+                <ul>
+                    {books.map((book) => (
+                        <li key={book.id} className="mb-2">{book.title}</li>
+                    ))}
+                </ul>
+            </div>
         </div>
     );
 }
