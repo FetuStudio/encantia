@@ -32,7 +32,7 @@ export default function Navbar() {
     };
 
     return (
-              <div className="flex flex-col h-screen p-4 bg-gray-900 text-white">
+        <div className="flex flex-col h-screen p-4 bg-gray-900 text-white relative">
             {/* Barra de navegación superior con "Inicio", "Chat" y "Libros" */}
             <div className="flex justify-between items-center mb-4">
                 <div>
@@ -44,39 +44,30 @@ export default function Navbar() {
                 </div>
 
                 <div className="flex gap-4">
-                    {/* Botón de "Inicio" */}
                     <button
                         onClick={() => window.location.href = "https://www.encantia.lat/"}
                         className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
                     >
                         Inicio
                     </button>
-
-                    {/* Botón de "Eventos" */}
                     <button
                         onClick={() => router.push('/EventsArea')}
                         className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
                     >
                         Eventos
                     </button>
-
-                    {/* Botón de "Chat" */}
                     <button
                         onClick={() => router.push('/chat')}
                         className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
                     >
                         Chat
                     </button>
-
-                    {/* Botón de "Libros" */}
                     <button
                         className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
                         onClick={() => router.push('/libros')}
                     >
                         Libros
                     </button>
-
-                    {/* Botón de "Discord" */}
                     <button
                         onClick={() => window.open("https://discord.gg/dxcX8S3mrF", "_blank")}
                         className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
@@ -89,7 +80,6 @@ export default function Navbar() {
                     >
                         Fetu Games 2
                     </button>
-                    {/* Mostrar botones para "Crear Libro" si el rol es 'owner' */}
                     {role === 'owner' && (
                         <button
                             className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
@@ -100,7 +90,15 @@ export default function Navbar() {
                     )}
                 </div>
             </div>
-            {/* Modal de Logout con fondo difuminado */}
+            {/* Botón de Logout en la parte inferior izquierda */}
+            <button 
+                onClick={handleLogout} 
+                className="absolute bottom-4 left-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-500 transition-all"
+            >
+                Cerrar sesión
+            </button>
+
+            {/* Modal de Logout */}
             {showLogoutModal && (
                 <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 backdrop-blur-md">
                     <div className="bg-gray-900 text-white p-5 rounded-lg shadow-2xl text-center">
