@@ -125,7 +125,7 @@ export default function CrearLibros() {
 
                 <div className="flex gap-4">
                     <button
-                        onClick={() => window.location.href = "https://encantia.lat/"}
+                        onClick={() => window.location.href = "https://www.encantia.lat/"}
                         className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
                     >
                         Inicio
