@@ -71,7 +71,7 @@ export default function Libros() {
             const hours = Math.floor((timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
             const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
             const seconds = Math.floor((timeDiff % (1000 * 60)) / 1000);
-            setTimeLeft(`${months} mes(es) ${days} día(s) ${hours}h ${minutes}m ${seconds}s`);
+            setTimeLeft(`${months} meses ${days} días ${hours}h ${minutes}m ${seconds}s`);
         }
     };
 
