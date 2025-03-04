@@ -85,54 +85,65 @@ export default function Settings() {
             </div>
 
             {/* Contenido de la configuración */}
-            <div>
-                <h1 className="text-3xl font-semibold mb-6">Configuración de Perfil</h1>
-                {loading ? (
-                    <p>Cargando...</p>
-                ) : (
-                    <div className="space-y-4">
-                        <div className="flex flex-col items-center">
-                            <img 
-                                src={avatarUrl} 
-                                alt="Avatar" 
-                                className="w-32 h-32 rounded-full border-4 border-gray-700"
-                            />
+            <div className="flex justify-center items-center h-full">
+                <div className="w-full max-w-md bg-gray-800 p-6 rounded-lg shadow-lg">
+                    <h1 className="text-3xl font-semibold mb-6 text-center">Configuración de Perfil</h1>
+                    {loading ? (
+                        <p className="text-center">Cargando...</p>
+                    ) : (
+                        <div className="space-y-6">
+                            {/* Imagen de Avatar */}
+                            <div className="flex justify-center">
+                                <img 
+                                    src={avatarUrl} 
+                                    alt="Avatar" 
+                                    className="w-32 h-32 rounded-full border-4 border-gray-700"
+                                />
+                            </div>
+
+                            {/* Email */}
+                            <div>
+                                <label className="block text-sm">Email</label>
+                                <input
+                                    type="text"
+                                    value={email}
+                                    disabled
+                                    className="px-4 py-2 text-black rounded w-full bg-gray-700 cursor-not-allowed"
+                                />
+                            </div>
+
+                            {/* Nombre de Usuario */}
+                            <div>
+                                <label className="block text-sm">Nombre de Usuario</label>
+                                <input
+                                    type="text"
+                                    value={username}
+                                    onChange={(e) => setUsername(e.target.value)}
+                                    className="px-4 py-2 text-black rounded w-full bg-gray-700"
+                                />
+                            </div>
+
+                            {/* Avatar URL */}
+                            <div>
+                                <label className="block text-sm">Avatar URL</label>
+                                <input
+                                    type="text"
+                                    value={avatarUrl}
+                                    onChange={(e) => setAvatarUrl(e.target.value)}
+                                    className="px-4 py-2 text-black rounded w-full bg-gray-700"
+                                />
+                            </div>
+
+                            {/* Botón de guardar cambios */}
+                            <button
+                                onClick={updateProfile}
+                                className="w-full py-2 bg-green-500 rounded-lg hover:bg-green-400 transition-colors"
+                            >
+                                Guardar Cambios
+                            </button>
                         </div>
-                        <div>
-                            <label className="block text-sm">Email</label>
-                            <input
-                                type="text"
-                                value={email}
-                                disabled
-                                className="px-2 py-1 text-black rounded w-full bg-gray-700 cursor-not-allowed"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm">Nombre de Usuario</label>
-                            <input
-                                type="text"
-                                value={username}
-                                onChange={(e) => setUsername(e.target.value)}
-                                className="px-2 py-1 text-black rounded w-full"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm">Avatar URL</label>
-                            <input
-                                type="text"
-                                value={avatarUrl}
-                                onChange={(e) => setAvatarUrl(e.target.value)}
-                                className="px-2 py-1 text-black rounded w-full"
-                            />
-                        </div>
-                        <button
-                            onClick={updateProfile}
-                            className="px-4 py-2 bg-green-500 rounded-lg hover:bg-green-400"
-                        >
-                            Guardar Cambios
-                        </button>
-                    </div>
-                )}
+                    )}
+                </div>
             </div>
         </div>
     );
