@@ -44,13 +44,30 @@ export default function Settings() {
     const updateProfile = async () => {
         if (!user) return;
 
+        // Verificar si hay cambios en los campos
+        const { data: profileData } = await supabase
+            .from('profiles')
+            .select('email, username, avatar_url')
+            .eq('id', user.id)
+            .single();
+
+        const emailChanged = profileData.email !== email;
+        const usernameChanged = profileData.username !== username;
+        const avatarChanged = profileData.avatar_url !== avatarUrl;
+
+        if (!emailChanged && !usernameChanged && !avatarChanged) {
+            alert('No hay cambios para guardar');
+            return; // No actualiza si no hay cambios
+        }
+
         const { error } = await supabase
             .from('profiles')
             .upsert({
                 id: user.id,
-                email: user.email, // Asegurar que el correo siempre esté actualizado
-                username,
-                avatar_url: avatarUrl === 'https://i.ibb.co/d0mWy0kP/perfildef.png' ? null : avatarUrl, // Solo actualiza el avatar si es diferente del predeterminado
+                email: email, // Actualiza email siempre
+                username: username, // Actualiza el nombre de usuario
+                avatar_url: avatarUrl === 'https://i.ibb.co/d0mWy0kP/perfildef.png' ? null : avatarUrl, // Actualiza avatar_url si no es el predeterminado
+                updated_at: new Date().toISOString(), // Forzamos la actualización del campo 'updated_at'
             });
 
         if (error) {
