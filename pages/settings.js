@@ -5,6 +5,7 @@ export default function Settings() {
     const [user, setUser] = useState(null);
     const [username, setUsername] = useState('');
     const [avatarUrl, setAvatarUrl] = useState('');
+    const [email, setEmail] = useState('');
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -16,6 +17,7 @@ export default function Settings() {
             }
             const currentUser = userData.user;
             setUser(currentUser);
+            setEmail(currentUser.email);
 
             // Asegurar que el usuario esté en la tabla profiles
             await supabase.from('profiles').upsert({ id: currentUser.id, email: currentUser.email }, { onConflict: ['id'] });
@@ -66,6 +68,15 @@ export default function Settings() {
                 <p>Cargando...</p>
             ) : (
                 <div className="space-y-4">
+                    <div>
+                        <label className="block text-sm">Email</label>
+                        <input
+                            type="text"
+                            value={email}
+                            disabled
+                            className="px-2 py-1 text-black rounded w-full bg-gray-700 cursor-not-allowed"
+                        />
+                    </div>
                     <div>
                         <label className="block text-sm">Nombre de Usuario</label>
                         <input
