@@ -7,7 +7,8 @@ export default function ElitecraftTeams() {
     const [passwordInput, setPasswordInput] = useState('');
     const [authenticatedTeam, setAuthenticatedTeam] = useState(null);
     const [messages, setMessages] = useState([]);
-    const [newMessage, setNewMessage] = useState('');
+    const [newMessage, setNewMessage] = useState([]);
+    const [users, setUsers] = useState({});  // Para almacenar los usuarios por ID
 
     useEffect(() => {
         const fetchTeams = async () => {
@@ -42,7 +43,7 @@ export default function ElitecraftTeams() {
     const fetchMessages = async (teamId) => {
         const { data, error } = await supabase
             .from('team_messages')
-            .select('id, message, created_at')
+            .select('id, message, created_at, user_id')
             .eq('team_id', teamId)
             .order('created_at', { ascending: true });
 
@@ -50,6 +51,27 @@ export default function ElitecraftTeams() {
             console.error('Error fetching messages:', error);
         } else {
             setMessages(data);
+            fetchUsers(data);
+        }
+    };
+
+    // Esta función obtiene la foto y nombre de los usuarios que enviaron mensajes
+    const fetchUsers = async (messages) => {
+        const userIds = [...new Set(messages.map((msg) => msg.user_id))];  // Obtiene los IDs de los usuarios únicos
+
+        const { data, error } = await supabase
+            .from('profiles')
+            .select('id, name, avatar_url')
+            .in('id', userIds);
+
+        if (error) {
+            console.error('Error fetching users:', error);
+        } else {
+            const userMap = data.reduce((acc, user) => {
+                acc[user.id] = user;
+                return acc;
+            }, {});
+            setUsers(userMap);  // Guardar los usuarios en un objeto para acceder rápidamente por ID
         }
     };
 
@@ -58,12 +80,12 @@ export default function ElitecraftTeams() {
 
         const { error } = await supabase
             .from('team_messages')
-            .insert([{ team_id: authenticatedTeam.id, message: newMessage }]);
+            .insert([{ team_id: authenticatedTeam.id, message: newMessage, user_id: supabase.auth.user().id }]);
 
         if (error) {
             console.error('Error sending message:', error);
         } else {
-            setNewMessage('');
+            setNewMessage('');  // Limpiar el input
         }
     };
 
@@ -72,6 +94,7 @@ export default function ElitecraftTeams() {
             .channel('team_messages')
             .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'team_messages', filter: `team_id=eq.${teamId}` }, (payload) => {
                 setMessages((prevMessages) => [...prevMessages, payload.new]);
+                fetchUsers([payload.new]);  // Obtener el usuario cuando se agrega un nuevo mensaje
             })
             .subscribe();
 
@@ -126,8 +149,16 @@ export default function ElitecraftTeams() {
                             <h3 className="text-xl mb-2">Chat del equipo</h3>
                             <div className="h-60 overflow-y-auto border border-gray-700 p-2 mb-2">
                                 {messages.map((msg) => (
-                                    <div key={msg.id} className="text-gray-300 text-sm">
-                                        {msg.message}
+                                    <div key={msg.id} className="flex items-start gap-2 text-gray-300 text-sm mb-2">
+                                        <img
+                                            src={users[msg.user_id]?.avatar_url || 'https://i.ibb.co/d0mWy0kP/perfildef.png'}
+                                            alt={users[msg.user_id]?.name}
+                                            className="w-8 h-8 rounded-full"
+                                        />
+                                        <div>
+                                            <p className="font-semibold">{users[msg.user_id]?.name}</p>
+                                            <p>{msg.message}</p>
+                                        </div>
                                     </div>
                                 ))}
                             </div>
