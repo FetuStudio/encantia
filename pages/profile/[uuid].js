@@ -63,7 +63,7 @@ export default function UserProfile() {
     return (
         <div className="flex flex-col min-h-screen bg-gray-900 text-white">
             {/* Barra de navegación */}
-            <div className="flex justify-between items-center p-4 bg-gray-800">
+            <div className="flex justify-between items-center p-4 bg-gray-900">
                 <div>
                     <img
                         src="https://images.encantia.lat/encantia-logo-2025.webp"
