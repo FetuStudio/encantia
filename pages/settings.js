@@ -9,26 +9,31 @@ export default function Settings() {
 
     useEffect(() => {
         const fetchUserProfile = async () => {
-            const { data: { user }, error } = await supabase.auth.getUser();
-            if (error || !user) {
-                console.error('Error fetching user:', error);
+            const { data: userData, error: userError } = await supabase.auth.getUser();
+            if (userError || !userData?.user) {
+                console.error('Error fetching user:', userError);
                 return;
             }
-            setUser(user);
+            const currentUser = userData.user;
+            setUser(currentUser);
+
+            // Asegurar que el usuario esté en la tabla profiles
+            await supabase.from('profiles').upsert({ id: currentUser.id, email: currentUser.email }, { onConflict: ['id'] });
 
             // Obtener perfil desde la tabla profiles
-            const { data, error: profileError } = await supabase
+            const { data: profileData, error: profileError } = await supabase
                 .from('profiles')
                 .select('username, avatar_url')
-                .eq('id', user.id)
+                .eq('id', currentUser.id)
                 .single();
 
             if (profileError && profileError.code !== 'PGRST116') {
                 console.error('Error fetching profile:', profileError);
             } else {
-                setUsername(data?.username || '');
-                setAvatarUrl(data?.avatar_url || '');
+                setUsername(profileData?.username || '');
+                setAvatarUrl(profileData?.avatar_url || '');
             }
+            setLoading(false);
         };
 
         fetchUserProfile();
