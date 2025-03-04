@@ -50,7 +50,7 @@ export default function Settings() {
                 id: user.id,
                 email: user.email, // Asegurar que el correo siempre esté actualizado
                 username,
-                avatar_url: avatarUrl,
+                avatar_url: avatarUrl === 'https://i.ibb.co/d0mWy0kP/perfildef.png' ? null : avatarUrl, // Solo actualiza el avatar si es diferente del predeterminado
             });
 
         if (error) {
@@ -128,7 +128,7 @@ export default function Settings() {
                                 <label className="block text-sm">Avatar URL</label>
                                 <input
                                     type="text"
-                                    value={avatarUrl}
+                                    value={avatarUrl === 'https://i.ibb.co/d0mWy0kP/perfildef.png' ? '' : avatarUrl} // Mostrar solo si no es el avatar predeterminado
                                     onChange={(e) => setAvatarUrl(e.target.value)}
                                     className="px-4 py-2 text-black rounded w-full bg-gray-700"
                                 />
