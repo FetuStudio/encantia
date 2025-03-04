@@ -17,9 +17,9 @@ export default function Profile() {
                 router.push('/');
                 return;
             }
-            
+
             setUser(user);
-            
+
             // Verificar si el perfil del usuario ya existe
             const { data, error } = await supabase
                 .from('profiles')
@@ -31,19 +31,17 @@ export default function Profile() {
             if (error || !data) {
                 const { error: insertError } = await supabase
                     .from('profiles')
-                    .insert([
-                        {
-                            id: user.id,
-                            username: user.user_metadata.full_name || 'Usuario',
-                            avatar_url: user.user_metadata.avatar_url || '',
-                        },
-                    ]);
+                    .insert([{
+                        id: user.id,
+                        username: user.user_metadata.full_name || 'Usuario',
+                        avatar_url: user.user_metadata.avatar_url || '',
+                    }]);
 
                 if (insertError) {
                     console.error('Error al crear el perfil:', insertError);
                     return;
                 }
-                
+
                 // Cargar el perfil recién creado
                 setProfile({
                     id: user.id,
@@ -61,33 +59,17 @@ export default function Profile() {
         fetchUserProfile();
     }, [router]);
 
-    // Enlace al perfil del usuario
-    const profileLink = user ? `https://www.encantia.lat/profile/${user.id}` : '';
+    // Redirigir al perfil del usuario en la ruta /profile/[uuid]
+    useEffect(() => {
+        if (user && profile) {
+            // Redirigir a la página de perfil con el UUID del usuario
+            router.push(`/profile/${user.id}`);
+        }
+    }, [user, profile, router]);
 
     if (loading) {
         return <div>Cargando...</div>;
     }
 
-    return (
-        <div className="flex flex-col items-center justify-center h-screen bg-gray-900 text-white">
-            <h1 className="text-3xl font-semibold mb-4">Perfil de {profile?.username}</h1>
-            
-            {/* Avatar */}
-            <img
-                src={profile?.avatar_url || 'https://i.ibb.co/d0mWy0kP/perfildef.png'}
-                alt="Avatar"
-                className="w-32 h-32 rounded-full mb-4"
-            />
-            
-            {/* Nombre de usuario */}
-            <p className="text-xl mb-4">{profile?.username}</p>
-            
-            {/* Enlace al perfil */}
-            <p className="text-lg text-blue-400">
-                <a href={profileLink} target="_blank" rel="noopener noreferrer">
-                    Ver mi perfil
-                </a>
-            </p>
-        </div>
-    );
+    return null; // No es necesario renderizar nada ya que redirigimos
 }
