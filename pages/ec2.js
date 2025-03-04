@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../utils/supabaseClient';
-import { useRouter } from 'next/router';
 
 export default function ElitecraftTeams() {
     const [teams, setTeams] = useState([]);
     const [selectedTeam, setSelectedTeam] = useState(null);
     const [passwordInput, setPasswordInput] = useState('');
     const [authenticatedTeam, setAuthenticatedTeam] = useState(null);
-    const router = useRouter();
+    const [messages, setMessages] = useState([]);
+    const [newMessage, setNewMessage] = useState('');
 
     useEffect(() => {
         const fetchTeams = async () => {
@@ -34,6 +34,36 @@ export default function ElitecraftTeams() {
             alert('Contraseña incorrecta');
         } else {
             setAuthenticatedTeam(selectedTeam);
+            fetchMessages(selectedTeam.id);
+        }
+    };
+
+    const fetchMessages = async (teamId) => {
+        const { data, error } = await supabase
+            .from('team_messages')
+            .select('id, message, created_at')
+            .eq('team_id', teamId)
+            .order('created_at', { ascending: true });
+
+        if (error) {
+            console.error('Error fetching messages:', error);
+        } else {
+            setMessages(data);
+        }
+    };
+
+    const sendMessage = async () => {
+        if (!newMessage.trim() || !authenticatedTeam) return;
+
+        const { error } = await supabase
+            .from('team_messages')
+            .insert([{ team_id: authenticatedTeam.id, message: newMessage }]);
+
+        if (error) {
+            console.error('Error sending message:', error);
+        } else {
+            setNewMessage('');
+            fetchMessages(authenticatedTeam.id);
         }
     };
 
@@ -77,10 +107,27 @@ export default function ElitecraftTeams() {
                     <div>
                         <h2 className="text-2xl">Bienvenido al equipo {authenticatedTeam.team}</h2>
                         <div className="mt-4 flex gap-4">
-                            <button onClick={() => router.push(`/chat?team=${authenticatedTeam.id}`)} className="px-4 py-2 bg-purple-500 rounded-lg hover:bg-purple-400">Chat</button>
-                            <button onClick={() => router.push(`/upload?team=${authenticatedTeam.id}`)} className="px-4 py-2 bg-green-500 rounded-lg hover:bg-green-400">Subir Archivos</button>
-                            <button onClick={() => router.push(`/video?team=${authenticatedTeam.id}`)} className="px-4 py-2 bg-red-500 rounded-lg hover:bg-red-400">Subir Video</button>
-                            <button onClick={() => router.push(`/call?team=${authenticatedTeam.id}`)} className="px-4 py-2 bg-blue-500 rounded-lg hover:bg-blue-400">Llamada</button>
+                            <button onClick={() => setAuthenticatedTeam(null)} className="px-4 py-2 bg-red-500 rounded-lg hover:bg-red-400">Salir</button>
+                        </div>
+                        <div className="mt-6 bg-gray-800 p-4 rounded-lg">
+                            <h3 className="text-xl mb-2">Chat del equipo</h3>
+                            <div className="h-60 overflow-y-auto border border-gray-700 p-2 mb-2">
+                                {messages.map((msg) => (
+                                    <div key={msg.id} className="text-gray-300 text-sm">
+                                        {msg.message}
+                                    </div>
+                                ))}
+                            </div>
+                            <div className="flex gap-2">
+                                <input
+                                    type="text"
+                                    value={newMessage}
+                                    onChange={(e) => setNewMessage(e.target.value)}
+                                    placeholder="Escribe un mensaje"
+                                    className="flex-grow px-2 py-1 text-black rounded"
+                                />
+                                <button onClick={sendMessage} className="px-4 py-1 bg-green-500 rounded-lg hover:bg-green-400">Enviar</button>
+                            </div>
                         </div>
                     </div>
                 )}
