@@ -1,104 +1,91 @@
-import { useState, useEffect } from 'react';
-import { supabase } from '../utils/supabaseClient';
-import { useRouter } from 'next/router';
+import { useState, useEffect } from "react";
+import { supabase } from "../utils/supabaseClient";
+import { useRouter } from "next/router";
 
-export default function EventsArea() {
-    const [events, setEvents] = useState([]);
-    const [userRole, setUserRole] = useState(null); // Estado para almacenar el rol del usuario
-    const [user, setUser] = useState(null); // Estado para almacenar los datos del usuario
-    const [menuOpen, setMenuOpen] = useState(false); // Estado para abrir/cerrar el menú
+export default function Navbar() {
+    const [role, setRole] = useState("");
+    const [showLogoutModal, setShowLogoutModal] = useState(false);
+    const [showMenu, setShowMenu] = useState(false); // Estado para controlar el menú desplegable
+    const [userProfile, setUserProfile] = useState(null); // Estado para el perfil del usuario
     const router = useRouter();
 
     useEffect(() => {
-        // Función para obtener los eventos
-        const fetchEvents = async () => {
-            const { data, error } = await supabase.from('events').select('*');
-            if (error) {
-                console.error('Error fetching events:', error);
-            } else {
-                setEvents(data);
-            }
-        };
-
-        // Función para obtener el rol del usuario y sus datos
-        const fetchUser = async () => {
+        const fetchUserProfile = async () => {
             const { data: { user }, error: authError } = await supabase.auth.getUser();
-            if (authError || !user) {
-                console.error('Error fetching user:', authError);
-                return;
-            }
+            if (authError || !user) return;
 
-            setUser(user);
-
-            // Buscar el rol del usuario en la tabla 'user_roles'
             const { data, error } = await supabase
                 .from('user_roles')
                 .select('role')
-                .eq('user_id', user.id) // Usamos el ID del usuario para obtener su rol
-                .single(); // Asumimos que un usuario tiene solo un rol
+                .eq('user_id', user.id)
+                .single();
 
-            if (error) {
-                console.error('Error fetching user role:', error);
-            } else {
-                setUserRole(data?.role); // Establece el rol del usuario
+            if (!error) {
+                setRole(data?.role);
+            }
+
+            // Obtener perfil del usuario
+            const { data: profileData, error: profileError } = await supabase
+                .from('profiles')
+                .select('avatar_url')
+                .eq('id', user.id)
+                .single();
+
+            if (!profileError) {
+                setUserProfile(profileData);
             }
         };
 
-        // Llamar a las funciones cuando el componente se monta
-        fetchEvents();
-        fetchUser();
+        fetchUserProfile();
     }, []);
 
-    const handleMenuToggle = () => {
-        setMenuOpen(!menuOpen); // Cambiar el estado para abrir o cerrar el menú
+    const handleLogout = () => setShowLogoutModal(true);
+
+    const confirmLogout = async () => {
+        await supabase.auth.signOut();
+        router.push("/");
     };
 
+    // Función para manejar el clic en la foto de perfil y abrir/cerrar el menú
+    const toggleMenu = () => setShowMenu(!showMenu);
+
     return (
-        <div className="flex flex-col h-screen px-6 bg-gray-900 text-white dark:bg-gray-900 dark:text-white">
-            {/* Barra de navegación */}
-            <div className="flex justify-between items-center mb-6">
+        <div className="flex flex-col h-screen p-4 bg-gray-900 text-white relative">
+            {/* Barra de navegación superior con "Inicio", "Chat" y "Libros" */}
+            <div className="flex justify-between items-center mb-4">
                 <div>
                     <img
-                        src="https://images.encantia.lat/encantia-logo-2025.webp" // Logo
+                        src="https://images.encantia.lat/encantia-logo-2025.webp"
                         alt="Logo"
                         className="h-16"
                     />
                 </div>
 
                 <div className="flex gap-4">
-                    {/* Botón de "Inicio" */}
                     <button
                         onClick={() => window.location.href = "https://www.encantia.lat/"}
                         className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
                     >
                         Inicio
                     </button>
-
-                    {/* Botón de "Eventos" */}
                     <button
                         onClick={() => router.push('/EventsArea')}
                         className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
                     >
                         Eventos
                     </button>
-
-                    {/* Botón de "Chat" */}
                     <button
                         onClick={() => router.push('/chat')}
                         className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
                     >
                         Chat
                     </button>
-
-                    {/* Botón de "Libros" */}
                     <button
                         className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
                         onClick={() => router.push('/libros')}
                     >
                         Libros
                     </button>
-
-                    {/* Botón de "Discord" */}
                     <button
                         onClick={() => window.open("https://discord.gg/dxcX8S3mrF", "_blank")}
                         className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
@@ -111,9 +98,7 @@ export default function EventsArea() {
                     >
                         Fetu Games 2
                     </button>
-
-                    {/* Botón de "Crear Libro" visible solo para los usuarios con rol "owner" */}
-                    {userRole === 'owner' && (
+                    {role === 'owner' && (
                         <button
                             className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
                             onClick={() => router.push('/crear-libro')}
@@ -121,71 +106,70 @@ export default function EventsArea() {
                             Crear Libro
                         </button>
                     )}
+                </div>
 
-                    {/* Foto de perfil con el menú */}
-                    {user && (
-                        <div className="relative">
-                            <img
-                                src={user.user_metadata.avatar_url || 'https://i.ibb.co/d0mWy0kP/perfildef.png'} // Avatar por defecto si no hay
-                                alt="Avatar"
-                                className="w-10 h-10 rounded-full cursor-pointer"
-                                onClick={handleMenuToggle} // Mostrar/ocultar menú al hacer clic
-                            />
+                {/* Foto de perfil en la parte superior derecha */}
+                {userProfile && (
+                    <div className="relative">
+                        <img
+                            src={userProfile.avatar_url || 'https://i.ibb.co/d0mWy0kP/perfildef.png'}
+                            alt="Avatar"
+                            className="w-12 h-12 rounded-full cursor-pointer"
+                            onClick={toggleMenu} // Al hacer clic en la imagen, toggle el menú
+                        />
 
-                            {/* Menú desplegable */}
-                            {menuOpen && (
-                                <div className="absolute right-0 mt-2 bg-gray-800 text-white rounded-md shadow-lg w-40">
-                                    <button
-                                        onClick={() => router.push('/profile')}
-                                        className="block px-4 py-2 text-sm hover:bg-gray-700"
-                                    >
-                                        Perfil
-                                    </button>
-                                    <button
+                        {/* Menú desplegable */}
+                        {showMenu && (
+                            <div className="absolute right-0 mt-2 w-48 bg-gray-800 text-white rounded-lg shadow-lg z-10">
+                                <ul className="py-2">
+                                    <li
+                                        className="px-4 py-2 cursor-pointer hover:bg-gray-700"
                                         onClick={() => router.push('/settings')}
-                                        className="block px-4 py-2 text-sm hover:bg-gray-700"
                                     >
                                         Configuración
-                                    </button>
+                                    </li>
+                                    <li
+                                        className="px-4 py-2 cursor-pointer hover:bg-gray-700"
+                                        onClick={() => router.push('/profile')}
+                                    >
+                                        Perfil
+                                    </li>
                                     {/* Cerrar sesión dentro del menú */}
-                                    <button
-                                        onClick={() => supabase.auth.signOut().then(() => router.push('/'))}
-                                        className="block px-4 py-2 text-sm text-red-500 hover:bg-gray-700"
+                                    <li
+                                        className="px-4 py-2 text-red-500 cursor-pointer hover:bg-gray-700"
+                                        onClick={handleLogout}
                                     >
                                         Cerrar sesión
-                                    </button>
-                                </div>
-                            )}
-                        </div>
-                    )}
-                </div>
-            </div>
-
-            {/* Título de los eventos */}
-            <div className="text-center mt-10">
-                <h1 className="text-3xl font-semibold">Eventos Disponibles</h1>
-            </div>
-
-            {/* Contenedor de eventos */}
-            <div className="flex-grow mt-8 space-y-4">
-                {events.length === 0 ? (
-                    <div className="text-center text-gray-400">
-                        No hay eventos disponibles.
+                                    </li>
+                                </ul>
+                            </div>
+                        )}
                     </div>
-                ) : (
-                    events.map((event) => (
-                        <div
-                            key={event.id}
-                            className="bg-gray-800 p-4 rounded-md shadow-md"
-                        >
-                            <h2 className="text-xl font-semibold">{event.name}</h2>
-                            <p className="text-sm text-gray-400">{event.date}</p>
-                            <p className="mt-2">{event.description}</p>
-                        </div>
-                    ))
                 )}
             </div>
+
+            {/* Modal de Logout */}
+            {showLogoutModal && (
+                <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 backdrop-blur-md">
+                    <div className="bg-gray-900 text-white p-5 rounded-lg shadow-2xl text-center">
+                        <p className="mb-4 text-lg font-semibold">¿Seguro que quieres cerrar sesión?</p>
+                        <div className="flex justify-center gap-4">
+                            <button
+                                onClick={confirmLogout}
+                                className="px-5 py-2 bg-red-500 text-white rounded-lg hover:bg-red-400 transition-all"
+                            >
+                                Sí
+                            </button>
+                            <button
+                                onClick={() => setShowLogoutModal(false)}
+                                className="px-5 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-500 transition-all"
+                            >
+                                No
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
-
