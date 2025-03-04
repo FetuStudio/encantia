@@ -3,11 +3,12 @@ import { supabase } from '../utils/supabaseClient';
 
 export default function Settings() {
     const [user, setUser] = useState(null);
-    const [username, setUsername] = useState('');
+    const [name, setName] = useState('');
     const [avatarUrl, setAvatarUrl] = useState('https://i.ibb.co/d0mWy0kP/perfildef.png');
     const [email, setEmail] = useState('');
     const [loading, setLoading] = useState(true);
     const [statusMessage, setStatusMessage] = useState('');
+    const [isNameAvailable, setIsNameAvailable] = useState(true);  // Para verificar si el nombre está disponible
 
     useEffect(() => {
         const fetchUserProfile = async () => {
@@ -27,7 +28,7 @@ export default function Settings() {
             // Obtener perfil desde la tabla profiles
             const { data: profileData, error: profileError } = await supabase
                 .from('profiles')
-                .select('username, avatar_url')
+                .select('name, avatar_url')
                 .eq('id', currentUser.id)
                 .single();
 
@@ -35,7 +36,7 @@ export default function Settings() {
                 console.error('Error fetching profile data:', profileError);
                 setStatusMessage(`Hubo un error al obtener los datos del perfil: ${profileError.message}`);
             } else {
-                setUsername(profileData?.username || '');
+                setName(profileData?.name || '');
                 setAvatarUrl(profileData?.avatar_url || 'https://i.ibb.co/d0mWy0kP/perfildef.png');
             }
             setLoading(false);
@@ -44,13 +45,40 @@ export default function Settings() {
         fetchUserProfile();
     }, []);
 
+    const checkNameAvailability = async (newName) => {
+        if (!newName) return;
+
+        const { data, error } = await supabase
+            .from('profiles')
+            .select('name')
+            .eq('name', newName)
+            .neq('id', user?.id); // Excluimos el usuario actual por si su nombre es el mismo
+
+        if (error) {
+            console.error('Error checking name availability:', error);
+            setStatusMessage('Error al verificar la disponibilidad del nombre de usuario.');
+            return;
+        }
+
+        if (data.length > 0) {
+            setIsNameAvailable(false);  // Nombre ya está en uso
+        } else {
+            setIsNameAvailable(true);  // Nombre disponible
+        }
+    };
+
     const updateProfile = async () => {
         if (!user) return;
 
-        // Verificar si hay cambios en los campos
+        // Verificar disponibilidad del nombre antes de actualizar
+        if (!isNameAvailable) {
+            setStatusMessage('El nombre de usuario ya está en uso.');
+            return;
+        }
+
         const { data: profileData, error: profileError } = await supabase
             .from('profiles')
-            .select('email, username, avatar_url')
+            .select('email, name, avatar_url')
             .eq('id', user.id)
             .single();
 
@@ -61,10 +89,10 @@ export default function Settings() {
         }
 
         const emailChanged = profileData.email !== email;
-        const usernameChanged = profileData.username !== username;
+        const nameChanged = profileData.name !== name;
         const avatarChanged = profileData.avatar_url !== avatarUrl;
 
-        if (!emailChanged && !usernameChanged && !avatarChanged) {
+        if (!emailChanged && !nameChanged && !avatarChanged) {
             setStatusMessage('No hay cambios para guardar.');
             return; // No actualiza si no hay cambios
         }
@@ -75,7 +103,7 @@ export default function Settings() {
             .upsert({
                 id: user.id,
                 email: email, // Actualiza email siempre
-                username: username, // Actualiza el nombre de usuario
+                name: name, // Cambié `username` por `name`
                 avatar_url: avatarUrl === 'https://i.ibb.co/d0mWy0kP/perfildef.png' ? null : avatarUrl, // Solo actualiza avatar_url si no es el predeterminado
                 updated_at: new Date().toISOString(), // Actualiza el campo 'updated_at'
             });
@@ -144,10 +172,16 @@ export default function Settings() {
                                 <label className="block text-sm">Nombre de Usuario</label>
                                 <input
                                     type="text"
-                                    value={username}
-                                    onChange={(e) => setUsername(e.target.value)}
+                                    value={name}
+                                    onChange={(e) => {
+                                        setName(e.target.value);
+                                        checkNameAvailability(e.target.value);  // Verificar disponibilidad cada vez que cambie el nombre
+                                    }}
                                     className="px-4 py-2 text-black rounded w-full bg-gray-700"
                                 />
+                                {!isNameAvailable && (
+                                    <p className="text-red-500 text-sm mt-2">Este nombre de usuario ya está en uso.</p>
+                                )}
                             </div>
 
                             {/* Avatar URL */}
