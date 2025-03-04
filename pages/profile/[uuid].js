@@ -5,7 +5,6 @@ import { useRouter } from 'next/router';
 export default function UserProfile() {
     const [profile, setProfile] = useState(null);
     const [userRole, setUserRole] = useState(null);
-    const [userCreatedAt, setUserCreatedAt] = useState(null); // Para almacenar la fecha de creación del usuario
     const [loading, setLoading] = useState(true);
     const [menuOpen, setMenuOpen] = useState(false); // Estado para abrir/cerrar el menú
     const router = useRouter();
@@ -39,17 +38,9 @@ export default function UserProfile() {
                 console.error('Error al obtener el rol:', roleError);
             }
 
-            // Obtener la fecha de creación del usuario desde auth.users
-            const { data: userData, error: userError } = await supabase.auth.getUser();
-
-            if (userError) {
-                console.error('Error al obtener los datos del usuario:', userError);
-            }
-
-            // Establecer los datos del perfil, rol y fecha de creación
+            // Establecer los datos del perfil y el rol
             setProfile(profileData);
             setUserRole(roleData?.role || 'No asignado');
-            setUserCreatedAt(userData?.created_at); // Establecer la fecha de creación
             setLoading(false);
         };
 
@@ -165,8 +156,7 @@ export default function UserProfile() {
                     <div>
                         {/* Aquí mostramos el nombre de usuario que es 'name' */}
                         <h1 className="text-3xl font-semibold">{profile.name}</h1>
-                        {/* Mostramos la fecha de creación desde 'auth.users' */}
-                        <p className="text-lg text-gray-400">Miembro desde {new Date(userCreatedAt).toLocaleDateString()}</p>
+                        <p className="text-lg text-gray-400">Miembro desde {new Date(profile.created_at).toLocaleDateString()}</p>
                     </div>
                 </div>
 
@@ -178,4 +168,3 @@ export default function UserProfile() {
         </div>
     );
 }
-
