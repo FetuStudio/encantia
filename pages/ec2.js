@@ -35,6 +35,7 @@ export default function ElitecraftTeams() {
         } else {
             setAuthenticatedTeam(selectedTeam);
             fetchMessages(selectedTeam.id);
+            subscribeToMessages(selectedTeam.id);
         }
     };
 
@@ -63,8 +64,20 @@ export default function ElitecraftTeams() {
             console.error('Error sending message:', error);
         } else {
             setNewMessage('');
-            fetchMessages(authenticatedTeam.id);
         }
+    };
+
+    const subscribeToMessages = (teamId) => {
+        const subscription = supabase
+            .channel('team_messages')
+            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'team_messages', filter: `team_id=eq.${teamId}` }, (payload) => {
+                setMessages((prevMessages) => [...prevMessages, payload.new]);
+            })
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(subscription);
+        };
     };
 
     return (
