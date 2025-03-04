@@ -14,6 +14,7 @@ export default function Settings() {
             const { data: userData, error: userError } = await supabase.auth.getUser();
             if (userError || !userData?.user) {
                 console.error('Error fetching user:', userError);
+                setStatusMessage('Error al obtener los datos del usuario.');
                 return;
             }
             const currentUser = userData.user;
@@ -30,8 +31,9 @@ export default function Settings() {
                 .eq('id', currentUser.id)
                 .single();
 
-            if (profileError && profileError.code !== 'PGRST116') {
-                console.error('Error fetching profile:', profileError);
+            if (profileError) {
+                console.error('Error fetching profile data:', profileError);
+                setStatusMessage(`Hubo un error al obtener los datos del perfil: ${profileError.message}`);
             } else {
                 setUsername(profileData?.username || '');
                 setAvatarUrl(profileData?.avatar_url || 'https://i.ibb.co/d0mWy0kP/perfildef.png');
@@ -53,8 +55,8 @@ export default function Settings() {
             .single();
 
         if (profileError) {
-            console.error('Error fetching profile data:', profileError);
-            setStatusMessage('Hubo un error al intentar obtener los datos del perfil.');
+            console.error('Error fetching profile data for update:', profileError);
+            setStatusMessage(`Hubo un error al intentar obtener los datos del perfil para actualizar: ${profileError.message}`);
             return;
         }
 
@@ -80,7 +82,7 @@ export default function Settings() {
 
         if (error) {
             console.error('Error updating profile:', error);
-            setStatusMessage('Hubo un error al actualizar tu perfil.');
+            setStatusMessage(`Hubo un error al actualizar tu perfil: ${error.message}`);
         } else {
             setStatusMessage('Perfil actualizado correctamente.');
         }
