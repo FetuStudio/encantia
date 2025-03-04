@@ -8,9 +8,7 @@ export default function ElitecraftTeams() {
     const [authenticatedTeam, setAuthenticatedTeam] = useState(null);
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState('');
-    const [users, setUsers] = useState({});  // Para almacenar los usuarios por ID
 
-    // Recupera los equipos disponibles
     useEffect(() => {
         const fetchTeams = async () => {
             const { data, error } = await supabase.from('teams_ec2').select('id, team');
@@ -23,7 +21,6 @@ export default function ElitecraftTeams() {
         fetchTeams();
     }, []);
 
-    // Verifica la contraseña y permite acceder al equipo
     const handlePasswordSubmit = async () => {
         if (!selectedTeam) return;
 
@@ -42,7 +39,6 @@ export default function ElitecraftTeams() {
         }
     };
 
-    // Recupera los mensajes del equipo
     const fetchMessages = async (teamId) => {
         const { data, error } = await supabase
             .from('team_messages')
@@ -54,60 +50,43 @@ export default function ElitecraftTeams() {
             console.error('Error fetching messages:', error);
         } else {
             setMessages(data);
-            fetchUsers(data); // Cargar los perfiles de los usuarios que han enviado los mensajes
         }
     };
 
-    // Recupera los usuarios que enviaron los mensajes
-    const fetchUsers = async (messages) => {
-        const userIds = [...new Set(messages.map((msg) => msg.user_id))];  // Obtiene los IDs únicos de los usuarios
-
-        const { data, error } = await supabase
-            .from('profiles')
-            .select('id, name, avatar_url')
-            .in('id', userIds);
-
-        if (error) {
-            console.error('Error fetching users:', error);
-        } else {
-            const userMap = data.reduce((acc, user) => {
-                acc[user.id] = user;
-                return acc;
-            }, {});
-            setUsers(userMap);  // Guardar los usuarios en un objeto para acceso rápido
-        }
-    };
-
-    // Envía un nuevo mensaje
     const sendMessage = async () => {
         if (!newMessage.trim() || !authenticatedTeam) return;
 
-        // Enviar mensaje con el user_id de quien está autenticado
-        const { error } = await supabase
+        // Insertar el mensaje en la base de datos con el team_id y el mensaje
+        const { data, error } = await supabase
             .from('team_messages')
             .insert([
                 {
-                    team_id: authenticatedTeam.id,
-                    message: newMessage,
-                    user_id: supabase.auth.user().id, // Obtener el user_id del usuario autenticado
+                    team_id: authenticatedTeam.id, // El ID del equipo autenticado
+                    message: newMessage, // El contenido del mensaje
+                    created_at: new Date(), // La fecha de creación del mensaje
+                    user_id: supabase.auth.user().id, // ID del usuario autenticado
                 }
             ]);
 
         if (error) {
             console.error('Error sending message:', error);
         } else {
-            setNewMessage('');  // Limpiar el campo del mensaje después de enviarlo
+            // Limpiar el campo del mensaje después de enviarlo
+            setNewMessage('');
+            // Actualizar los mensajes manualmente
+            setMessages((prevMessages) => [...prevMessages, ...data]);
         }
     };
 
-    // Suscribirse a nuevos mensajes del equipo
     const subscribeToMessages = (teamId) => {
         const subscription = supabase
             .channel('team_messages')
-            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'team_messages', filter: `team_id=eq.${teamId}` }, (payload) => {
-                setMessages((prevMessages) => [...prevMessages, payload.new]);
-                fetchUsers([payload.new]);  // Obtener el usuario que ha enviado el mensaje
-            })
+            .on('postgres_changes', 
+                { event: 'INSERT', schema: 'public', table: 'team_messages', filter: `team_id=eq.${teamId}` }, 
+                (payload) => {
+                    // Al recibir un nuevo mensaje, actualizamos el estado de los mensajes
+                    setMessages((prevMessages) => [...prevMessages, payload.new]);
+                })
             .subscribe();
 
         return () => {
@@ -161,15 +140,17 @@ export default function ElitecraftTeams() {
                             <h3 className="text-xl mb-2">Chat del equipo</h3>
                             <div className="h-60 overflow-y-auto border border-gray-700 p-2 mb-2">
                                 {messages.map((msg) => (
-                                    <div key={msg.id} className="flex items-start gap-2 text-gray-300 text-sm mb-2">
-                                        <img
-                                            src={users[msg.user_id]?.avatar_url || 'https://i.ibb.co/d0mWy0kP/perfildef.png'}
-                                            alt={users[msg.user_id]?.name}
+                                    <div key={msg.id} className="flex items-start space-x-2">
+                                        <img 
+                                            src={`https://api.adorable.io/avatars/40/${msg.user_id}.png`} 
+                                            alt="Avatar" 
                                             className="w-8 h-8 rounded-full"
                                         />
                                         <div>
-                                            <p className="font-semibold">{users[msg.user_id]?.name}</p>
-                                            <p>{msg.message}</p>
+                                            <p className="text-sm font-semibold text-white">
+                                                {msg.user_id}
+                                            </p>
+                                            <p className="text-gray-300 text-sm">{msg.message}</p>
                                         </div>
                                     </div>
                                 ))}
