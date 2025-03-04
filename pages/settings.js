@@ -70,6 +70,17 @@ export default function Settings() {
     const updateProfile = async () => {
         if (!user) return;
 
+        // Validación de campos obligatorios
+        if (!name || name.trim() === '') {
+            setStatusMessage('El nombre de usuario es obligatorio.');
+            return;
+        }
+
+        if (avatarUrl === 'https://i.ibb.co/d0mWy0kP/perfildef.png') {
+            setStatusMessage('La foto de perfil es obligatoria.');
+            return;
+        }
+
         // Verificar disponibilidad del nombre antes de actualizar
         if (!isNameAvailable) {
             setStatusMessage('El nombre de usuario ya está en uso.');
@@ -216,3 +227,4 @@ export default function Settings() {
         </div>
     );
 }
+
