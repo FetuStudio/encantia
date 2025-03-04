@@ -6,18 +6,32 @@ export default function UserProfile() {
     const [profile, setProfile] = useState(null);
     const [loading, setLoading] = useState(true);
     const router = useRouter();
-    const { uuid } = router.query; // Obtener el uuid de la URL
+    const { param } = router.query; // Obtener el parámetro de la URL
 
     useEffect(() => {
-        if (!uuid) return;
+        if (!param) return;
 
         const fetchProfile = async () => {
-            // Buscar el perfil usando el UUID
-            const { data, error } = await supabase
-                .from('profiles')
-                .select('*')
-                .eq('id', uuid)
-                .single();
+            let data;
+            let error;
+
+            // Verificar si el parámetro es un UUID o un nombre de usuario
+            if (param.startsWith('@')) {
+                // Si comienza con '@', es un nombre de usuario
+                const username = param.slice(1); // Eliminar el '@' para obtener el nombre de usuario
+                ({ data, error } = await supabase
+                    .from('profiles')
+                    .select('*')
+                    .eq('username', username)
+                    .single());
+            } else {
+                // Si no, asumimos que es un UUID
+                ({ data, error } = await supabase
+                    .from('profiles')
+                    .select('*')
+                    .eq('id', param) // Buscar por UUID
+                    .single());
+            }
 
             if (error) {
                 console.error('Error al obtener el perfil:', error);
@@ -30,7 +44,7 @@ export default function UserProfile() {
         };
 
         fetchProfile();
-    }, [uuid]);
+    }, [param]);
 
     if (loading) {
         return <div>Cargando...</div>;
@@ -56,3 +70,4 @@ export default function UserProfile() {
         </div>
     );
 }
+
