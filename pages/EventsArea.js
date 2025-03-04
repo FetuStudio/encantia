@@ -5,6 +5,8 @@ import { useRouter } from 'next/router';
 export default function EventsArea() {
     const [events, setEvents] = useState([]);
     const [userRole, setUserRole] = useState(null); // Estado para almacenar el rol del usuario
+    const [user, setUser] = useState(null); // Estado para almacenar los datos del usuario
+    const [menuOpen, setMenuOpen] = useState(false); // Estado para abrir/cerrar el menú
     const router = useRouter();
 
     useEffect(() => {
@@ -18,13 +20,15 @@ export default function EventsArea() {
             }
         };
 
-        // Función para obtener el rol del usuario
-        const fetchUserRole = async () => {
+        // Función para obtener el rol del usuario y sus datos
+        const fetchUser = async () => {
             const { data: { user }, error: authError } = await supabase.auth.getUser();
             if (authError || !user) {
                 console.error('Error fetching user:', authError);
                 return;
             }
+
+            setUser(user);
 
             // Buscar el rol del usuario en la tabla 'user_roles'
             const { data, error } = await supabase
@@ -36,15 +40,18 @@ export default function EventsArea() {
             if (error) {
                 console.error('Error fetching user role:', error);
             } else {
-                console.log('Rol del usuario:', data?.role); // Verifica en la consola
                 setUserRole(data?.role); // Establece el rol del usuario
             }
         };
 
         // Llamar a las funciones cuando el componente se monta
         fetchEvents();
-        fetchUserRole();
+        fetchUser();
     }, []);
+
+    const handleMenuToggle = () => {
+        setMenuOpen(!menuOpen); // Cambiar el estado para abrir o cerrar el menú
+    };
 
     return (
         <div className="flex flex-col h-screen px-6 bg-gray-900 text-white dark:bg-gray-900 dark:text-white">
@@ -104,6 +111,7 @@ export default function EventsArea() {
                     >
                         Fetu Games 2
                     </button>
+
                     {/* Botón de "Crear Libro" visible solo para los usuarios con rol "owner" */}
                     {userRole === 'owner' && (
                         <button
@@ -112,6 +120,42 @@ export default function EventsArea() {
                         >
                             Crear Libro
                         </button>
+                    )}
+
+                    {/* Foto de perfil con el menú */}
+                    {user && (
+                        <div className="relative">
+                            <img
+                                src={user.user_metadata.avatar_url || 'https://i.ibb.co/d0mWy0kP/perfildef.png'} // Avatar por defecto si no hay
+                                alt="Avatar"
+                                className="w-10 h-10 rounded-full cursor-pointer"
+                                onClick={handleMenuToggle} // Mostrar/ocultar menú al hacer clic
+                            />
+
+                            {/* Menú desplegable */}
+                            {menuOpen && (
+                                <div className="absolute right-0 mt-2 bg-gray-800 text-white rounded-md shadow-lg w-40">
+                                    <button
+                                        onClick={() => router.push('/profile')}
+                                        className="block px-4 py-2 text-sm hover:bg-gray-700"
+                                    >
+                                        Perfil
+                                    </button>
+                                    <button
+                                        onClick={() => router.push('/settings')}
+                                        className="block px-4 py-2 text-sm hover:bg-gray-700"
+                                    >
+                                        Configuración
+                                    </button>
+                                    <button
+                                        onClick={() => supabase.auth.signOut().then(() => router.push('/'))}
+                                        className="block px-4 py-2 text-sm text-red-500 hover:bg-gray-700"
+                                    >
+                                        Cerrar sesión
+                                    </button>
+                                </div>
+                            )}
+                        </div>
                     )}
                 </div>
             </div>
@@ -143,4 +187,3 @@ export default function EventsArea() {
         </div>
     );
 }
-
