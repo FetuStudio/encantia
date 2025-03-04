@@ -18,7 +18,7 @@ export default function UserProfile() {
             const { data: profileData, error: profileError } = await supabase
                 .from('profiles')
                 .select('*')
-                .eq('id', uuid)
+                .eq('id', uuid) // Asegurándonos de buscar por UUID
                 .single();
 
             if (profileError) {
@@ -38,6 +38,7 @@ export default function UserProfile() {
                 console.error('Error al obtener el rol:', roleError);
             }
 
+            // Establecer los datos del perfil y el rol
             setProfile(profileData);
             setUserRole(roleData?.role || 'No asignado');
             setLoading(false);
@@ -153,7 +154,8 @@ export default function UserProfile() {
                         className="w-32 h-32 rounded-full"
                     />
                     <div>
-                        <h1 className="text-3xl font-semibold">{profile.username}</h1>
+                        {/* Aquí mostramos el nombre de usuario que es 'name' */}
+                        <h1 className="text-3xl font-semibold">{profile.name}</h1>
                         <p className="text-lg text-gray-400">Miembro desde {new Date(profile.created_at).toLocaleDateString()}</p>
                     </div>
                 </div>
