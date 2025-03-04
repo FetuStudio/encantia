@@ -62,6 +62,27 @@ export default function Settings() {
     };
 
     return (
+        <div className="flex flex-col h-screen px-6 bg-gray-900 text-white dark:bg-gray-900 dark:text-white">
+            {/* Barra de navegación */}
+            <div className="flex justify-between items-center mb-6">
+                <div>
+                    <img
+                        src="https://images.encantia.lat/encantia-logo-2025.webp" // Logo
+                        alt="Logo"
+                        className="h-16"
+                    />
+                </div>
+
+                <div className="flex gap-4">
+                    {/* Botón de "Inicio" */}
+                    <button
+                        onClick={() => window.location.href = "https://www.encantia.lat/"}
+                        className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
+                    >
+                        Inicio
+                    </button>
+
+
         <div className="flex flex-col h-screen px-6 bg-gray-900 text-white">
             <h1 className="text-3xl font-semibold mb-6">Configuración de Perfil</h1>
             {loading ? (
