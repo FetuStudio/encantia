@@ -76,7 +76,8 @@ export default function Settings() {
             return;
         }
 
-        if (avatarUrl === 'https://i.ibb.co/d0mWy0kP/perfildef.png') {
+        // Validar si la foto de perfil es obligatoria (no debe ser la URL predeterminada)
+        if (avatarUrl === 'https://i.ibb.co/d0mWy0kP/perfildef.png' || avatarUrl.trim() === '') {
             setStatusMessage('La foto de perfil es obligatoria.');
             return;
         }
@@ -227,4 +228,3 @@ export default function Settings() {
         </div>
     );
 }
-
