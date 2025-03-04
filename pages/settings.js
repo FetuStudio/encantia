@@ -4,7 +4,7 @@ import { supabase } from '../utils/supabaseClient';
 export default function Settings() {
     const [user, setUser] = useState(null);
     const [username, setUsername] = useState('');
-    const [avatarUrl, setAvatarUrl] = useState('');
+    const [avatarUrl, setAvatarUrl] = useState('https://i.ibb.co/d0mWy0kP/perfildef.png');
     const [email, setEmail] = useState('');
     const [loading, setLoading] = useState(true);
 
@@ -33,7 +33,7 @@ export default function Settings() {
                 console.error('Error fetching profile:', profileError);
             } else {
                 setUsername(profileData?.username || '');
-                setAvatarUrl(profileData?.avatar_url || '');
+                setAvatarUrl(profileData?.avatar_url || 'https://i.ibb.co/d0mWy0kP/perfildef.png');
             }
             setLoading(false);
         };
@@ -68,6 +68,13 @@ export default function Settings() {
                 <p>Cargando...</p>
             ) : (
                 <div className="space-y-4">
+                    <div className="flex flex-col items-center">
+                        <img 
+                            src={avatarUrl} 
+                            alt="Avatar" 
+                            className="w-32 h-32 rounded-full border-4 border-gray-700"
+                        />
+                    </div>
                     <div>
                         <label className="block text-sm">Email</label>
                         <input
