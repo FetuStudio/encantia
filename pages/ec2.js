@@ -7,9 +7,10 @@ export default function ElitecraftTeams() {
     const [passwordInput, setPasswordInput] = useState('');
     const [authenticatedTeam, setAuthenticatedTeam] = useState(null);
     const [messages, setMessages] = useState([]);
-    const [newMessage, setNewMessage] = useState([]);
+    const [newMessage, setNewMessage] = useState('');
     const [users, setUsers] = useState({});  // Para almacenar los usuarios por ID
 
+    // Recupera los equipos disponibles
     useEffect(() => {
         const fetchTeams = async () => {
             const { data, error } = await supabase.from('teams_ec2').select('id, team');
@@ -22,6 +23,7 @@ export default function ElitecraftTeams() {
         fetchTeams();
     }, []);
 
+    // Verifica la contraseña y permite acceder al equipo
     const handlePasswordSubmit = async () => {
         if (!selectedTeam) return;
 
@@ -40,6 +42,7 @@ export default function ElitecraftTeams() {
         }
     };
 
+    // Recupera los mensajes del equipo
     const fetchMessages = async (teamId) => {
         const { data, error } = await supabase
             .from('team_messages')
@@ -51,13 +54,13 @@ export default function ElitecraftTeams() {
             console.error('Error fetching messages:', error);
         } else {
             setMessages(data);
-            fetchUsers(data);
+            fetchUsers(data); // Cargar los perfiles de los usuarios que han enviado los mensajes
         }
     };
 
-    // Esta función obtiene la foto y nombre de los usuarios que enviaron mensajes
+    // Recupera los usuarios que enviaron los mensajes
     const fetchUsers = async (messages) => {
-        const userIds = [...new Set(messages.map((msg) => msg.user_id))];  // Obtiene los IDs de los usuarios únicos
+        const userIds = [...new Set(messages.map((msg) => msg.user_id))];  // Obtiene los IDs únicos de los usuarios
 
         const { data, error } = await supabase
             .from('profiles')
@@ -71,30 +74,39 @@ export default function ElitecraftTeams() {
                 acc[user.id] = user;
                 return acc;
             }, {});
-            setUsers(userMap);  // Guardar los usuarios en un objeto para acceder rápidamente por ID
+            setUsers(userMap);  // Guardar los usuarios en un objeto para acceso rápido
         }
     };
 
+    // Envía un nuevo mensaje
     const sendMessage = async () => {
         if (!newMessage.trim() || !authenticatedTeam) return;
 
+        // Enviar mensaje con el user_id de quien está autenticado
         const { error } = await supabase
             .from('team_messages')
-            .insert([{ team_id: authenticatedTeam.id, message: newMessage, user_id: supabase.auth.user().id }]);
+            .insert([
+                {
+                    team_id: authenticatedTeam.id,
+                    message: newMessage,
+                    user_id: supabase.auth.user().id, // Obtener el user_id del usuario autenticado
+                }
+            ]);
 
         if (error) {
             console.error('Error sending message:', error);
         } else {
-            setNewMessage('');  // Limpiar el input
+            setNewMessage('');  // Limpiar el campo del mensaje después de enviarlo
         }
     };
 
+    // Suscribirse a nuevos mensajes del equipo
     const subscribeToMessages = (teamId) => {
         const subscription = supabase
             .channel('team_messages')
             .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'team_messages', filter: `team_id=eq.${teamId}` }, (payload) => {
                 setMessages((prevMessages) => [...prevMessages, payload.new]);
-                fetchUsers([payload.new]);  // Obtener el usuario cuando se agrega un nuevo mensaje
+                fetchUsers([payload.new]);  // Obtener el usuario que ha enviado el mensaje
             })
             .subscribe();
 
