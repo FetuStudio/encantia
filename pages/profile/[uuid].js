@@ -7,6 +7,8 @@ export default function UserProfile() {
     const [userRole, setUserRole] = useState(null);
     const [loading, setLoading] = useState(true);
     const [menuOpen, setMenuOpen] = useState(false); // Estado para abrir/cerrar el menú
+    const [videos, setVideos] = useState([]); // Para almacenar los videos del usuario
+    const [videoFile, setVideoFile] = useState(null); // Para almacenar el archivo del video a subir
     const router = useRouter();
     const { uuid } = router.query; // Obtener el UUID de la URL
 
@@ -38,14 +40,83 @@ export default function UserProfile() {
                 console.error('Error al obtener el rol:', roleError);
             }
 
-            // Establecer los datos del perfil y el rol
+            // Obtener los videos del usuario desde la tabla videos
+            const { data: videosData, error: videosError } = await supabase
+                .from('videos')
+                .select('*')
+                .eq('user_id', uuid);
+
+            if (videosError) {
+                console.error('Error al obtener los videos:', videosError);
+            }
+
+            // Establecer los datos del perfil, rol y videos
             setProfile(profileData);
             setUserRole(roleData?.role || 'No asignado');
+            setVideos(videosData || []);
             setLoading(false);
         };
 
         fetchProfile();
     }, [uuid]);
+
+    const handleMenuToggle = () => {
+        setMenuOpen(!menuOpen);
+    };
+
+    // Función para manejar el cambio de archivo de video
+    const handleVideoChange = (e) => {
+        setVideoFile(e.target.files[0]);
+    };
+
+    // Función para subir el video a Supabase y asociarlo con el perfil
+    const handleUploadVideo = async () => {
+        if (!videoFile) return;
+
+        setLoading(true);
+
+        const fileExt = videoFile.name.split('.').pop();
+        const fileName = `${Date.now()}.${fileExt}`;
+        const filePath = `videos/${fileName}`;
+
+        // Subir el video a Supabase Storage
+        const { data, error } = await supabase.storage
+            .from('videos')
+            .upload(filePath, videoFile);
+
+        if (error) {
+            console.error('Error uploading video:', error);
+            setLoading(false);
+            return;
+        }
+
+        // Obtener la URL pública del video
+        const videoUrl = supabase.storage
+            .from('videos')
+            .getPublicUrl(filePath).publicURL;
+
+        // Guardar el enlace en la base de datos (tabla 'videos')
+        const { user } = await supabase.auth.getUser();
+
+        const { error: dbError } = await supabase
+            .from('videos')
+            .insert([{ user_id: user.id, video_url: videoUrl }]);
+
+        if (dbError) {
+            console.error('Error saving video info:', dbError);
+            setLoading(false);
+            return;
+        }
+
+        // Recargar los videos después de la subida
+        const { data: updatedVideos } = await supabase
+            .from('videos')
+            .select('*')
+            .eq('user_id', user.id);
+
+        setVideos(updatedVideos || []);
+        setLoading(false);
+    };
 
     if (loading) {
         return <div>Cargando...</div>;
@@ -54,11 +125,6 @@ export default function UserProfile() {
     if (!profile) {
         return <div>Perfil no encontrado.</div>;
     }
-
-    // Función para manejar el clic en la foto de perfil y abrir/cerrar el menú
-    const handleMenuToggle = () => {
-        setMenuOpen(!menuOpen);
-    };
 
     return (
         <div className="flex flex-col min-h-screen bg-gray-900 text-white">
@@ -165,7 +231,35 @@ export default function UserProfile() {
                     <p className="text-xl">Roles: {userRole}</p>
                 </div>
             </div>
+
+            {/* Subir video */}
+            <div className="flex flex-col items-center justify-center p-8">
+                <input
+                    type="file"
+                    accept="video/*"
+                    onChange={handleVideoChange}
+                    className="mb-4"
+                />
+                <button
+                    onClick={handleUploadVideo}
+                    disabled={loading}
+                    className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
+                >
+                    {loading ? 'Subiendo...' : 'Subir Video'}
+                </button>
+
+                {/* Mostrar videos */}
+                <div className="mt-8 grid grid-cols-1 gap-4">
+                    {videos.map((video, index) => (
+                        <div key={index} className="w-full">
+                            <video controls className="w-full">
+                                <source src={video.video_url} type="video/mp4" />
+                                Tu navegador no soporta el elemento de video.
+                            </video>
+                        </div>
+                    ))}
+                </div>
+            </div>
         </div>
     );
 }
-
