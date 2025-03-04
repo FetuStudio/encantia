@@ -7,6 +7,7 @@ export default function Settings() {
     const [avatarUrl, setAvatarUrl] = useState('https://i.ibb.co/d0mWy0kP/perfildef.png');
     const [email, setEmail] = useState('');
     const [loading, setLoading] = useState(true);
+    const [statusMessage, setStatusMessage] = useState('');
 
     useEffect(() => {
         const fetchUserProfile = async () => {
@@ -45,36 +46,43 @@ export default function Settings() {
         if (!user) return;
 
         // Verificar si hay cambios en los campos
-        const { data: profileData } = await supabase
+        const { data: profileData, error: profileError } = await supabase
             .from('profiles')
             .select('email, username, avatar_url')
             .eq('id', user.id)
             .single();
+
+        if (profileError) {
+            console.error('Error fetching profile data:', profileError);
+            setStatusMessage('Hubo un error al intentar obtener los datos del perfil.');
+            return;
+        }
 
         const emailChanged = profileData.email !== email;
         const usernameChanged = profileData.username !== username;
         const avatarChanged = profileData.avatar_url !== avatarUrl;
 
         if (!emailChanged && !usernameChanged && !avatarChanged) {
-            alert('No hay cambios para guardar');
+            setStatusMessage('No hay cambios para guardar.');
             return; // No actualiza si no hay cambios
         }
 
+        // Realizamos el upsert en la base de datos
         const { error } = await supabase
             .from('profiles')
             .upsert({
                 id: user.id,
                 email: email, // Actualiza email siempre
                 username: username, // Actualiza el nombre de usuario
-                avatar_url: avatarUrl === 'https://i.ibb.co/d0mWy0kP/perfildef.png' ? null : avatarUrl, // Actualiza avatar_url si no es el predeterminado
-                updated_at: new Date().toISOString(), // Forzamos la actualización del campo 'updated_at'
+                avatar_url: avatarUrl === 'https://i.ibb.co/d0mWy0kP/perfildef.png' ? null : avatarUrl, // Solo actualiza avatar_url si no es el predeterminado
+                updated_at: new Date().toISOString(), // Actualiza el campo 'updated_at'
             });
 
         if (error) {
             console.error('Error updating profile:', error);
-            alert('Error al actualizar perfil');
+            setStatusMessage('Hubo un error al actualizar tu perfil.');
         } else {
-            alert('Perfil actualizado correctamente');
+            setStatusMessage('Perfil actualizado correctamente.');
         }
     };
 
@@ -150,6 +158,13 @@ export default function Settings() {
                                     className="px-4 py-2 text-black rounded w-full bg-gray-700"
                                 />
                             </div>
+
+                            {/* Estado de la operación */}
+                            {statusMessage && (
+                                <div className="text-center text-sm font-semibold mt-4">
+                                    <p>{statusMessage}</p>
+                                </div>
+                            )}
 
                             {/* Botón de guardar cambios */}
                             <button
