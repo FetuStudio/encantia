@@ -178,7 +178,20 @@ export default function UserProfile() {
                 </div>
 
                 {/* Foto de perfil con el menú */}
-                <div className="relative">
+                <div className="relative flex items-center gap-4">
+                    <button
+                        onClick={() => document.getElementById('videoInput').click()}
+                        className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
+                    >
+                        Subir Video
+                    </button>
+                    <input
+                        id="videoInput"
+                        type="file"
+                        accept="video/*"
+                        onChange={handleVideoChange}
+                        className="hidden"
+                    />
                     <img
                         src={profile.avatar_url || 'https://i.ibb.co/d0mWy0kP/perfildef.png'}
                         alt="Avatar"
@@ -232,21 +245,17 @@ export default function UserProfile() {
                 </div>
             </div>
 
-            {/* Subir video */}
+            {/* Subir video y mostrar los videos */}
             <div className="flex flex-col items-center justify-center p-8">
-                <input
-                    type="file"
-                    accept="video/*"
-                    onChange={handleVideoChange}
-                    className="mb-4"
-                />
-                <button
-                    onClick={handleUploadVideo}
-                    disabled={loading}
-                    className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
-                >
-                    {loading ? 'Subiendo...' : 'Subir Video'}
-                </button>
+                {videoFile && (
+                    <button
+                        onClick={handleUploadVideo}
+                        disabled={loading}
+                        className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
+                    >
+                        {loading ? 'Subiendo...' : 'Subir Video'}
+                    </button>
+                )}
 
                 {/* Mostrar videos */}
                 <div className="mt-8 grid grid-cols-1 gap-4">
