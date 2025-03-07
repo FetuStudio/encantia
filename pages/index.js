@@ -46,4 +46,18 @@ export default function Home() {
       {session ? <UserArea /> : <Auth />}
     </div>
   );
+
+export default function Home() {
+  return (
+    <>
+      <Head>
+        <script src="/cde.js" defer></script>
+      </Head>
+      <main>
+        <h1>Bienvenido a mi sitio web</h1>
+        <p>Contenido normal cuando `EOD === False`.</p>
+      </main>
+    </>
+  );
+}
 }
