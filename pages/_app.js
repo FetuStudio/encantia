@@ -14,31 +14,40 @@ function MyApp({ Component, pageProps }) {
     const fetchMaintenanceStatus = async () => {
       try {
         console.log('Fetching maintenance status...');
+        
+        // Solicita el estado de mantenimiento a Supabase
         const { data, error } = await supabase
           .from('maintenance')
           .select('is_active, reason, start_time')
-          .eq('id', 1)
+          .eq('id', 1) // Asumiendo que el ID de la fila de mantenimiento es 1
           .single();
 
+        // Verifica si hubo un error al obtener los datos
         if (error) {
           console.error('Error fetching maintenance status:', error);
         } else {
-          console.log('Fetched data:', data); // Verifica los datos que recibimos
-          if (data && data.is_active) {
-            setIsMaintenance(true);
+          // Log de datos obtenidos
+          console.log('Fetched data:', data);
+
+          // Verifica si los datos están correctos y si `is_active` es true
+          if (data && data.is_active === true) {
+            console.log('Maintenance is active, redirecting to home...');
+            setIsMaintenance(true); // Cambia el estado a mantenimiento
             setReason(data.reason || 'Mantenimiento programado');
             setStartTime(data.start_time);
-
+            
             // Redirige a la página de inicio
             router.push('/');
           } else {
+            console.log('Maintenance is not active.');
             setIsMaintenance(false);
           }
         }
       } catch (err) {
         console.error('Error during maintenance status fetch:', err);
       } finally {
-        setIsLoading(false); // Asegúrate de que la carga siempre termine
+        // Cambia el estado de carga para que deje de mostrar "Loading..."
+        setIsLoading(false);
       }
     };
 
@@ -52,7 +61,7 @@ function MyApp({ Component, pageProps }) {
 
   // Si está en mantenimiento, no renderizamos nada ya que la redirección se realiza en el useEffect
   if (isMaintenance) {
-    return null;
+    return null; // No hacemos render en la página de mantenimiento
   }
 
   // Si no está en mantenimiento, sigue con el flujo normal
