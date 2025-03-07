@@ -1,7 +1,9 @@
 import '../styles/globals.css'; // Importa tus estilos globales
 import React, { useEffect, useState } from 'react';
 import MaintenancePage from './maintenance'; // Importa la página de mantenimiento
-import supabase from '../utils/supabaseClient'; // Importa la configuración function MyApp({ Component, pageProps }) {
+import supabase from '../utils/supabaseClient'; // Importa la configuración de Supabase
+
+function MyApp({ Component, pageProps }) { // Se arregló la declaración de la función
 
   const [isMaintenance, setIsMaintenance] = useState(false);
   const [reason, setReason] = useState('');
@@ -27,7 +29,7 @@ import supabase from '../utils/supabaseClient'; // Importa la configuración fun
     };
 
     fetchMaintenanceStatus();
-  }, []);
+  }, []); // Esta dependencia vacía asegura que solo se ejecute al montar el componente
 
   if (isMaintenance) {
     return <MaintenancePage reason={reason} startTime={startTime} />;
