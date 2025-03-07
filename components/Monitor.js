@@ -6,7 +6,7 @@ const Monitor = () => {
   const [pageDisabled, setPageDisabled] = useState(false);  // Estado de la página (si está deshabilitada o no)
 
   useEffect(() => {
-    // Función para verificar si hay una caída
+    // Función para consultar el estado de la caída en la base de datos
     const checkCaidaStatus = async () => {
       const { data, error } = await supabase
         .from('caida')
@@ -23,33 +23,25 @@ const Monitor = () => {
           setPageDisabled(true);
         } else {
           // Si no hay caídas, la página sigue funcionando normalmente
+          setCaidaData(null);
           setPageDisabled(false);
         }
       }
     };
 
-    // Llama a la función cuando el componente se monte
+    // Llamar a la función inicialmente cuando el componente se monte
     checkCaidaStatus();
 
-    // Suscripción en tiempo real para actualizaciones
-    const subscription = supabase
-      .from('caida')
-      .on('UPDATE', (payload) => {
-        if (payload.new.EOD === 'True') {
-          setCaidaData(payload.new);  // Actualiza los datos de la caída
-          setPageDisabled(true);  // Deshabilita la página si EOD es True
-        } else {
-          setCaidaData(null);  // Resetea los datos de la caída
-          setPageDisabled(false);  // Habilita la página si EOD no es True
-        }
-      })
-      .subscribe();
+    // Configurar un intervalo para verificar el estado de la caída cada 5 segundos
+    const intervalId = setInterval(() => {
+      checkCaidaStatus();
+    }, 5000); // 5000 milisegundos = 5 segundos
 
-    // Limpiar la suscripción cuando el componente se desmonte
+    // Limpiar el intervalo cuando el componente se desmonte
     return () => {
-      supabase.removeSubscription(subscription);
+      clearInterval(intervalId);
     };
-  }, []);
+  }, []); // Ejecutar solo una vez cuando el componente se monta
 
   // Si la página está deshabilitada, muestra el motivo de la caída
   if (pageDisabled && caidaData) {
