@@ -8,6 +8,16 @@ function MyApp({ Component, pageProps }) {
   }, []);
   
   return <Component {...pageProps} />;
+
+  import Monitor from "@/components/Monitor";
+
+function MyApp({ Component, pageProps }) {
+  return (
+    <>
+      <Monitor />
+      <Component {...pageProps} />
+    </>
+  );
 }
 
 export default MyApp;
