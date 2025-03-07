@@ -1,19 +1,12 @@
-// pages/_app.js
-import '../styles/globals.css';  // Importa tu archivo CSS global aquí
+import '../styles/globals.css'; // Importa tus estilos globales
 import { useEffect } from 'react';
-import Monitor from "@/components/Monitor";  // Asegúrate de que la ruta sea correcta
 
 function MyApp({ Component, pageProps }) {
   useEffect(() => {
-    // Este hook de efecto asegura que el CSS se cargue correctamente
+    // Puedes incluir aquí lógica si necesitas algo en el momento de la carga de la app
   }, []);
 
-  return (
-    <>
-      <Monitor />
-      <Component {...pageProps} />
-    </>
-  );
+  return <Component {...pageProps} />; // Renderiza el componente de la página
 }
 
 export default MyApp;
