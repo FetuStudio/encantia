@@ -1,3 +1,4 @@
+import Styles from '../styles/globals'
 import { useEffect, useState } from 'react';
 import { supabase, getCdtsStatus } from '../utils/supabaseClient';
 
