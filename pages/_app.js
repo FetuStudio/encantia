@@ -1,71 +1,70 @@
-import '../styles/globals.css'; // Importa tus estilos globales
-import React, { useEffect, useState } from 'react';
-import { useRouter } from 'next/router'; // Importa el hook useRouter
-import supabase from '../utils/supabaseClient'; // Importa la configuración de Supabase
+import { useEffect, useState } from 'react';
+import { supabase, getCdtsStatus } from '../utils/supabaseClient';
 
-function MyApp({ Component, pageProps }) {
-  const [isMaintenance, setIsMaintenance] = useState(false);
-  const [reason, setReason] = useState('');
-  const [startTime, setStartTime] = useState('');
-  const [isLoading, setIsLoading] = useState(true); // Estado para manejar la carga
-  const router = useRouter(); // Usamos el router para redirigir
+export default function MyApp({ Component, pageProps }) {
+    const [isDisabled, setIsDisabled] = useState(false);
+    const [cdtsCode, setCdtsCode] = useState('');
+    const [motivo, setMotivo] = useState('');
+    const [horaCaida, setHoraCaida] = useState('');
 
-  useEffect(() => {
-    const fetchMaintenanceStatus = async () => {
-      try {
-        console.log('Fetching maintenance status...');
-        
-        // Solicita el estado de mantenimiento a Supabase
-        const { data, error } = await supabase
-          .from('maintenance')
-          .select('is_active, reason, start_time')
-          .eq('id', 1) // Asumiendo que el ID de la fila de mantenimiento es 1
-          .single();
+    useEffect(() => {
+        const fetchStatus = async () => {
+            const { caida, cdtscode, motivo, hora_caida } = await getCdtsStatus();
+            setIsDisabled(caida);
+            setCdtsCode(caida ? cdtscode : '');
+            setMotivo(caida ? motivo : '');
+            setHoraCaida(caida ? new Date(hora_caida).toLocaleString() : '');
+        };
 
-        // Verifica si hubo un error al obtener los datos
-        if (error) {
-          console.error('Error fetching maintenance status:', error);
-        } else {
-          // Log de datos obtenidos
-          console.log('Fetched data:', data);
+        fetchStatus();
 
-          // Verifica si los datos están correctos y si `is_active` es true
-          if (data && data.is_active === true) {
-            console.log('Maintenance is active, redirecting to home...');
-            setIsMaintenance(true); // Cambia el estado a mantenimiento
-            setReason(data.reason || 'Mantenimiento programado');
-            setStartTime(data.start_time);
-            
-            // Redirige a la página de inicio
-            router.push('/');
-          } else {
-            console.log('Maintenance is not active.');
-            setIsMaintenance(false);
-          }
-        }
-      } catch (err) {
-        console.error('Error during maintenance status fetch:', err);
-      } finally {
-        // Cambia el estado de carga para que deje de mostrar "Loading..."
-        setIsLoading(false);
-      }
-    };
+        // Escuchar cambios en la tabla 'cdts' en tiempo real
+        const subscription = supabase
+            .channel('realtime:cdts')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'cdts' }, fetchStatus)
+            .subscribe();
 
-    fetchMaintenanceStatus();
-  }, [router]); // Asegúrate de que el router esté disponible
+        return () => {
+            supabase.removeChannel(subscription);
+        };
+    }, []);
 
-  // Mientras se carga el estado de mantenimiento, muestra una pantalla de carga o nada
-  if (isLoading) {
-    return <div>Loading...</div>; // Esto se puede personalizar o eliminar según tus necesidades
-  }
+    return (
+        <div className={isDisabled ? 'disabled-overlay' : ''}>
+            {isDisabled ? (
+                <div className="cdts-container">
+                    <h1>Sitio en mantenimiento</h1>
+                    <p><strong>{cdtsCode}</strong></p>
+                    <p><strong>Motivo:</strong> {motivo}</p>
+                    <p><strong>Hora de caída:</strong> {horaCaida}</p>
+                </div>
+            ) : (
+                <Component {...pageProps} />
+            )}
 
-  // Si está en mantenimiento, no renderizamos nada ya que la redirección se realiza en el useEffect
-  if (isMaintenance) {
-    return null; // No hacemos render en la página de mantenimiento
-  }
-
-  // Si no está en mantenimiento, sigue con el flujo normal
-  return <Component {...pageProps} />;
+            <style jsx>{`
+                .disabled-overlay {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: rgba(0, 0, 0, 0.8);
+                    color: white;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 1.5rem;
+                    z-index: 1000;
+                }
+                .cdts-container {
+                    text-align: center;
+                    padding: 20px;
+                    background: #222;
+                    border-radius: 10px;
+                    box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+                }
+            `}</style>
+        </div>
+    );
 }
-
-export default MyApp;
