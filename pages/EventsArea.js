@@ -56,12 +56,12 @@ export default function EventsArea() {
     return (
         <div className="flex flex-col h-screen px-6 bg-gray-900 text-white dark:bg-gray-900 dark:text-white">
             {/* Barra de navegación */}
-            <div className="flex flex-col items-center mb-6">
+            <div className="flex justify-between items-center mb-6">
                 <div>
                     <img
                         src="https://images.encantia.lat/encantia-logo-2025.webp" // Logo
                         alt="Logo"
-                        className="h-16 mb-4"
+                        className="h-16"
                     />
                 </div>
 
@@ -123,42 +123,6 @@ export default function EventsArea() {
                     )}
                 </div>
             </div>
-
-            {/* Foto de perfil con el menú */}
-            {user && (
-                <div className="relative self-end">
-                    <img
-                        src={user.user_metadata.avatar_url || 'https://i.ibb.co/d0mWy0kP/perfildef.png'} // Avatar por defecto si no hay
-                        alt="Avatar"
-                        className="w-10 h-10 rounded-full cursor-pointer"
-                        onClick={handleMenuToggle} // Mostrar/ocultar menú al hacer clic
-                    />
-
-                    {/* Menú desplegable */}
-                    {menuOpen && (
-                        <div className="absolute right-0 mt-2 bg-gray-800 text-white rounded-md shadow-lg w-40">
-                            <button
-                                onClick={() => router.push('/profile')}
-                                className="block px-4 py-2 text-sm hover:bg-gray-700"
-                            >
-                                Perfil
-                            </button>
-                            <button
-                                onClick={() => router.push('/settings')}
-                                className="block px-4 py-2 text-sm hover:bg-gray-700"
-                            >
-                                Configuración
-                            </button>
-                            <button
-                                onClick={() => supabase.auth.signOut().then(() => router.push('/'))}
-                                className="block px-4 py-2 text-sm text-red-500 hover:bg-gray-700"
-                            >
-                                Cerrar sesión
-                            </button>
-                        </div>
-                    )}
-                </div>
-            )}
 
             {/* Título de los eventos */}
             <div className="text-center mt-10">
