@@ -12,11 +12,13 @@ export default function CrearLibros() {
     const [bookLink, setBookLink] = useState(""); // Para el link del libro
     const [bookTitle, setBookTitle] = useState(""); // Para el título del libro
     const [role, setRole] = useState("");  // Estado para el rol del usuario
+    const [userProfile, setUserProfile] = useState(null); // Estado para el perfil del usuario
     const router = useRouter();
 
     useEffect(() => {
         fetchBooks();
         fetchUserRole();
+        fetchUserProfile();
     }, []);
 
     const fetchBooks = async () => {
@@ -43,6 +45,21 @@ export default function CrearLibros() {
             return;
         }
         setRole(data?.role);  // Asignamos el rol del usuario
+    };
+
+    const fetchUserProfile = async () => {
+        const { data: { user }, error: authError } = await supabase.auth.getUser();
+        if (authError || !user) return;
+
+        const { data: profileData, error: profileError } = await supabase
+            .from('profiles')
+            .select('avatar_url')
+            .eq('id', user.id)
+            .single();
+
+        if (!profileError) {
+            setUserProfile(profileData);
+        }
     };
 
     const handleAddChapter = () => {
@@ -176,6 +193,17 @@ export default function CrearLibros() {
 
                     )}
                 </div>
+
+                {/* Foto de perfil */}
+                {userProfile && (
+                    <div className="relative">
+                        <img
+                            src={userProfile.avatar_url || 'https://i.ibb.co/d0mWy0kP/perfildef.png'}
+                            alt="Avatar"
+                            className="w-12 h-12 rounded-full cursor-pointer"
+                        />
+                    </div>
+                )}
             </div>
 
             {/* Crear libro */}
