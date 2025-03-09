@@ -47,8 +47,6 @@ export default function CrearLibros() {
             return;
         }
 
-        // Verificamos el rol
-        console.log("Rol del usuario:", data?.role); // Esto nos ayuda a verificar el rol
         setRole(data?.role);  // Asignamos el rol del usuario
     };
 
@@ -151,7 +149,8 @@ export default function CrearLibros() {
 
     return (
         <div className="flex flex-col h-screen p-4 bg-gray-900 text-white">
-            {/* Barra de navegación superior con "Inicio", "Chat" y "Libros" */}
+            
+            {/* Barra de navegación */}
             <div className="flex justify-between items-center mb-4">
                 <div>
                     <img
@@ -161,6 +160,7 @@ export default function CrearLibros() {
                     />
                 </div>
 
+                {/* Botones de navegación */}
                 <div className="flex gap-4">
                     <button
                         onClick={() => window.location.href = "https://www.encantia.lat/"}
@@ -190,7 +190,6 @@ export default function CrearLibros() {
                         Libros
                     </button>
 
-                    {/* Botón de "Discord" */}
                     <button
                         onClick={() => window.open("https://discord.gg/dxcX8S3mrF", "_blank")}
                         className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
@@ -204,7 +203,7 @@ export default function CrearLibros() {
                         Fetu Games 2
                     </button>
 
-                    {/* Mostrar el botón "Crear Libro" solo si el rol es 'owner' */}
+                    {/* Botón de crear libro solo si es owner */}
                     {role === 'owner' ? (
                         <button
                             className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
@@ -213,21 +212,19 @@ export default function CrearLibros() {
                             Crear Libro
                         </button>
                     ) : (
-                        <p className="text-red-500">No tienes permisos para crear libros.</p> // Mensaje si el rol no es owner
+                        <p className="text-red-500">No tienes permisos para crear libros.</p>
                     )}
                 </div>
 
-                {/* Foto de perfil en la parte superior derecha */}
+                {/* Foto de perfil y menú */}
                 {userProfile && (
                     <div className="relative">
                         <img
                             src={userProfile.avatar_url || 'https://i.ibb.co/d0mWy0kP/perfildef.png'}
                             alt="Avatar"
                             className="w-12 h-12 rounded-full cursor-pointer"
-                            onClick={toggleMenu} // Al hacer clic en la imagen, toggle el menú
+                            onClick={toggleMenu}
                         />
-
-                        {/* Menú desplegable */}
                         {showMenu && (
                             <div className="absolute right-0 mt-2 w-48 bg-gray-800 text-white rounded-lg shadow-lg z-10">
                                 <ul className="py-2">
@@ -243,7 +240,6 @@ export default function CrearLibros() {
                                     >
                                         Perfil
                                     </li>
-                                    {/* Cerrar sesión dentro del menú */}
                                     <li
                                         className="px-4 py-2 text-red-500 cursor-pointer hover:bg-gray-700"
                                         onClick={handleLogout}
@@ -257,18 +253,16 @@ export default function CrearLibros() {
                 )}
             </div>
 
-            {/* Listado de libros */}
+            {/* Lista de libros */}
             <div className="flex flex-col items-center justify-center p-4">
                 <h1 className="text-2xl font-bold mb-4">Mis Libros</h1>
 
-                {/* Lista de libros */}
                 {books.length > 0 ? (
                     books.map((book) => (
                         <div key={book.id} className="flex flex-col items-center bg-gray-800 p-4 rounded-lg mb-4 w-full max-w-md">
                             <h2 className="text-xl font-bold">{book.title}</h2>
                             <p className="text-gray-400">{book.description}</p>
                             <div className="flex gap-4 mt-2">
-                                {/* Botón para eliminar el libro */}
                                 <button 
                                     className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-400 transition-colors"
                                     onClick={() => handleDeleteBook(book.id)}
@@ -283,11 +277,9 @@ export default function CrearLibros() {
                 )}
             </div>
 
-            {/* Sección para agregar libros con capítulos */}
+            {/* Sección para crear libro */}
             <div className="mt-8">
                 <h2 className="text-2xl font-bold mb-4">Agregar Libro</h2>
-
-                {/* Input para el título y descripción */}
                 <div className="mb-4">
                     <label className="block mb-2">Título:</label>
                     <input
@@ -318,7 +310,6 @@ export default function CrearLibros() {
                     />
                 </div>
 
-                {/* Añadir capítulos */}
                 <h3 className="font-bold text-xl mb-4">Capítulos</h3>
                 {chapters.map((chapter, index) => (
                     <div key={index} className="mb-4">
