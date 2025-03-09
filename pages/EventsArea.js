@@ -96,8 +96,8 @@ export default function EventsArea() {
                             />
                             {menuOpen && (
                                 <div className="absolute right-0 mt-2 w-48 bg-gray-800 border border-gray-700 rounded-lg shadow-lg py-2">
-                                    <button onClick={() => router.push('/perfil')} className="block px-4 py-2 text-white hover:bg-gray-700 w-full text-left">Perfil</button>
-                                    <button onClick={() => router.push('/configuracion')} className="block px-4 py-2 text-white hover:bg-gray-700 w-full text-left">Configuración</button>
+                                    <button onClick={() => router.push('/profile')} className="block px-4 py-2 text-white hover:bg-gray-700 w-full text-left">Perfil</button>
+                                    <button onClick={() => router.push('/settings')} className="block px-4 py-2 text-white hover:bg-gray-700 w-full text-left">Configuración</button>
                                     <button onClick={handleLogout} className="block px-4 py-2 text-red-500 hover:bg-gray-700 w-full text-left">Cerrar sesión</button>
                                 </div>
                             )}
