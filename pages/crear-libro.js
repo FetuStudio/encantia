@@ -13,7 +13,7 @@ export default function CrearLibros() {
     const [bookTitle, setBookTitle] = useState(""); // Para el título del libro
     const [role, setRole] = useState("");  // Estado para el rol del usuario
     const [userProfile, setUserProfile] = useState(null); // Estado para el perfil del usuario
-    const [showMenu, setShowMenu] = useState(false);  // Estado para controlar el menú
+    const [showMenu, setShowMenu] = useState(false); // Estado para mostrar el menú del perfil
     const router = useRouter();
 
     useEffect(() => {
@@ -49,8 +49,8 @@ export default function CrearLibros() {
     };
 
     const fetchUserProfile = async () => {
-        const { data: { user }, error } = await supabase.auth.getUser();
-        if (error || !user) return;
+        const { data: { user }, error: authError } = await supabase.auth.getUser();
+        if (authError || !user) return;
 
         const { data, error: profileError } = await supabase
             .from('profiles')
@@ -59,7 +59,7 @@ export default function CrearLibros() {
             .single();
 
         if (!profileError) {
-            setUserProfile(data);  // Asignamos el perfil del usuario
+            setUserProfile(data);
         }
     };
 
@@ -129,8 +129,13 @@ export default function CrearLibros() {
         else console.error("Error al eliminar el libro:", error.message);
     };
 
-    const toggleMenu = () => {
-        setShowMenu(!showMenu);  // Cambiar el estado del menú al hacer clic en la foto
+    // Función para manejar el clic en la foto de perfil y abrir/cerrar el menú
+    const toggleMenu = () => setShowMenu(!showMenu);
+
+    // Función para manejar el logout
+    const handleLogout = async () => {
+        await supabase.auth.signOut();
+        router.push("/");
     };
 
     return (
@@ -187,7 +192,8 @@ export default function CrearLibros() {
                     >
                         Fetu Games 2
                     </button>
-                    {/* Mostrar los botones solo si el usuario tiene el rol adecuado */}
+
+                    {/* Mostrar el botón "Crear Libro" solo si el rol es 'owner' */}
                     {role === 'owner' && (
                         <button
                             className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
@@ -198,7 +204,7 @@ export default function CrearLibros() {
                     )}
                 </div>
 
-                {/* Foto de perfil */}
+                {/* Foto de perfil en la parte superior derecha */}
                 {userProfile && (
                     <div className="relative">
                         <img
@@ -227,10 +233,7 @@ export default function CrearLibros() {
                                     {/* Cerrar sesión dentro del menú */}
                                     <li
                                         className="px-4 py-2 text-red-500 cursor-pointer hover:bg-gray-700"
-                                        onClick={() => { 
-                                            supabase.auth.signOut();
-                                            router.push('/'); 
-                                        }}
+                                        onClick={handleLogout}
                                     >
                                         Cerrar sesión
                                     </li>
@@ -239,6 +242,86 @@ export default function CrearLibros() {
                         )}
                     </div>
                 )}
+            </div>
+
+            {/* Crear libro */}
+            <div className="flex flex-col items-center justify-center p-4">
+                <h1 className="text-2xl font-bold mb-4">Crear Libro</h1>
+
+                {!isLinkMode ? (
+                    <>
+                        <input 
+                            className="p-2 mb-2 w-full max-w-md bg-gray-800 border border-gray-700 rounded"
+                            placeholder="Título"
+                            value={title}
+                            onChange={(e) => setTitle(e.target.value)}
+                        />
+                        <input 
+                            className="p-2 mb-2 w-full max-w-md bg-gray-800 border border-gray-700 rounded"
+                            placeholder="Descripción"
+                            value={description}
+                            onChange={(e) => setDescription(e.target.value)}
+                        />
+                        <input 
+                            className="p-2 mb-2 w-full max-w-md bg-gray-800 border border-gray-700 rounded"
+                            placeholder="URL de la portada"
+                            value={coverUrl}
+                            onChange={(e) => setCoverUrl(e.target.value)}
+                        />
+
+                        <h2 className="text-lg font-bold mt-4">Capítulos</h2>
+                        {chapters.map((chap, index) => (
+                            <div key={index} className="mb-2 w-full max-w-md">
+                                <label className="block text-sm mb-1">Capítulo {chap.number}</label>
+                                <textarea
+                                    className="p-2 w-full h-20 bg-gray-800 border border-gray-700 rounded"
+                                    placeholder={`Contenido del capítulo ${chap.number}`}
+                                    value={chap.content}
+                                    onChange={(e) => handleChapterChange(index, e.target.value)}
+                                />
+                            </div>
+                        ))}
+                        <button 
+                            className="p-2 bg-blue-500 hover:bg-blue-600 text-white rounded mb-4"
+                            onClick={handleAddChapter}
+                        >
+                            + Agregar Capítulo
+                        </button>
+
+                        <button className="p-2 bg-green-500 hover:bg-green-600 text-white rounded"
+                            onClick={handleCreateBook}
+                        >
+                            Guardar Libro
+                        </button>
+                    </>
+                ) : (
+                    <>
+                        <input 
+                            className="p-2 mb-2 w-full max-w-md bg-gray-800 border border-gray-700 rounded"
+                            placeholder="Link del libro"
+                            value={bookLink}
+                            onChange={(e) => setBookLink(e.target.value)}
+                        />
+                        <input 
+                            className="p-2 mb-2 w-full max-w-md bg-gray-800 border border-gray-700 rounded"
+                            placeholder="Título del libro"
+                            value={bookTitle}
+                            onChange={(e) => setBookTitle(e.target.value)}
+                        />
+                        <button className="p-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded"
+                            onClick={handleLinkSubmit}
+                        >
+                            Subir Libro
+                        </button>
+                    </>
+                )}
+
+                <button 
+                    className="mt-4 p-2 bg-blue-500 hover:bg-blue-600 text-white rounded"
+                    onClick={() => setIsLinkMode(!isLinkMode)}
+                >
+                    {isLinkMode ? "Crear un nuevo libro" : "¿Ya tienes un libro creado? Ponga el link del libro"}
+                </button>
             </div>
         </div>
     );
