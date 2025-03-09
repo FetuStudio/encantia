@@ -282,6 +282,100 @@ export default function CrearLibros() {
                     <p className="text-gray-500">No tienes libros disponibles.</p>
                 )}
             </div>
+
+            {/* Sección para agregar libros con capítulos */}
+            <div className="mt-8">
+                <h2 className="text-2xl font-bold mb-4">Agregar Libro</h2>
+
+                {/* Input para el título y descripción */}
+                <div className="mb-4">
+                    <label className="block mb-2">Título:</label>
+                    <input
+                        type="text"
+                        value={title}
+                        onChange={(e) => setTitle(e.target.value)}
+                        className="w-full px-4 py-2 text-black rounded-lg"
+                    />
+                </div>
+
+                <div className="mb-4">
+                    <label className="block mb-2">Descripción:</label>
+                    <input
+                        type="text"
+                        value={description}
+                        onChange={(e) => setDescription(e.target.value)}
+                        className="w-full px-4 py-2 text-black rounded-lg"
+                    />
+                </div>
+
+                <div className="mb-4">
+                    <label className="block mb-2">URL de portada:</label>
+                    <input
+                        type="text"
+                        value={coverUrl}
+                        onChange={(e) => setCoverUrl(e.target.value)}
+                        className="w-full px-4 py-2 text-black rounded-lg"
+                    />
+                </div>
+
+                {/* Añadir capítulos */}
+                <h3 className="font-bold text-xl mb-4">Capítulos</h3>
+                {chapters.map((chapter, index) => (
+                    <div key={index} className="mb-4">
+                        <label className="block">Capítulo {chapter.number}</label>
+                        <textarea
+                            value={chapter.content}
+                            onChange={(e) => handleChapterChange(index, e.target.value)}
+                            className="w-full px-4 py-2 text-black rounded-lg"
+                        />
+                    </div>
+                ))}
+                <button
+                    onClick={handleAddChapter}
+                    className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
+                >
+                    Agregar capítulo
+                </button>
+
+                <button
+                    onClick={handleCreateBook}
+                    className="mt-4 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-400 transition-colors"
+                >
+                    Crear Libro
+                </button>
+            </div>
+
+            {/* Sección para usar link */}
+            <div className="mt-8">
+                <h2 className="text-2xl font-bold mb-4">Usar Link para Subir Libro</h2>
+
+                <div className="mb-4">
+                    <label className="block mb-2">Título del Libro:</label>
+                    <input
+                        type="text"
+                        value={bookTitle}
+                        onChange={(e) => setBookTitle(e.target.value)}
+                        className="w-full px-4 py-2 text-black rounded-lg"
+                    />
+                </div>
+
+                <div className="mb-4">
+                    <label className="block mb-2">Link del Libro:</label>
+                    <input
+                        type="text"
+                        value={bookLink}
+                        onChange={(e) => setBookLink(e.target.value)}
+                        className="w-full px-4 py-2 text-black rounded-lg"
+                    />
+                </div>
+
+                <button
+                    onClick={handleLinkSubmit}
+                    className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
+                >
+                    Subir Libro desde Link
+                </button>
+            </div>
         </div>
     );
 }
