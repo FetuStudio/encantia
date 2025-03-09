@@ -148,10 +148,10 @@ export default function CrearLibros() {
     };
 
     return (
-        <div className="flex flex-col h-screen p-4 bg-gray-900 text-white">
+        <div className="flex flex-col items-center justify-center h-screen bg-gray-900 text-white px-4">
             
             {/* Barra de navegación */}
-            <div className="flex justify-between items-center mb-4">
+            <div className="flex justify-between items-center mb-4 w-full">
                 <div>
                     <img
                         src="https://images.encantia.lat/encantia-logo-2025.webp"
@@ -254,7 +254,7 @@ export default function CrearLibros() {
             </div>
 
             {/* Sección para agregar un nuevo libro */}
-            <div className="mt-8">
+            <div className="mt-8 w-full max-w-3xl">
                 <h2 className="text-2xl font-bold mb-4">Agregar Libro</h2>
                 <div className="mb-4">
                     <label className="block mb-2">Título:</label>
@@ -313,12 +313,12 @@ export default function CrearLibros() {
             </div>
 
             {/* Lista de libros */}
-            <div className="flex flex-col items-center justify-center p-4 mt-8">
+            <div className="flex flex-col items-center justify-center p-4 mt-8 w-full max-w-3xl">
                 <h1 className="text-2xl font-bold mb-4">Mis Libros</h1>
 
                 {books.length > 0 ? (
                     books.map((book) => (
-                        <div key={book.id} className="flex flex-col items-center bg-gray-800 p-4 rounded-lg mb-4 w-full max-w-md">
+                        <div key={book.id} className="flex flex-col items-center bg-gray-800 p-4 rounded-lg mb-4 w-full">
                             <h2 className="text-xl font-bold">{book.title}</h2>
                             <p className="text-gray-400">{book.description}</p>
                             <div className="flex gap-4 mt-2">
