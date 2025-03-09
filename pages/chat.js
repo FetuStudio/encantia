@@ -11,6 +11,8 @@ export default function Chat() {
     const [user, setUser] = useState(null);
     const [error, setError] = useState(null);
     const [role, setRole] = useState('');
+    const [userProfile, setUserProfile] = useState(null); // Estado para el perfil del usuario
+    const [showMenu, setShowMenu] = useState(false); // Estado para controlar el menú desplegable
     const router = useRouter();
 
     useEffect(() => {
@@ -21,6 +23,17 @@ export default function Chat() {
                 return;
             }
             setUser(user);
+
+            // Obtener perfil del usuario
+            const { data: profileData, error: profileError } = await supabase
+                .from('profiles')
+                .select('avatar_url')
+                .eq('id', user.id)
+                .single();
+
+            if (!profileError) {
+                setUserProfile(profileData);
+            }
         };
 
         fetchUserProfile();
@@ -30,7 +43,7 @@ export default function Chat() {
         if (user) {
             fetchContacts();
             fetchChatMessages();
-            fetchUserRole(); // Get the user's role
+            fetchUserRole(); // Obtener el rol del usuario
         }
     }, [user]);
 
@@ -88,13 +101,11 @@ export default function Chat() {
         if (message.trim() && selectedContact) {
             const { error } = await supabase
                 .from('messages')
-                .insert([
-                    {
-                        from_user: user.id,
-                        to_user: selectedContact.id,
-                        message,
-                    },
-                ]);
+                .insert([{
+                    from_user: user.id,
+                    to_user: selectedContact.id,
+                    message,
+                }]);
 
             if (error) {
                 console.error('Error sending message:', error);
@@ -139,6 +150,9 @@ export default function Chat() {
         }
     };
 
+    // Función para manejar el clic en la foto de perfil y abrir/cerrar el menú
+    const toggleMenu = () => setShowMenu(!showMenu);
+
     return (
         <div className="flex flex-col h-screen p-4 bg-gray-900 text-white">
             {/* Barra de navegación superior con "Inicio", "Chat" y "Libros" */}
@@ -158,21 +172,18 @@ export default function Chat() {
                     >
                         Inicio
                     </button>
-
                     <button
                         onClick={() => router.push('/EventsArea')}
                         className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
                     >
                         Eventos
                     </button>
-
                     <button
                         onClick={() => router.push('/chat')}
                         className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
                     >
                         Chat
                     </button>
-
                     <button
                         className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
                         onClick={() => router.push('/libros')}
@@ -180,20 +191,43 @@ export default function Chat() {
                         Libros
                     </button>
 
-                    {/* Botón de "Discord" */}
-                    <button
-                        onClick={() => window.open("https://discord.gg/dxcX8S3mrF", "_blank")}
-                        className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
-                    >
-                        Discord
-                    </button>
-                    <button
-                        className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
-                        onClick={() => router.push('/fg2')}
-                    >
-                        Fetu Games 2
-                    </button>
+                    {/* Foto de perfil en la parte superior derecha */}
+                    {userProfile && (
+                        <div className="relative">
+                            <img
+                                src={userProfile.avatar_url || 'https://i.ibb.co/d0mWy0kP/perfildef.png'}
+                                alt="Avatar"
+                                className="w-12 h-12 rounded-full cursor-pointer"
+                                onClick={toggleMenu} // Al hacer clic en la imagen, toggle el menú
+                            />
 
+                            {/* Menú desplegable */}
+                            {showMenu && (
+                                <div className="absolute right-0 mt-2 w-48 bg-gray-800 text-white rounded-lg shadow-lg z-10">
+                                    <ul className="py-2">
+                                        <li
+                                            className="px-4 py-2 cursor-pointer hover:bg-gray-700"
+                                            onClick={() => router.push('/settings')}
+                                        >
+                                            Configuración
+                                        </li>
+                                        <li
+                                            className="px-4 py-2 cursor-pointer hover:bg-gray-700"
+                                            onClick={() => router.push('/profile')}
+                                        >
+                                            Perfil
+                                        </li>
+                                        {/* Cerrar sesión dentro del menú */}
+                                        <li
+                                            className="px-4 py-2 text-red-500 cursor-pointer hover:bg-gray-700"
+                                            onClick={() => supabase.auth.signOut().then(() => router.push("/"))}
+                                        >
+                                            Cerrar sesión
+                                        </li>
+                                    </ul>
+                                </div>
+                            )}
+                        </div>
                     )}
                 </div>
             </div>
