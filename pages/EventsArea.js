@@ -62,6 +62,11 @@ export default function EventsArea() {
         setMenuOpen(!menuOpen);
     };
 
+    const handleLogout = async () => {
+        await supabase.auth.signOut();
+        router.push('/');
+    };
+
     return (
         <div className="flex flex-col h-screen px-6 bg-gray-900 text-white dark:bg-gray-900 dark:text-white">
             <div className="flex justify-between items-center mb-6">
@@ -73,7 +78,7 @@ export default function EventsArea() {
                     />
                 </div>
 
-                <div className="flex gap-4 items-center">
+                <div className="flex gap-4 items-center relative">
                     <button onClick={() => window.location.href = "https://www.encantia.lat/"} className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors">Inicio</button>
                     <button onClick={() => router.push('/EventsArea')} className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors">Eventos</button>
                     <button onClick={() => router.push('/chat')} className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors">Chat</button>
@@ -82,12 +87,21 @@ export default function EventsArea() {
                     <button className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors" onClick={() => router.push('/fg2')}>Fetu Games 2</button>
                     {userRole === 'owner' && <button className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors" onClick={() => router.push('/crear-libro')}>Crear Libro</button>}
                     {avatarUrl && (
-                        <img
-                            src={avatarUrl}
-                            alt="Perfil"
-                            className="w-10 h-10 rounded-full border-2 border-white cursor-pointer"
-                            onClick={() => router.push('/perfil')}
-                        />
+                        <div className="relative">
+                            <img
+                                src={avatarUrl}
+                                alt="Perfil"
+                                className="w-10 h-10 rounded-full border-2 border-white cursor-pointer"
+                                onClick={handleMenuToggle}
+                            />
+                            {menuOpen && (
+                                <div className="absolute right-0 mt-2 w-48 bg-gray-800 border border-gray-700 rounded-lg shadow-lg py-2">
+                                    <button onClick={() => router.push('/perfil')} className="block px-4 py-2 text-white hover:bg-gray-700 w-full text-left">Perfil</button>
+                                    <button onClick={() => router.push('/configuracion')} className="block px-4 py-2 text-white hover:bg-gray-700 w-full text-left">Configuración</button>
+                                    <button onClick={handleLogout} className="block px-4 py-2 text-red-500 hover:bg-gray-700 w-full text-left">Cerrar sesión</button>
+                                </div>
+                            )}
+                        </div>
                     )}
                 </div>
             </div>
