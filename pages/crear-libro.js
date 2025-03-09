@@ -253,31 +253,7 @@ export default function CrearLibros() {
                 )}
             </div>
 
-            {/* Lista de libros */}
-            <div className="flex flex-col items-center justify-center p-4">
-                <h1 className="text-2xl font-bold mb-4">Mis Libros</h1>
-
-                {books.length > 0 ? (
-                    books.map((book) => (
-                        <div key={book.id} className="flex flex-col items-center bg-gray-800 p-4 rounded-lg mb-4 w-full max-w-md">
-                            <h2 className="text-xl font-bold">{book.title}</h2>
-                            <p className="text-gray-400">{book.description}</p>
-                            <div className="flex gap-4 mt-2">
-                                <button 
-                                    className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-400 transition-colors"
-                                    onClick={() => handleDeleteBook(book.id)}
-                                >
-                                    Eliminar
-                                </button>
-                            </div>
-                        </div>
-                    ))
-                ) : (
-                    <p className="text-gray-500">No tienes libros disponibles.</p>
-                )}
-            </div>
-
-            {/* Sección para crear libro */}
+            {/* Sección para agregar un nuevo libro */}
             <div className="mt-8">
                 <h2 className="text-2xl font-bold mb-4">Agregar Libro</h2>
                 <div className="mb-4">
@@ -336,37 +312,30 @@ export default function CrearLibros() {
                 </button>
             </div>
 
-            {/* Sección para usar link */}
-            <div className="mt-8">
-                <h2 className="text-2xl font-bold mb-4">Usar Link para Subir Libro</h2>
+            {/* Lista de libros */}
+            <div className="flex flex-col items-center justify-center p-4 mt-8">
+                <h1 className="text-2xl font-bold mb-4">Mis Libros</h1>
 
-                <div className="mb-4">
-                    <label className="block mb-2">Título del Libro:</label>
-                    <input
-                        type="text"
-                        value={bookTitle}
-                        onChange={(e) => setBookTitle(e.target.value)}
-                        className="w-full px-4 py-2 text-black rounded-lg"
-                    />
-                </div>
-
-                <div className="mb-4">
-                    <label className="block mb-2">Link del Libro:</label>
-                    <input
-                        type="text"
-                        value={bookLink}
-                        onChange={(e) => setBookLink(e.target.value)}
-                        className="w-full px-4 py-2 text-black rounded-lg"
-                    />
-                </div>
-
-                <button
-                    onClick={handleLinkSubmit}
-                    className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
-                >
-                    Subir Libro desde Link
-                </button>
+                {books.length > 0 ? (
+                    books.map((book) => (
+                        <div key={book.id} className="flex flex-col items-center bg-gray-800 p-4 rounded-lg mb-4 w-full max-w-md">
+                            <h2 className="text-xl font-bold">{book.title}</h2>
+                            <p className="text-gray-400">{book.description}</p>
+                            <div className="flex gap-4 mt-2">
+                                <button 
+                                    className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-400 transition-colors"
+                                    onClick={() => handleDeleteBook(book.id)}
+                                >
+                                    Eliminar
+                                </button>
+                            </div>
+                        </div>
+                    ))
+                ) : (
+                    <p className="text-gray-500">No tienes libros disponibles.</p>
+                )}
             </div>
         </div>
     );
 }
+
