@@ -149,7 +149,7 @@ export default function CrearLibros() {
 
     return (
         <div className="flex flex-col items-center justify-center h-screen bg-gray-900 text-white px-4">
-            
+
             {/* Barra de navegación */}
             <div className="flex justify-between items-center mb-4 w-full">
                 <div>
@@ -338,4 +338,3 @@ export default function CrearLibros() {
         </div>
     );
 }
-
