@@ -35,6 +35,7 @@ export default function CrearLibros() {
             return;
         }
 
+        // Obtenemos el rol del usuario desde la tabla user_roles
         const { data, error: roleError } = await supabase
             .from('user_roles')
             .select('role')
@@ -45,6 +46,9 @@ export default function CrearLibros() {
             console.error('Error fetching role:', roleError);
             return;
         }
+
+        // Verificamos el rol
+        console.log("Rol del usuario:", data?.role); // Esto nos ayuda a verificar el rol
         setRole(data?.role);  // Asignamos el rol del usuario
     };
 
@@ -194,13 +198,15 @@ export default function CrearLibros() {
                     </button>
 
                     {/* Mostrar el botón "Crear Libro" solo si el rol es 'owner' */}
-                    {role === 'owner' && (
+                    {role === 'owner' ? (
                         <button
                             className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
                             onClick={() => router.push('/crear-libro')}
                         >
                             Crear Libro
                         </button>
+                    ) : (
+                        <p className="text-red-500">No tienes permisos para crear libros.</p> // Mensaje si el rol no es owner
                     )}
                 </div>
 
