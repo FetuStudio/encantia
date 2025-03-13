@@ -98,7 +98,6 @@ export default function Navbar() {
                     >
                         Fetu Games 2
                     </button>
-                    )}
                 </div>
 
                 {/* Foto de perfil en la parte superior derecha */}
