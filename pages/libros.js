@@ -5,46 +5,53 @@ import { useRouter } from "next/router";
 export default function Libros() {
     const [books, setBooks] = useState([]); 
     const [role, setRole] = useState("");  // Estado para almacenar el rol del usuario
+    const [showMenu, setShowMenu] = useState(false); // Estado para controlar el menú desplegable
+    const [userProfile, setUserProfile] = useState(null); // Estado para el perfil del usuario
+    const [showLogoutModal, setShowLogoutModal] = useState(false);
     const router = useRouter(); 
 
-    useEffect(() => {
-        const fetchBooks = async () => {
-            const { data, error } = await supabase.from("books").select("*");
-            if (error) {
-                console.error("Error al obtener libros:", error);
-            } else {
-                setBooks(data);
-            }
-        };
-
-        // Función para obtener el rol del usuario
-        const fetchUserRole = async () => {
+   useEffect(() => {
+        const fetchUserProfile = async () => {
             const { data: { user }, error: authError } = await supabase.auth.getUser();
-            if (authError || !user) {
-                console.error("Error al obtener usuario:", authError);
-                return;
-            }
+            if (authError || !user) return;
 
-            // Obtener el rol del usuario en la tabla 'user_roles'
             const { data, error } = await supabase
                 .from('user_roles')
                 .select('role')
-                .eq('user_id', user.id) // Usamos el ID del usuario para obtener su rol
+                .eq('user_id', user.id)
                 .single();
 
-            if (error) {
-                console.error("Error al obtener el rol del usuario:", error);
-            } else {
-                setRole(data?.role); // Establecemos el rol del usuario
+            if (!error) {
+                setRole(data?.role);
+            }
+
+            // Obtener perfil del usuario
+            const { data: profileData, error: profileError } = await supabase
+                .from('profiles')
+                .select('avatar_url')
+                .eq('id', user.id)
+                .single();
+
+            if (!profileError) {
+                setUserProfile(profileData);
             }
         };
 
-        fetchBooks();
-        fetchUserRole();  // Llamar a la función para obtener el rol del usuario
+        fetchUserProfile();
     }, []);
 
+    const handleLogout = () => setShowLogoutModal(true);
+
+    const confirmLogout = async () => {
+        await supabase.auth.signOut();
+        router.push("/");
+    };
+
+    // Función para manejar el clic en la foto de perfil y abrir/cerrar el menú
+    const toggleMenu = () => setShowMenu(!showMenu);
+
     return (
-        <div className="flex flex-col h-screen p-4 bg-gray-900 text-white">
+        <div className="flex flex-col h-screen p-4 bg-gray-900 text-white relative">
             {/* Barra de navegación superior con "Inicio", "Chat" y "Libros" */}
             <div className="flex justify-between items-center mb-4">
                 <div>
@@ -56,39 +63,30 @@ export default function Libros() {
                 </div>
 
                 <div className="flex gap-4">
-                    {/* Botón de "Inicio" */}
                     <button
                         onClick={() => window.location.href = "https://www.encantia.lat/"}
                         className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
                     >
                         Inicio
                     </button>
-
-                    {/* Botón de "Eventos" */}
                     <button
                         onClick={() => router.push('/EventsArea')}
                         className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
                     >
                         Eventos
                     </button>
-
-                    {/* Botón de "Chat" */}
                     <button
                         onClick={() => router.push('/chat')}
                         className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
                     >
                         Chat
                     </button>
-
-                    {/* Botón de "Libros" */}
                     <button
                         className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
                         onClick={() => router.push('/libros')}
                     >
                         Libros
                     </button>
-
-                    {/* Botón de "Discord" */}
                     <button
                         onClick={() => window.open("https://discord.gg/dxcX8S3mrF", "_blank")}
                         className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
@@ -101,9 +99,70 @@ export default function Libros() {
                     >
                         Fetu Games 2
                     </button>
-                    {/* Mostrar botones para "Crear Libro" si el rol es 'owner' */}
                 </div>
+
+                {/* Foto de perfil en la parte superior derecha */}
+                {userProfile && (
+                    <div className="relative">
+                        <img
+                            src={userProfile.avatar_url || 'https://i.ibb.co/d0mWy0kP/perfildef.png'}
+                            alt="Avatar"
+                            className="w-12 h-12 rounded-full cursor-pointer"
+                            onClick={toggleMenu} // Al hacer clic en la imagen, toggle el menú
+                        />
+
+                        {/* Menú desplegable */}
+                        {showMenu && (
+                            <div className="absolute right-0 mt-2 w-48 bg-gray-800 text-white rounded-lg shadow-lg z-10">
+                                <ul className="py-2">
+                                    <li
+                                        className="px-4 py-2 cursor-pointer hover:bg-gray-700"
+                                        onClick={() => router.push('/settings')}
+                                    >
+                                        Configuración
+                                    </li>
+                                    <li
+                                        className="px-4 py-2 cursor-pointer hover:bg-gray-700"
+                                        onClick={() => router.push('/profile')}
+                                    >
+                                        Perfil
+                                    </li>
+                                    {/* Cerrar sesión dentro del menú */}
+                                    <li
+                                        className="px-4 py-2 text-red-500 cursor-pointer hover:bg-gray-700"
+                                        onClick={handleLogout}
+                                    >
+                                        Cerrar sesión
+                                    </li>
+                                </ul>
+                            </div>
+                        )}
+                    </div>
+                )}
             </div>
+
+            {/* Modal de Logout */}
+            {showLogoutModal && (
+                <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 backdrop-blur-md">
+                    <div className="bg-gray-900 text-white p-5 rounded-lg shadow-2xl text-center">
+                        <p className="mb-4 text-lg font-semibold">¿Seguro que quieres cerrar sesión?</p>
+                        <div className="flex justify-center gap-4">
+                            <button
+                                onClick={confirmLogout}
+                                className="px-5 py-2 bg-red-500 text-white rounded-lg hover:bg-red-400 transition-all"
+                            >
+                                Sí
+                            </button>
+                            <button
+                                onClick={() => setShowLogoutModal(false)}
+                                className="px-5 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-500 transition-all"
+                            >
+                                No
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             <h1 className="text-3xl mb-4">📚 Libros Disponibles</h1>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
