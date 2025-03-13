@@ -111,107 +111,100 @@ export default function Navbar() {
 
   return (
     <div className="flex flex-col h-screen p-4 bg-gray-900 text-white relative">
-      {/* Barra de navegación superior con "Inicio", "Chat" y "Libros" */}
-      <div className="flex justify-between items-center mb-4">
-        <div>
-          <img
-            src="https://images.encantia.lat/encantia-logo-2025.webp"
-            alt="Logo"
-            className="h-16"
-          />
-        </div>
+      {/* Solo mostrar la barra de navegación si el perfil existe */}
+      {profileExists ? (
+        <>
+          {/* Barra de navegación superior con "Inicio", "Chat" y "Libros" */}
+          <div className="flex justify-between items-center mb-4">
+            <div>
+              <img
+                src="https://images.encantia.lat/encantia-logo-2025.webp"
+                alt="Logo"
+                className="h-16"
+              />
+            </div>
 
-        <div className="flex gap-4">
-          <button
-            onClick={() => window.location.href = "https://www.encantia.lat/"}
-            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
-          >
-            Inicio
-          </button>
-          <button
-            onClick={() => router.push('/EventsArea')}
-            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
-          >
-            Eventos
-          </button>
-          <button
-            onClick={() => router.push('/chat')}
-            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
-          >
-            Chat
-          </button>
-          <button
-            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
-            onClick={() => router.push('/libros')}
-          >
-            Libros
-          </button>
-          <button
-            onClick={() => window.open("https://discord.gg/dxcX8S3mrF", "_blank")}
-            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
-          >
-            Discord
-          </button>
-          <button
-            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
-            onClick={() => router.push('/fg2')}
-          >
-            Fetu Games 2
-          </button>
-        </div>
+            <div className="flex gap-4">
+              <button
+                onClick={() => window.location.href = "https://www.encantia.lat/"}
+                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
+              >
+                Inicio
+              </button>
+              <button
+                onClick={() => router.push('/EventsArea')}
+                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
+              >
+                Eventos
+              </button>
+              <button
+                onClick={() => router.push('/chat')}
+                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
+              >
+                Chat
+              </button>
+              <button
+                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
+                onClick={() => router.push('/libros')}
+              >
+                Libros
+              </button>
+              <button
+                onClick={() => window.open("https://discord.gg/dxcX8S3mrF", "_blank")}
+                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
+              >
+                Discord
+              </button>
+              <button
+                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
+                onClick={() => router.push('/fg2')}
+              >
+                Fetu Games 2
+              </button>
+            </div>
 
-        {/* Foto de perfil en la parte superior derecha */}
-        {userProfile && (
-          <div className="relative">
-            <img
-              src={userProfile.avatar_url || 'https://i.ibb.co/d0mWy0kP/perfildef.png'}
-              alt="Avatar"
-              className="w-12 h-12 rounded-full cursor-pointer"
-              onClick={toggleMenu} // Al hacer clic en la imagen, toggle el menú
-            />
+            {/* Foto de perfil en la parte superior derecha */}
+            {userProfile && (
+              <div className="relative">
+                <img
+                  src={userProfile.avatar_url || 'https://i.ibb.co/d0mWy0kP/perfildef.png'}
+                  alt="Avatar"
+                  className="w-12 h-12 rounded-full cursor-pointer"
+                  onClick={toggleMenu} // Al hacer clic en la imagen, toggle el menú
+                />
 
-            {/* Menú desplegable */}
-            {showMenu && (
-              <div className="absolute right-0 mt-2 w-48 bg-gray-800 text-white rounded-lg shadow-lg z-10">
-                <ul className="py-2">
-                  <li
-                    className="px-4 py-2 cursor-pointer hover:bg-gray-700"
-                    onClick={() => router.push('/settings')}
-                  >
-                    Configuración
-                  </li>
-                  <li
-                    className="px-4 py-2 cursor-pointer hover:bg-gray-700"
-                    onClick={() => router.push('/profile')}
-                  >
-                    Perfil
-                  </li>
-                  {/* Cerrar sesión dentro del menú */}
-                  <li
-                    className="px-4 py-2 text-red-500 cursor-pointer hover:bg-gray-700"
-                    onClick={handleLogout}
-                  >
-                    Cerrar sesión
-                  </li>
-                </ul>
+                {/* Menú desplegable */}
+                {showMenu && (
+                  <div className="absolute right-0 mt-2 w-48 bg-gray-800 text-white rounded-lg shadow-lg z-10">
+                    <ul className="py-2">
+                      <li
+                        className="px-4 py-2 cursor-pointer hover:bg-gray-700"
+                        onClick={() => router.push('/settings')}
+                      >
+                        Configuración
+                      </li>
+                      <li
+                        className="px-4 py-2 cursor-pointer hover:bg-gray-700"
+                        onClick={() => router.push('/profile')}
+                      >
+                        Perfil
+                      </li>
+                      {/* Cerrar sesión dentro del menú */}
+                      <li
+                        className="px-4 py-2 text-red-500 cursor-pointer hover:bg-gray-700"
+                        onClick={handleLogout}
+                      >
+                        Cerrar sesión
+                      </li>
+                    </ul>
+                  </div>
+                )}
               </div>
             )}
           </div>
-        )}
-      </div>
-
-      {/* Mostrar formulario solo si el perfil no existe */}
-      {profileExists ? (
-        <div className="text-center">
-          <p className="text-green-500 font-semibold">¡Perfil ya existe!</p>
-          <button
-            onClick={() => setProfileExists(false)}
-            className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-400"
-          >
-            Editar Perfil
-          </button>
-        </div>
+        </>
       ) : (
+        // Si el perfil no existe, mostrar solo el formulario
         <div className="w-full max-w-sm bg-gray-800 p-6 rounded-lg shadow-xl">
           <h2 className="text-2xl font-semibold text-center mb-4">Crear o Editar Perfil</h2>
 
@@ -262,4 +255,3 @@ export default function Navbar() {
     </div>
   );
 }
-
