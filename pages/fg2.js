@@ -5,6 +5,7 @@ import { useRouter } from "next/router";
 export default function Navbar() {
     const [role, setRole] = useState("");  // Estado para almacenar el rol del usuario
     const [event, setEvent] = useState(null);  // Estado para almacenar el evento
+    const [events, setEvents] = useState([]); // Estado para almacenar la lista de eventos
     const [timeLeft, setTimeLeft] = useState("");  // Estado para almacenar el tiempo restante
     const [showMenu, setShowMenu] = useState(false); // Estado para controlar el menú desplegable
     const [userProfile, setUserProfile] = useState(null); // Estado para el perfil del usuario
@@ -40,11 +41,15 @@ export default function Navbar() {
 
         const fetchEvents = async () => {
             const { data, error } = await supabase.from('events').select('*');
+            console.log("Eventos obtenidos:", data);  // Verificamos los datos obtenidos de la base de datos
+
             if (!error && data && data.length > 0) {
-                // Si hay eventos, tomamos el primero (o el evento actual que te interese)
-                const upcomingEvent = data[0];  // Suponiendo que el primer evento es el más cercano
+                setEvents(data);  // Almacenamos todos los eventos
+                const upcomingEvent = data[0];  // Suponiendo que tomamos el primer evento como ejemplo
                 setEvent(upcomingEvent);
                 calculateTimeLeft(upcomingEvent);
+            } else {
+                console.log("No se encontraron eventos o hubo un error:", error);
             }
         };
 
@@ -169,6 +174,23 @@ export default function Navbar() {
                     </div>
                 </div>
             )}
+
+            {/* Mostrar los eventos */}
+            <div className="text-center mt-8">
+                <h2 className="text-2xl font-bold mb-2">Eventos Disponibles</h2>
+                {events.length > 0 ? (
+                    <div>
+                        {events.map((event, index) => (
+                            <div key={index} className="mb-4">
+                                <h3 className="text-xl font-semibold">{event.event_name}</h3>
+                                <p>{event.event_description}</p>  {/* Agregar la descripción del evento si es necesario */}
+                            </div>
+                        ))}
+                    </div>
+                ) : (
+                    <p>No hay eventos disponibles.</p>
+                )}
+            </div>
 
             {/* Mostrar el evento y el contador de tiempo */}
             {event && (
