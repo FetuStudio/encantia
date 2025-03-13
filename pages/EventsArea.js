@@ -63,7 +63,6 @@ export default function Navbar() {
         { name: 'Chat', url: '/chat' },
         { name: 'Libros', url: '/libros' },
         { name: 'Discord', url: 'https://discord.gg/dxcX8S3mrF', target: '_blank' },
-        { name: 'Fetu Games 2', url: '/fg2' }
     ];
 
     return (
