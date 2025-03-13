@@ -74,6 +74,15 @@ export default function Navbar() {
       return;
     }
 
+    // Verifica si el email está correctamente asignado
+    if (!userEmail) {
+      setErrorMessage("No se pudo obtener el correo electrónico del usuario.");
+      setLoading(false);
+      return;
+    }
+
+    console.log('Email del usuario:', userEmail); // Verificación del email
+
     // Verificar si el nombre de usuario ya existe
     const { data: existingProfile, error } = await supabase
       .from("profiles")
