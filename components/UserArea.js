@@ -44,6 +44,7 @@ export default function Navbar() {
         setProfileExists(true); // El perfil ya existe en la base de datos
       } else {
         setProfileExists(false); // Si no hay perfil, se debe crear uno
+        setUserEmail(user.email); // Asignar el email desde la autenticación
       }
     };
 
