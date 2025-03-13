@@ -74,29 +74,28 @@ export default function Navbar() {
                     <button onClick={() => router.push('/libros')} className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors">Libros</button>
                     <button onClick={() => window.open("https://discord.gg/dxcX8S3mrF", "_blank")} className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors">Discord</button>
                     <button onClick={() => router.push('/fg2')} className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors">Fetu Games 2</button>
+                </div>
+            </div>
+
+            {userProfile && (
+                <div className="relative">
+                    <img
+                        src={userProfile.avatar_url || 'https://i.ibb.co/d0mWy0kP/perfildef.png'}
+                        alt="Avatar"
+                        className="w-12 h-12 rounded-full cursor-pointer"
+                        onClick={toggleMenu}
+                    />
+                    {showMenu && (
+                        <div className="absolute right-0 mt-2 w-48 bg-gray-800 text-white rounded-lg shadow-lg z-10">
+                            <ul className="py-2">
+                                <li className="px-4 py-2 cursor-pointer hover:bg-gray-700" onClick={() => router.push('/settings')}>Configuración</li>
+                                <li className="px-4 py-2 cursor-pointer hover:bg-gray-700" onClick={() => router.push('/profile')}>Perfil</li>
+                                <li className="px-4 py-2 text-red-500 cursor-pointer hover:bg-gray-700" onClick={handleLogout}>Cerrar sesión</li>
+                            </ul>
+                        </div>
                     )}
                 </div>
-
-                {userProfile && (
-                    <div className="relative">
-                        <img
-                            src={userProfile.avatar_url || 'https://i.ibb.co/d0mWy0kP/perfildef.png'}
-                            alt="Avatar"
-                            className="w-12 h-12 rounded-full cursor-pointer"
-                            onClick={toggleMenu}
-                        />
-                        {showMenu && (
-                            <div className="absolute right-0 mt-2 w-48 bg-gray-800 text-white rounded-lg shadow-lg z-10">
-                                <ul className="py-2">
-                                    <li className="px-4 py-2 cursor-pointer hover:bg-gray-700" onClick={() => router.push('/settings')}>Configuración</li>
-                                    <li className="px-4 py-2 cursor-pointer hover:bg-gray-700" onClick={() => router.push('/profile')}>Perfil</li>
-                                    <li className="px-4 py-2 text-red-500 cursor-pointer hover:bg-gray-700" onClick={handleLogout}>Cerrar sesión</li>
-                                </ul>
-                            </div>
-                        )}
-                    </div>
-                )}
-            </div>
+            )}
 
             {showLogoutModal && (
                 <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 backdrop-blur-md">
