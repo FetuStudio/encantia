@@ -10,7 +10,22 @@ export default function Libros() {
     const [showLogoutModal, setShowLogoutModal] = useState(false);
     const router = useRouter(); 
 
-   useEffect(() => {
+    useEffect(() => {
+        // Obtener los libros disponibles de la base de datos
+        const fetchBooks = async () => {
+            const { data, error } = await supabase
+                .from('books')  // Cambiar el nombre de la tabla si es necesario
+                .select('*');   // Seleccionar todas las columnas, puedes personalizar si es necesario
+            
+            if (error) {
+                console.error("Error al obtener los libros:", error.message);
+            } else {
+                setBooks(data); // Actualiza el estado con los libros
+            }
+        };
+
+        fetchBooks(); // Llamada para obtener los libros cuando se carga el componente
+
         const fetchUserProfile = async () => {
             const { data: { user }, error: authError } = await supabase.auth.getUser();
             if (authError || !user) return;
@@ -47,12 +62,10 @@ export default function Libros() {
         router.push("/");
     };
 
-    // Función para manejar el clic en la foto de perfil y abrir/cerrar el menú
     const toggleMenu = () => setShowMenu(!showMenu);
 
     return (
         <div className="flex flex-col h-screen p-4 bg-gray-900 text-white relative">
-            {/* Barra de navegación superior con "Inicio", "Chat" y "Libros" */}
             <div className="flex justify-between items-center mb-4">
                 <div>
                     <img
@@ -101,17 +114,15 @@ export default function Libros() {
                     </button>
                 </div>
 
-                {/* Foto de perfil en la parte superior derecha */}
                 {userProfile && (
                     <div className="relative">
                         <img
                             src={userProfile.avatar_url || 'https://i.ibb.co/d0mWy0kP/perfildef.png'}
                             alt="Avatar"
                             className="w-12 h-12 rounded-full cursor-pointer"
-                            onClick={toggleMenu} // Al hacer clic en la imagen, toggle el menú
+                            onClick={toggleMenu}
                         />
 
-                        {/* Menú desplegable */}
                         {showMenu && (
                             <div className="absolute right-0 mt-2 w-48 bg-gray-800 text-white rounded-lg shadow-lg z-10">
                                 <ul className="py-2">
@@ -127,7 +138,6 @@ export default function Libros() {
                                     >
                                         Perfil
                                     </li>
-                                    {/* Cerrar sesión dentro del menú */}
                                     <li
                                         className="px-4 py-2 text-red-500 cursor-pointer hover:bg-gray-700"
                                         onClick={handleLogout}
@@ -141,7 +151,6 @@ export default function Libros() {
                 )}
             </div>
 
-            {/* Modal de Logout */}
             {showLogoutModal && (
                 <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 backdrop-blur-md">
                     <div className="bg-gray-900 text-white p-5 rounded-lg shadow-2xl text-center">
