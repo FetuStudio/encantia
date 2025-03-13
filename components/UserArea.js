@@ -110,6 +110,9 @@ export default function Navbar() {
 
       setProfileSaved(true); // Marcar como perfil guardado exitosamente
       setErrorMessage("");  // Limpiar mensaje de error si el perfil se guarda correctamente
+
+      // Recargar la página después de guardar el perfil correctamente
+      window.location.reload();
     } else {
       setLoading(false);
       setErrorMessage("El nombre de usuario ya está en uso.");
@@ -265,3 +268,4 @@ export default function Navbar() {
     </div>
   );
 }
+
