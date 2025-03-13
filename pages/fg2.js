@@ -59,9 +59,13 @@ export default function Navbar() {
             const timeDiff = eventDate - now;
 
             if (timeDiff > 0) {
-                const hours = Math.floor(timeDiff / (1000 * 60 * 60));
-                const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
-                setTimeLeft(`${hours} horas y ${minutes} minutos`);
+                const months = Math.floor(timeDiff / (1000 * 60 * 60 * 24 * 30));  // Aproximación de meses
+                const days = Math.floor((timeDiff % (1000 * 60 * 60 * 24 * 30)) / (1000 * 60 * 60 * 24));  // Días restantes
+                const hours = Math.floor((timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));  // Horas restantes
+                const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));  // Minutos restantes
+                const seconds = Math.floor((timeDiff % (1000 * 60)) / 1000);  // Segundos restantes
+
+                setTimeLeft(`${months} meses, ${days} días, ${hours} horas, ${minutes} minutos, ${seconds} segundos`);
             } else {
                 setTimeLeft("El evento ha comenzado");
             }
@@ -202,3 +206,4 @@ export default function Navbar() {
         </div>
     );
 }
+
