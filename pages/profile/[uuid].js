@@ -86,12 +86,6 @@ export default function UserProfile() {
                         Eventos
                     </button>
                     <button
-                        onClick={() => router.push('/profile')}  // Redirige al perfil del usuario
-                        className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
-                    >
-                        Mi Perfil
-                    </button>
-                    <button
                         onClick={() => router.push('/chat')}  // Redirige al área de chat
                         className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
                     >
@@ -108,12 +102,6 @@ export default function UserProfile() {
                         className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
                     >
                         Discord
-                    </button>
-                    <button
-                        onClick={() => router.push('/fg2')}  // Redirige a otra sección de la app
-                        className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
-                    >
-                        Fetu Games 2
                     </button>
                 </div>
 
