@@ -7,10 +7,9 @@ export default function Navbar() {
     const [showLogoutModal, setShowLogoutModal] = useState(false);
     const [showMenu, setShowMenu] = useState(false);
     const [userProfile, setUserProfile] = useState(null);
-    const [userEmail, setUserEmail] = useState(""); // Almacena el correo del usuario
-    const [username, setUsername] = useState(""); // Almacena el nombre de usuario ingresado
-    const [isUsernameModalOpen, setIsUsernameModalOpen] = useState(false); // Modal para ingresar nombre de usuario
-    const [error, setError] = useState(""); // Para mostrar errores (por ejemplo, múltiples perfiles)
+    const [username, setUsername] = useState("");  // Estado para el nombre de usuario
+    const [avatarUrl, setAvatarUrl] = useState("");  // Estado para la URL de la foto de perfil
+    const [imagePreview, setImagePreview] = useState(null); // Estado para mostrar la vista previa de la imagen
     const router = useRouter();
 
     useEffect(() => {
@@ -18,32 +17,6 @@ export default function Navbar() {
             const { data: { user }, error: authError } = await supabase.auth.getUser();
             if (authError || !user) return;
 
-            setUserEmail(user.email); // Establecer el correo del usuario
-
-            // Obtener el perfil del usuario en la tabla 'profiles'
-            const { data: profileData, error: profileError } = await supabase
-                .from('profiles')
-                .select('id, avatar_url, name')
-                .eq('email', user.email); // Usar 'email' para buscar perfiles
-
-            if (profileError) {
-                setError("Error al obtener el perfil");
-                return;
-            }
-
-            if (profileData && profileData.length > 0) {
-                // Si existe más de un perfil para el mismo correo, mostrar un error
-                if (profileData.length > 1) {
-                    setError("Error: Existen múltiples perfiles con el mismo correo.");
-                } else {
-                    setUserProfile(profileData[0]);
-                }
-            } else {
-                // Si no existe, abrir el modal para que ingrese su nombre de usuario
-                setIsUsernameModalOpen(true);
-            }
-
-            // Obtener el rol del usuario
             const { data, error } = await supabase
                 .from('user_roles')
                 .select('role')
@@ -52,6 +25,23 @@ export default function Navbar() {
 
             if (!error) {
                 setRole(data?.role);
+            }
+
+            const { data: profileData, error: profileError } = await supabase
+                .from('profiles')
+                .select('avatar_url, name')
+                .eq('id', user.id)
+                .single();
+
+            if (!profileError) {
+                setUserProfile(profileData);
+                if (profileData?.name) {
+                    setUsername(profileData.name);
+                }
+                if (profileData?.avatar_url) {
+                    setAvatarUrl(profileData.avatar_url);
+                    setImagePreview(profileData.avatar_url);
+                }
             }
         };
 
@@ -65,29 +55,40 @@ export default function Navbar() {
         router.push("/");
     };
 
-    const handleUsernameSubmit = async () => {
-        if (!username) {
-            setError("El nombre de usuario es obligatorio.");
-            return;
-        }
+    const handleUsernameChange = (e) => setUsername(e.target.value);
 
-        // Insertar el perfil con el nombre de usuario
-        const { data, error } = await supabase
-            .from('profiles')
-            .insert([
-                { email: userEmail, name: username }
-            ]);
-
-        if (error) {
-            setError("Error al crear el perfil");
-            return;
-        }
-
-        setUserProfile(data[0]); // Actualizar el perfil
-        setIsUsernameModalOpen(false); // Cerrar el modal
+    const handleAvatarUrlChange = (e) => {
+        const url = e.target.value;
+        setAvatarUrl(url);
+        setImagePreview(url); // Actualiza la vista previa de la imagen
     };
 
-    // Función para manejar el clic en la foto de perfil y abrir/cerrar el menú
+    const handleSaveProfile = async () => {
+        const { data: { user } } = await supabase.auth.getUser();
+
+        // Verificar si el nombre de usuario ya existe
+        const { data: existingProfile, error } = await supabase
+            .from("profiles")
+            .select("id")
+            .eq("name", username)
+            .single();
+
+        if (error || !existingProfile) {
+            // Guardar el nuevo nombre de usuario y la foto
+            const { error: updateError } = await supabase
+                .from("profiles")
+                .upsert({ id: user.id, name: username, avatar_url: avatarUrl });
+
+            if (updateError) {
+                console.error("Error al actualizar perfil", updateError);
+            } else {
+                alert("Perfil actualizado correctamente.");
+            }
+        } else {
+            alert("El nombre de usuario ya está en uso.");
+        }
+    };
+
     const toggleMenu = () => setShowMenu(!showMenu);
 
     return (
@@ -102,42 +103,7 @@ export default function Navbar() {
                 </div>
 
                 <div className="flex gap-4">
-                    <button
-                        onClick={() => window.location.href = "https://www.encantia.lat/"}
-                        className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
-                    >
-                        Inicio
-                    </button>
-                    <button
-                        onClick={() => router.push('/EventsArea')}
-                        className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
-                    >
-                        Eventos
-                    </button>
-                    <button
-                        onClick={() => router.push('/chat')}
-                        className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
-                    >
-                        Chat
-                    </button>
-                    <button
-                        className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
-                        onClick={() => router.push('/libros')}
-                    >
-                        Libros
-                    </button>
-                    <button
-                        onClick={() => window.open("https://discord.gg/dxcX8S3mrF", "_blank")}
-                        className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
-                    >
-                        Discord
-                    </button>
-                    <button
-                        className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
-                        onClick={() => router.push('/fg2')}
-                    >
-                        Fetu Games 2
-                    </button>
+                    {/* Otros botones de navegación */}
                 </div>
 
                 {/* Foto de perfil en la parte superior derecha */}
@@ -147,7 +113,7 @@ export default function Navbar() {
                             src={userProfile.avatar_url || 'https://i.ibb.co/d0mWy0kP/perfildef.png'}
                             alt="Avatar"
                             className="w-12 h-12 rounded-full cursor-pointer"
-                            onClick={toggleMenu}
+                            onClick={toggleMenu} // Al hacer clic en la imagen, toggle el menú
                         />
 
                         {showMenu && (
@@ -178,36 +144,45 @@ export default function Navbar() {
                 )}
             </div>
 
-            {/* Modal para ingresar nombre de usuario */}
-            {isUsernameModalOpen && (
-                <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 backdrop-blur-md">
-                    <div className="bg-gray-900 text-white p-5 rounded-lg shadow-2xl text-center">
-                        <h2 className="mb-4">Ingresa un nombre de usuario</h2>
-                        <input
-                            type="text"
-                            value={username}
-                            onChange={(e) => setUsername(e.target.value)}
-                            className="mb-4 p-2 border border-gray-600 bg-gray-800 text-white rounded"
-                            placeholder="Nombre de usuario"
-                        />
-                        {error && <p className="text-red-500">{error}</p>}
-                        <div className="flex justify-center gap-4">
-                            <button
-                                onClick={handleUsernameSubmit}
-                                className="px-5 py-2 bg-green-500 text-white rounded-lg hover:bg-green-400 transition-all"
-                            >
-                                Guardar
-                            </button>
-                            <button
-                                onClick={() => setIsUsernameModalOpen(false)}
-                                className="px-5 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-500 transition-all"
-                            >
-                                Cancelar
-                            </button>
-                        </div>
-                    </div>
+            {/* Formulario de creación o edición del perfil */}
+            <div className="bg-gray-800 p-5 rounded-lg shadow-lg text-center">
+                <h2 className="text-xl mb-4 text-white">Crear o Editar Perfil</h2>
+                <div className="mb-4">
+                    <label htmlFor="username" className="block text-white">Nombre de Usuario:</label>
+                    <input
+                        type="text"
+                        id="username"
+                        value={username}
+                        onChange={handleUsernameChange}
+                        className="px-4 py-2 bg-gray-700 text-white rounded-lg w-full"
+                    />
                 </div>
-            )}
+
+                <div className="mb-4">
+                    <label htmlFor="avatarUrl" className="block text-white">Foto de Perfil (URL):</label>
+                    <input
+                        type="text"
+                        id="avatarUrl"
+                        value={avatarUrl}
+                        onChange={handleAvatarUrlChange}
+                        className="px-4 py-2 bg-gray-700 text-white rounded-lg w-full"
+                    />
+                </div>
+
+                <div className="mb-4">
+                    <h3 className="text-white">Vista Previa de la Foto:</h3>
+                    {imagePreview && (
+                        <img src={imagePreview} alt="Vista previa" className="w-24 h-24 rounded-full mx-auto" />
+                    )}
+                </div>
+
+                <button
+                    onClick={handleSaveProfile}
+                    className="px-5 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-all"
+                >
+                    Guardar Perfil
+                </button>
+            </div>
 
             {/* Modal de Logout */}
             {showLogoutModal && (
@@ -234,3 +209,4 @@ export default function Navbar() {
         </div>
     );
 }
+
