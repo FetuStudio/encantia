@@ -168,12 +168,6 @@ export default function Navbar() {
               >
                 Discord
               </button>
-              <button
-                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
-                onClick={() => router.push('/fg2')}
-              >
-                Fetu Games 2
-              </button>
             </div>
 
             {/* Foto de perfil en la parte superior derecha */}
