@@ -31,7 +31,7 @@ export default function Auth() {
             }
 
             // Redirigir a la URL externa después del inicio de sesión exitoso
-            window.location.href = "https://www.encantia.lat"; 
+            router.push('/');
         } catch (e) {
             setErrorMessage(e.message);
         } finally {
@@ -57,7 +57,7 @@ export default function Auth() {
             setIsSignUp(false);
 
             // Redirigir a la URL externa después del registro exitoso
-            window.location.href = "https://www.encantia.lat"; 
+            router.push('/');
         } catch (e) {
             setErrorMessage(e.message);
         } finally {
