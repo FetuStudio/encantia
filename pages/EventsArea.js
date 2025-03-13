@@ -5,8 +5,9 @@ import { useRouter } from "next/router";
 export default function Navbar() {
     const [role, setRole] = useState("");
     const [showLogoutModal, setShowLogoutModal] = useState(false);
-    const [showMenu, setShowMenu] = useState(false); // Estado para controlar el menú desplegable
-    const [userProfile, setUserProfile] = useState(null); // Estado para el perfil del usuario
+    const [showMenu, setShowMenu] = useState(false);
+    const [userProfile, setUserProfile] = useState(null);
+    const [events, setEvents] = useState([]); // Estado para los eventos
     const router = useRouter();
 
     useEffect(() => {
@@ -36,7 +37,15 @@ export default function Navbar() {
             }
         };
 
+        const fetchEvents = async () => {
+            const { data, error } = await supabase.from('events').select('*');
+            if (!error) {
+                setEvents(data);
+            }
+        };
+
         fetchUserProfile();
+        fetchEvents();
     }, []);
 
     const handleLogout = () => setShowLogoutModal(true);
@@ -46,12 +55,20 @@ export default function Navbar() {
         router.push("/");
     };
 
-    // Función para manejar el clic en la foto de perfil y abrir/cerrar el menú
     const toggleMenu = () => setShowMenu(!showMenu);
+
+    const navButtons = [
+        { name: 'Inicio', url: 'https://www.encantia.lat/' },
+        { name: 'Eventos', url: '/EventsArea' },
+        { name: 'Chat', url: '/chat' },
+        { name: 'Libros', url: '/libros' },
+        { name: 'Discord', url: 'https://discord.gg/dxcX8S3mrF', target: '_blank' },
+        { name: 'Fetu Games 2', url: '/fg2' }
+    ];
 
     return (
         <div className="flex flex-col h-screen p-4 bg-gray-900 text-white relative">
-            {/* Barra de navegación superior con "Inicio", "Chat" y "Libros" */}
+            {/* Barra de navegación superior */}
             <div className="flex justify-between items-center mb-4">
                 <div>
                     <img
@@ -62,52 +79,25 @@ export default function Navbar() {
                 </div>
 
                 <div className="flex gap-4">
-                    <button
-                        onClick={() => window.location.href = "https://www.encantia.lat/"}
-                        className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
-                    >
-                        Inicio
-                    </button>
-                    <button
-                        onClick={() => router.push('/EventsArea')}
-                        className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
-                    >
-                        Eventos
-                    </button>
-                    <button
-                        onClick={() => router.push('/chat')}
-                        className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
-                    >
-                        Chat
-                    </button>
-                    <button
-                        className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
-                        onClick={() => router.push('/libros')}
-                    >
-                        Libros
-                    </button>
-                    <button
-                        onClick={() => window.open("https://discord.gg/dxcX8S3mrF", "_blank")}
-                        className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
-                    >
-                        Discord
-                    </button>
-                    <button
-                        className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
-                        onClick={() => router.push('/fg2')}
-                    >
-                        Fetu Games 2
-                    </button>
+                    {navButtons.map((button, index) => (
+                        <button
+                            key={index}
+                            onClick={() => window.open(button.url, button.target || "_self")}
+                            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
+                        >
+                            {button.name}
+                        </button>
+                    ))}
                 </div>
 
-                {/* Foto de perfil en la parte superior derecha */}
+                {/* Foto de perfil */}
                 {userProfile && (
                     <div className="relative">
                         <img
                             src={userProfile.avatar_url || 'https://i.ibb.co/d0mWy0kP/perfildef.png'}
                             alt="Avatar"
                             className="w-12 h-12 rounded-full cursor-pointer"
-                            onClick={toggleMenu} // Al hacer clic en la imagen, toggle el menú
+                            onClick={toggleMenu}
                         />
 
                         {/* Menú desplegable */}
@@ -126,7 +116,6 @@ export default function Navbar() {
                                     >
                                         Perfil
                                     </li>
-                                    {/* Cerrar sesión dentro del menú */}
                                     <li
                                         className="px-4 py-2 text-red-500 cursor-pointer hover:bg-gray-700"
                                         onClick={handleLogout}
@@ -162,6 +151,7 @@ export default function Navbar() {
                     </div>
                 </div>
             )}
+
             <div className="text-center mt-10">
                 <h1 className="text-3xl font-semibold">Eventos Disponibles</h1>
             </div>
