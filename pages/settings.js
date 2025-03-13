@@ -5,8 +5,8 @@ import { useRouter } from 'next/router'; // Asegúrate de importar el useRouter
 export default function Settings() {
     const [user, setUser] = useState(null);
     const [name, setName] = useState('');
-    const [avatarUrl, setAvatarUrl] = useState('https://i.ibb.co/d0mWy0kP/perfildef.png');
     const [email, setEmail] = useState('');
+    const [avatarUrl, setAvatarUrl] = useState('https://i.ibb.co/d0mWy0kP/perfildef.png');
     const [loading, setLoading] = useState(true);
     const [statusMessage, setStatusMessage] = useState('');
     const [isNameAvailable, setIsNameAvailable] = useState(true);  // Para verificar si el nombre está disponible
@@ -200,7 +200,7 @@ export default function Settings() {
                 {user && (
                     <div className="relative">
                         <img
-                            src={user.avatar_url || 'https://i.ibb.co/d0mWy0kP/perfildef.png'}
+                            src={avatarUrl || 'https://i.ibb.co/d0mWy0kP/perfildef.png'} // Cambié esto para usar avatarUrl
                             alt="Avatar"
                             className="w-12 h-12 rounded-full cursor-pointer"
                             onClick={toggleMenu} // Al hacer clic en la imagen, toggle el menú
