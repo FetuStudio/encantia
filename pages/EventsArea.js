@@ -74,8 +74,6 @@ export default function Navbar() {
                     <button onClick={() => router.push('/libros')} className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors">Libros</button>
                     <button onClick={() => window.open("https://discord.gg/dxcX8S3mrF", "_blank")} className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors">Discord</button>
                     <button onClick={() => router.push('/fg2')} className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors">Fetu Games 2</button>
-                    {role === 'owner' && (
-                        <button onClick={() => router.push('/crear-libro')} className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors">Crear Libro</button>
                     )}
                 </div>
 
