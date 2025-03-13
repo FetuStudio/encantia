@@ -40,8 +40,8 @@ export default function Navbar() {
         };
 
         const fetchEvents = async () => {
-            const { data, error } = await supabase.from('events').select('*');
-            console.log("Eventos obtenidos:", data);  // Verificamos los datos obtenidos de la base de datos
+            const { data, error } = await supabase.from('events_fg2').select('*');
+            console.log("Eventos obtenidos de events_fg2:", data);  // Verificamos los datos obtenidos de la base de datos
 
             if (!error && data && data.length > 0) {
                 setEvents(data);  // Almacenamos todos los eventos
