@@ -13,6 +13,7 @@ export default function Navbar() {
   const [errorMessage, setErrorMessage] = useState('');
   const [userEmail, setUserEmail] = useState('');
   const [loading, setLoading] = useState(false);
+  const [profileExists, setProfileExists] = useState(false); // Estado para saber si el perfil existe
   const router = useRouter();
 
   useEffect(() => {
@@ -33,13 +34,16 @@ export default function Navbar() {
       // Obtener perfil del usuario
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
-        .select('avatar_url, email')
-        .eq('id', user.id)
+        .select('avatar_url, email, name')
+        .eq('email', user.email) // Verificar por el correo electrónico
         .single();
 
-      if (!profileError) {
+      if (!profileError && profileData) {
         setUserProfile(profileData);
         setUserEmail(profileData?.email); // Establecer email del perfil
+        setProfileExists(true); // El perfil ya existe en la base de datos
+      } else {
+        setProfileExists(false); // Si no hay perfil, se debe crear uno
       }
     };
 
@@ -196,15 +200,15 @@ export default function Navbar() {
         )}
       </div>
 
-      {/* Formulario para crear perfil */}
-      {profileSaved ? (
+      {/* Mostrar formulario solo si el perfil no existe */}
+      {profileExists ? (
         <div className="text-center">
-          <p className="text-green-500 font-semibold">¡Perfil guardado con éxito!</p>
+          <p className="text-green-500 font-semibold">¡Perfil ya existe!</p>
           <button
-            onClick={() => setProfileSaved(false)}
+            onClick={() => setProfileExists(false)}
             className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-400"
           >
-            Volver a crear/editar perfil
+            Editar Perfil
           </button>
         </div>
       ) : (
@@ -258,3 +262,4 @@ export default function Navbar() {
     </div>
   );
 }
+
