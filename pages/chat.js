@@ -84,7 +84,7 @@ export default function Chat() {
                     <button onClick={() => router.push('/EventsArea')} className="px-4 py-2 bg-blue-500 rounded-lg hover:bg-blue-400">Eventos</button>
                     <button onClick={() => router.push('/chat')} className="px-4 py-2 bg-blue-500 rounded-lg hover:bg-blue-400">Chat</button>
                     <button onClick={() => router.push('/libros')} className="px-4 py-2 bg-blue-500 rounded-lg hover:bg-blue-400">Libros</button>
-                    <button onClick={() => window.open("https://discord.gg/dxcX8S3mrF", "_blank")} className="px-4 py-2 bg-blue-500 rounded-lg hover:bg-blue-400">Libros</button>
+                    <button onClick={() => window.open("https://discord.gg/dxcX8S3mrF", "_blank")} className="px-4 py-2 bg-blue-500 rounded-lg hover:bg-blue-400">Discord</button>
                     <button onClick={() => router.push('/fg2')} className="px-4 py-2 bg-blue-500 rounded-lg hover:bg-blue-400">Fetu Games 2</button>
                 </div>
                 {userProfile && (
