@@ -82,7 +82,10 @@ export default function Chat() {
                 <div className="flex gap-4">
                     <button onClick={() => window.location.href = "https://www.encantia.lat/"} className="px-4 py-2 bg-blue-500 rounded-lg hover:bg-blue-400">Inicio</button>
                     <button onClick={() => router.push('/EventsArea')} className="px-4 py-2 bg-blue-500 rounded-lg hover:bg-blue-400">Eventos</button>
-                    {role === 'owner' && <button onClick={() => router.push('/crear-libro')} className="px-4 py-2 bg-blue-500 rounded-lg hover:bg-blue-400">Crear Libro</button>}
+                    <button onClick={() => router.push('/chat')} className="px-4 py-2 bg-blue-500 rounded-lg hover:bg-blue-400">Chat</button>
+                    <button onClick={() => router.push('/libros')} className="px-4 py-2 bg-blue-500 rounded-lg hover:bg-blue-400">Libros</button>
+                    <button onClick={() => window.open("https://discord.gg/dxcX8S3mrF", "_blank")} className="px-4 py-2 bg-blue-500 rounded-lg hover:bg-blue-400">Libros</button>
+                    <button onClick={() => router.push('/fg2')} className="px-4 py-2 bg-blue-500 rounded-lg hover:bg-blue-400">Fetu Games 2</button>
                 </div>
                 {userProfile && (
                     <div className="relative">
