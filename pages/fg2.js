@@ -68,12 +68,23 @@ export default function Navbar() {
                 setTimeLeft(`${months} meses, ${days} días, ${hours} horas, ${minutes} minutos, ${seconds} segundos`);
             } else {
                 setTimeLeft("El evento ha comenzado");
+                clearInterval(intervalId); // Detenemos el contador cuando el evento ha comenzado
             }
         };
 
+        // Cada segundo actualizamos el tiempo restante
+        const intervalId = setInterval(() => {
+            if (event) {
+                calculateTimeLeft(event);  // Actualizamos el tiempo cada segundo
+            }
+        }, 1000);
+
         fetchUserProfile();
         fetchEvents();
-    }, []);
+
+        // Limpiar el intervalo cuando el componente se desmonte
+        return () => clearInterval(intervalId);
+    }, [event]); // Dependemos de 'event' para recalcular cuando cambie
 
     const handleLogout = () => setShowLogoutModal(true);
 
@@ -206,4 +217,3 @@ export default function Navbar() {
         </div>
     );
 }
-
