@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect } from "react"; 
 import { supabase } from "../utils/supabaseClient";
 import { useRouter } from "next/router";
 
@@ -81,18 +81,36 @@ export default function Navbar() {
 
     console.log('Email del usuario:', userEmail);
 
-    const { error: updateError } = await supabase
-      .from("profiles")
-      .update({
-        name: username,
-        avatar_url: avatarUrl
-      })
-      .eq("email", userEmail);
+    let updateOrCreateError = null;
+
+    if (profileExists) {
+      // Si el perfil existe, actualizamos los datos.
+      const { error: updateError } = await supabase
+        .from("profiles")
+        .update({
+          name: username,
+          avatar_url: avatarUrl
+        })
+        .eq("email", userEmail);
+
+      updateOrCreateError = updateError;
+    } else {
+      // Si no existe el perfil, lo creamos.
+      const { error: insertError } = await supabase
+        .from("profiles")
+        .insert([{
+          email: userEmail,
+          name: username,
+          avatar_url: avatarUrl,
+        }]);
+
+      updateOrCreateError = insertError;
+    }
 
     setLoading(false);
 
-    if (updateError) {
-      setErrorMessage(updateError.message);
+    if (updateOrCreateError) {
+      setErrorMessage(updateOrCreateError.message);
       return;
     }
 
@@ -164,6 +182,32 @@ export default function Navbar() {
       ) : (
         <div className="w-full max-w-sm bg-gray-800 p-6 rounded-lg shadow-xl">
           <h2 className="text-2xl font-semibold text-center mb-4">Crear o Editar Perfil</h2>
+          <div>
+            <input
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              placeholder="Nombre de usuario"
+              className="w-full p-2 mb-2 bg-gray-700 text-white rounded"
+            />
+            <input
+              type="text"
+              value={avatarUrl}
+              onChange={(e) => setAvatarUrl(e.target.value)}
+              placeholder="URL de foto de perfil"
+              className="w-full p-2 mb-2 bg-gray-700 text-white rounded"
+            />
+            {errorMessage && (
+              <p className="text-red-500 text-sm mt-2">{errorMessage}</p>
+            )}
+            <button
+              onClick={handleSaveProfile}
+              className="w-full p-2 mt-4 bg-blue-500 text-white rounded hover:bg-blue-400 transition-colors"
+              disabled={loading}
+            >
+              {loading ? 'Guardando...' : 'Guardar Perfil'}
+            </button>
+          </div>
         </div>
       )}
     </div>
