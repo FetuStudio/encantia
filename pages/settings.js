@@ -1,153 +1,160 @@
-import { useState, useEffect } from 'react';
-import { supabase } from '../utils/supabaseClient';
-import { useRouter } from 'next/router'; // Asegúrate de importar el useRouter
+import { useState, useEffect } from "react";
+import { supabase } from "../utils/supabaseClient";
+import { useRouter } from "next/router";
 
-export default function Settings() {
-    const [user, setUser] = useState(null);
-    const [name, setName] = useState('');
-    const [email, setEmail] = useState('');
-    const [avatarUrl, setAvatarUrl] = useState('https://i.ibb.co/d0mWy0kP/perfildef.png');
-    const [loading, setLoading] = useState(true);
-    const [statusMessage, setStatusMessage] = useState('');
-    const [isNameAvailable, setIsNameAvailable] = useState(true);  // Para verificar si el nombre está disponible
-    const [showMenu, setShowMenu] = useState(false); // Para controlar el menú de usuario
-    const [showLogoutModal, setShowLogoutModal] = useState(false); // Para mostrar modal de logout
-    const router = useRouter(); // Instanciamos el router
+export default function Navbar() {
+    const [role, setRole] = useState("");
+    const [showLogoutModal, setShowLogoutModal] = useState(false);
+    const [showMenu, setShowMenu] = useState(false);
+    const [userProfile, setUserProfile] = useState(null);
+    const [events, setEvents] = useState([]); // Estado para los eventos
+    const [username, setUsername] = useState(""); // Variable para el nombre de usuario
+    const [avatarUrl, setAvatarUrl] = useState(""); // Variable para la URL del avatar
+    const [userEmail, setUserEmail] = useState(""); // Variable para el correo electrónico
+    const [profileExists, setProfileExists] = useState(true); // Variable para saber si el perfil existe
+    const [loading, setLoading] = useState(false); // Variable para el estado de carga
+    const [errorMessage, setErrorMessage] = useState(""); // Variable para mensajes de error
+    const [profileSaved, setProfileSaved] = useState(false); // Variable para saber si el perfil se guardó correctamente
+
+    const router = useRouter();
 
     useEffect(() => {
+        // Obtener perfil del usuario
         const fetchUserProfile = async () => {
-            const { data: userData, error: userError } = await supabase.auth.getUser();
-            if (userError || !userData?.user) {
-                console.error('Error fetching user:', userError);
-                setStatusMessage('Error al obtener los datos del usuario.');
-                return;
-            }
-            const currentUser = userData.user;
-            setUser(currentUser);
-            setEmail(currentUser.email);
+            const { data: { user }, error: authError } = await supabase.auth.getUser();
+            if (authError || !user) return;
 
-            // Asegurar que el usuario esté en la tabla profiles
-            await supabase.from('profiles').upsert({ id: currentUser.id, email: currentUser.email }, { onConflict: ['id'] });
-
-            // Obtener perfil desde la tabla profiles
-            const { data: profileData, error: profileError } = await supabase
-                .from('profiles')
-                .select('name, avatar_url')
-                .eq('id', currentUser.id)
+            const { data, error } = await supabase
+                .from('user_roles')
+                .select('role')
+                .eq('user_id', user.id)
                 .single();
 
-            if (profileError) {
-                console.error('Error fetching profile data:', profileError);
-                setStatusMessage(`Hubo un error al obtener los datos del perfil: ${profileError.message}`);
-            } else {
-                setName(profileData?.name || '');
-                setAvatarUrl(profileData?.avatar_url || 'https://i.ibb.co/d0mWy0kP/perfildef.png');
+            if (!error) {
+                setRole(data?.role);
             }
-            setLoading(false);
+
+            const { data: profileData, error: profileError } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('email', user.email)
+                .single();
+
+            if (!profileError && profileData) {
+                setUserProfile(profileData);
+                setUserEmail(profileData.email);
+                setUsername(profileData.name || '');
+                setAvatarUrl(profileData.avatar_url || '');
+                
+                if (!profileData.avatar_url || !profileData.name) {
+                    setProfileExists(false);
+                } else {
+                    setProfileExists(true);
+                }
+            } else {
+                setProfileExists(false);
+                setUserEmail(user.email);
+            }
+        };
+
+        // Obtener eventos disponibles
+        const fetchEvents = async () => {
+            const { data, error } = await supabase
+                .from('events')
+                .select('*'); // Obtén todos los eventos
+
+            if (error) {
+                console.error("Error al obtener eventos:", error);
+            } else {
+                setEvents(data);
+            }
         };
 
         fetchUserProfile();
-    }, []);
+        fetchEvents(); // Llamada para obtener los eventos
 
-    const checkNameAvailability = async (newName) => {
-        if (!newName) return;
+    }, []); // Dependencia vacía para que se ejecute solo una vez al cargar el componente
 
-        const { data, error } = await supabase
-            .from('profiles')
-            .select('name')
-            .eq('name', newName)
-            .neq('id', user?.id); // Excluimos el usuario actual por si su nombre es el mismo
-
-        if (error) {
-            console.error('Error checking name availability:', error);
-            setStatusMessage('Error al verificar la disponibilidad del nombre de usuario.');
+    const handleSaveProfile = async () => {
+        if (!username || !avatarUrl) {
+            setErrorMessage("El nombre de usuario y la foto de perfil son obligatorios.");
             return;
         }
 
-        if (data.length > 0) {
-            setIsNameAvailable(false);  // Nombre ya está en uso
+        setLoading(true);
+        setErrorMessage("");
+
+        const { data: { user }, error: authError } = await supabase.auth.getUser();
+        if (authError || !user) {
+            setErrorMessage("No se pudo obtener el usuario.");
+            setLoading(false);
+            return;
+        }
+
+        if (!userEmail) {
+            setErrorMessage("No se pudo obtener el correo electrónico del usuario.");
+            setLoading(false);
+            return;
+        }
+
+        let updateOrCreateError = null;
+
+        if (profileExists) {
+            // Si el perfil existe, actualizamos los datos
+            const { error: updateError } = await supabase
+                .from("profiles")
+                .update({
+                    name: username,
+                    avatar_url: avatarUrl
+                })
+                .eq("email", userEmail);
+
+            updateOrCreateError = updateError;
         } else {
-            setIsNameAvailable(true);  // Nombre disponible
+            // Si no existe el perfil, lo creamos
+            const { error: insertError } = await supabase
+                .from("profiles")
+                .insert([{
+                    email: userEmail,
+                    name: username,
+                    avatar_url: avatarUrl,
+                }]);
+
+            updateOrCreateError = insertError;
         }
-    };
 
-    const updateProfile = async () => {
-        if (!user) return;
+        setLoading(false);
 
-        // Validación de campos obligatorios
-        if (!name || name.trim() === '') {
-            setStatusMessage('El nombre de usuario es obligatorio.');
+        if (updateOrCreateError) {
+            setErrorMessage(updateOrCreateError.message);
             return;
         }
 
-        // Validar si la foto de perfil es obligatoria (no debe ser la URL predeterminada)
-        if (avatarUrl === 'https://i.ibb.co/d0mWy0kP/perfildef.png' || avatarUrl.trim() === '') {
-            setStatusMessage('La foto de perfil es obligatoria.');
-            return;
-        }
-
-        // Verificar disponibilidad del nombre antes de actualizar
-        if (!isNameAvailable) {
-            setStatusMessage('El nombre de usuario ya está en uso.');
-            return;
-        }
-
-        const { data: profileData, error: profileError } = await supabase
-            .from('profiles')
-            .select('email, name, avatar_url')
-            .eq('id', user.id)
-            .single();
-
-        if (profileError) {
-            console.error('Error fetching profile data for update:', profileError);
-            setStatusMessage(`Hubo un error al intentar obtener los datos del perfil para actualizar: ${profileError.message}`);
-            return;
-        }
-
-        const emailChanged = profileData.email !== email;
-        const nameChanged = profileData.name !== name;
-        const avatarChanged = profileData.avatar_url !== avatarUrl;
-
-        if (!emailChanged && !nameChanged && !avatarChanged) {
-            setStatusMessage('No hay cambios para guardar.');
-            return; // No actualiza si no hay cambios
-        }
-
-        // Realizamos el upsert en la base de datos
-        const { error } = await supabase
-            .from('profiles')
-            .upsert({
-                id: user.id,
-                email: email, // Actualiza email siempre
-                name: name, // Cambié `username` por `name`
-                avatar_url: avatarUrl === 'https://i.ibb.co/d0mWy0kP/perfildef.png' ? null : avatarUrl, // Solo actualiza avatar_url si no es el predeterminado
-                updated_at: new Date().toISOString(), // Actualiza el campo 'updated_at'
-            });
-
-        if (error) {
-            console.error('Error updating profile:', error);
-            setStatusMessage(`Hubo un error al actualizar tu perfil: ${error.message}`);
-        } else {
-            setStatusMessage('Perfil actualizado correctamente.');
-        }
+        setProfileSaved(true);
+        setErrorMessage("");
+        window.location.reload();
     };
 
-    const toggleMenu = () => {
-        setShowMenu(!showMenu);
-    };
+    const toggleMenu = () => setShowMenu(!showMenu);
 
-    const handleLogout = () => {
-        setShowLogoutModal(true);
-    };
+    const handleLogout = () => setShowLogoutModal(true);
 
     const confirmLogout = async () => {
         await supabase.auth.signOut();
-        router.push('/login');
+        router.push("/");
     };
+
+    const navButtons = [
+        { name: 'Inicio', url: 'https://www.encantia.lat/' },
+        { name: 'Eventos', url: '/EventsArea' },
+        { name: 'Chat', url: '/chat' },
+        { name: 'Libros', url: '/libros' },
+        { name: 'Discord', url: 'https://discord.gg/dxcX8S3mrF', target: '_blank' },
+    ];
 
     return (
         <div className="flex flex-col h-screen p-4 bg-gray-900 text-white relative">
-            {/* Barra de navegación superior con "Inicio", "Chat" y "Libros" */}
+            {/* Barra de navegación superior */}
             <div className="flex justify-between items-center mb-4">
                 <div>
                     <img
@@ -158,46 +165,25 @@ export default function Settings() {
                 </div>
 
                 <div className="flex gap-4">
-                    <button
-                        onClick={() => router.push('/')}
-                        className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
-                    >
-                        Inicio
-                    </button>
-                    <button
-                        onClick={() => router.push('/EventsArea')}
-                        className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
-                    >
-                        Eventos
-                    </button>
-                    <button
-                        onClick={() => router.push('/chat')}
-                        className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
-                    >
-                        Chat
-                    </button>
-                    <button
-                        className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
-                        onClick={() => router.push('/libros')}
-                    >
-                        Libros
-                    </button>
-                    <button
-                        onClick={() => window.open("https://discord.gg/dxcX8S3mrF", "_blank")}
-                        className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
-                    >
-                        Discord
-                    </button>
+                    {navButtons.map((button, index) => (
+                        <button
+                            key={index}
+                            onClick={() => window.open(button.url, button.target || "_self")}
+                            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
+                        >
+                            {button.name}
+                        </button>
+                    ))}
                 </div>
 
-                {/* Foto de perfil en la parte superior derecha */}
-                {user && (
+                {/* Foto de perfil */}
+                {userProfile && (
                     <div className="relative">
                         <img
-                            src={avatarUrl || 'https://i.ibb.co/d0mWy0kP/perfildef.png'} // Cambié esto para usar avatarUrl
+                            src={userProfile.avatar_url || 'https://i.ibb.co/d0mWy0kP/perfildef.png'}
                             alt="Avatar"
                             className="w-12 h-12 rounded-full cursor-pointer"
-                            onClick={toggleMenu} // Al hacer clic en la imagen, toggle el menú
+                            onClick={toggleMenu}
                         />
 
                         {/* Menú desplegable */}
@@ -216,7 +202,6 @@ export default function Settings() {
                                     >
                                         Perfil
                                     </li>
-                                    {/* Cerrar sesión dentro del menú */}
                                     <li
                                         className="px-4 py-2 text-red-500 cursor-pointer hover:bg-gray-700"
                                         onClick={handleLogout}
@@ -230,79 +215,45 @@ export default function Settings() {
                 )}
             </div>
 
-            {/* Contenido de la configuración */}
-            <div className="flex justify-center items-center h-full">
-                <div className="w-full max-w-md bg-gray-800 p-6 rounded-lg shadow-lg">
-                    <h1 className="text-3xl font-semibold mb-6 text-center">Configuración de Perfil</h1>
-                    {loading ? (
-                        <p className="text-center">Cargando...</p>
-                    ) : (
-                        <div className="space-y-6">
-                            {/* Imagen de Avatar */}
-                            <div className="flex justify-center">
-                                <img 
-                                    src={avatarUrl} 
-                                    alt="Avatar" 
-                                    className="w-32 h-32 rounded-full border-4 border-gray-700"
-                                />
-                            </div>
-
-                            {/* Email */}
-                            <div>
-                                <label className="block text-sm">Email</label>
-                                <input
-                                    type="text"
-                                    value={email}
-                                    disabled
-                                    className="px-4 py-2 text-black rounded w-full bg-gray-700 cursor-not-allowed"
-                                />
-                            </div>
-
-                            {/* Nombre de Usuario */}
-                            <div>
-                                <label className="block text-sm">Nombre de Usuario</label>
-                                <input
-                                    type="text"
-                                    value={name}
-                                    onChange={(e) => {
-                                        setName(e.target.value);
-                                        checkNameAvailability(e.target.value);  // Verificar disponibilidad cada vez que cambie el nombre
-                                    }}
-                                    className="px-4 py-2 text-black rounded w-full bg-gray-700"
-                                />
-                                {!isNameAvailable && (
-                                    <p className="text-red-500 text-sm mt-2">Este nombre de usuario ya está en uso.</p>
-                                )}
-                            </div>
-
-                            {/* Avatar URL */}
-                            <div>
-                                <label className="block text-sm">Avatar URL</label>
-                                <input
-                                    type="text"
-                                    value={avatarUrl === 'https://i.ibb.co/d0mWy0kP/perfildef.png' ? '' : avatarUrl} // Mostrar solo si no es el avatar predeterminado
-                                    onChange={(e) => setAvatarUrl(e.target.value)}
-                                    className="px-4 py-2 text-black rounded w-full bg-gray-700"
-                                />
-                            </div>
-
-                            {/* Estado de la operación */}
-                            {statusMessage && (
-                                <div className="text-center text-sm font-semibold mt-4">
-                                    <p>{statusMessage}</p>
-                                </div>
-                            )}
-
-                            {/* Botón de guardar cambios */}
+            {/* Modal de Logout */}
+            {showLogoutModal && (
+                <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 backdrop-blur-md">
+                    <div className="bg-gray-900 text-white p-5 rounded-lg shadow-2xl text-center">
+                        <p className="mb-4 text-lg font-semibold">¿Seguro que quieres cerrar sesión?</p>
+                        <div className="flex justify-center gap-4">
                             <button
-                                onClick={updateProfile}
-                                className="w-full py-2 bg-green-500 rounded-lg hover:bg-green-400 transition-colors"
+                                onClick={confirmLogout}
+                                className="px-5 py-2 bg-red-500 text-white rounded-lg hover:bg-red-400 transition-all"
                             >
-                                Guardar Cambios
+                                Sí
+                            </button>
+                            <button
+                                onClick={() => setShowLogoutModal(false)}
+                                className="px-5 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-500 transition-all"
+                            >
+                                No
                             </button>
                         </div>
-                    )}
+                    </div>
                 </div>
+            )}
+
+            <div className="text-center mt-10">
+                <h1 className="text-3xl font-semibold">Eventos Disponibles</h1>
+            </div>
+
+            <div className="flex-grow mt-8 space-y-4">
+                {events.length === 0 ? (
+                    <div className="text-center text-gray-400">No hay eventos disponibles.</div>
+                ) : (
+                    events.map((event) => (
+                        <div key={event.id} className="bg-gray-800 p-4 rounded-md shadow-md">
+                            <h2 className="text-xl font-semibold">{event.name}</h2>
+                            <p className="text-sm text-gray-400">{event.date}</p>
+                            <p className="mt-2">{event.description}</p>
+                        </div>
+                    ))
+                )}
             </div>
         </div>
     );
