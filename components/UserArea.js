@@ -95,13 +95,14 @@ export default function Navbar() {
 
       updateOrCreateError = updateError;
     } else {
-      // Si no existe el perfil, lo creamos.
+      // Si no existe el perfil, lo creamos, pero no incluimos el campo 'id' ya que será autogenerado por la base de datos.
       const { error: insertError } = await supabase
         .from("profiles")
         .insert([{
           email: userEmail,
           name: username,
           avatar_url: avatarUrl,
+          // No incluimos el campo 'id' ya que la base de datos lo generará automáticamente como un UUID.
         }]);
 
       updateOrCreateError = insertError;
@@ -213,3 +214,4 @@ export default function Navbar() {
     </div>
   );
 }
+
