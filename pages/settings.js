@@ -104,7 +104,7 @@ export default function Settings() {
 
         // Verificar disponibilidad del nombre antes de actualizar
         if (!isNameAvailable) {
-            setStatusMessage('El nombre de usuario ya está en uso.');
+            setStatusMessage('El nombre de usuario ya está en uso. Por favor elige otro.');
             return;
         }
 
@@ -287,7 +287,7 @@ export default function Settings() {
                                     className="px-4 py-2 text-black rounded w-full bg-gray-700"
                                 />
                                 {!isNameAvailable && (
-                                    <p className="text-red-500 text-sm mt-2">Este nombre de usuario ya está en uso.</p>
+                                    <p className="text-red-500 text-sm mt-2">Este nombre de usuario ya está en uso. Por favor elige otro.</p>
                                 )}
                             </div>
 
