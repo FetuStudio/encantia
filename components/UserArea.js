@@ -33,13 +33,15 @@ export default function Navbar() {
 
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
-        .select('avatar_url, email, name')
+        .select('*')
         .eq('email', user.email)
         .single();
 
       if (!profileError && profileData) {
         setUserProfile(profileData);
-        setUserEmail(profileData?.email);
+        setUserEmail(profileData.email);
+        setUsername(profileData.name || '');
+        setAvatarUrl(profileData.avatar_url || '');
         
         if (!profileData.avatar_url || !profileData.name) {
           setProfileExists(false);
@@ -54,13 +56,6 @@ export default function Navbar() {
 
     fetchUserProfile();
   }, []);
-
-  const handleLogout = () => setShowLogoutModal(true);
-
-  const confirmLogout = async () => {
-    await supabase.auth.signOut();
-    router.push("/");
-  };
 
   const handleSaveProfile = async () => {
     if (!username || !avatarUrl) {
@@ -86,36 +81,24 @@ export default function Navbar() {
 
     console.log('Email del usuario:', userEmail);
 
-    const { data: existingProfile, error } = await supabase
+    const { error: updateError } = await supabase
       .from("profiles")
-      .select("id")
-      .eq("name", username)
-      .single();
+      .update({
+        name: username,
+        avatar_url: avatarUrl
+      })
+      .eq("email", userEmail);
 
-    if (error || !existingProfile) {
-      const { error: upsertError } = await supabase
-        .from("profiles")
-        .upsert({
-          id: user.id,
-          name: username,
-          avatar_url: avatarUrl,
-          email: userEmail,
-        });
+    setLoading(false);
 
-      setLoading(false);
-
-      if (upsertError) {
-        setErrorMessage(upsertError.message);
-        return;
-      }
-
-      setProfileSaved(true);
-      setErrorMessage("");
-      window.location.reload();
-    } else {
-      setLoading(false);
-      setErrorMessage("El nombre de usuario ya está en uso.");
+    if (updateError) {
+      setErrorMessage(updateError.message);
+      return;
     }
+
+    setProfileSaved(true);
+    setErrorMessage("");
+    window.location.reload();
   };
 
   const toggleMenu = () => setShowMenu(!showMenu);
