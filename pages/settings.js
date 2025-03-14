@@ -26,14 +26,28 @@ export default function Settings() {
             setUser(currentUser);
             setEmail(currentUser.email);
 
-            // Aseguramos que el usuario esté en la tabla profiles
-            await supabase.from('profiles').upsert({ id: currentUser.id, email: currentUser.email }, { onConflict: ['id'] });
+            // Aseguramos que el perfil del usuario esté en la tabla profiles (upsert)
+            const { error: upsertError } = await supabase
+                .from('profiles')
+                .upsert({
+                    id: currentUser.id,
+                    email: currentUser.email,
+                    name: currentUser.user_metadata?.name || '',
+                    avatar_url: currentUser.user_metadata?.avatar_url || 'https://i.ibb.co/d0mWy0kP/perfildef.png',
+                }, { onConflict: ['id'] });
 
-            // Obtener perfil desde la tabla profiles
+            if (upsertError) {
+                console.error('Error al asegurarse de que el perfil existe:', upsertError);
+                setStatusMessage('Hubo un error al crear o actualizar el perfil.');
+                setLoading(false);
+                return;
+            }
+
+            // Obtener el perfil desde la tabla profiles
             const { data: profileData, error: profileError } = await supabase
                 .from('profiles')
                 .select('name, avatar_url')
-                .eq('id', currentUser.id);  // Eliminamos .single() para manejar múltiples o ninguna fila
+                .eq('id', currentUser.id);
 
             if (profileError) {
                 console.error('Error fetching profile data:', profileError);
