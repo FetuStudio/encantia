@@ -19,6 +19,7 @@ export default function Navbar() {
     const router = useRouter();
 
     useEffect(() => {
+        // Obtener perfil del usuario
         const fetchUserProfile = async () => {
             const { data: { user }, error: authError } = await supabase.auth.getUser();
             if (authError || !user) return;
@@ -33,7 +34,6 @@ export default function Navbar() {
                 setRole(data?.role);
             }
 
-            // Obtener perfil del usuario
             const { data: profileData, error: profileError } = await supabase
                 .from('profiles')
                 .select('*')
@@ -57,8 +57,23 @@ export default function Navbar() {
             }
         };
 
+        // Obtener eventos disponibles
+        const fetchEvents = async () => {
+            const { data, error } = await supabase
+                .from('events')
+                .select('*'); // Obtén todos los eventos
+
+            if (error) {
+                console.error("Error al obtener eventos:", error);
+            } else {
+                setEvents(data);
+            }
+        };
+
         fetchUserProfile();
-    }, []);
+        fetchEvents(); // Llamada para obtener los eventos
+
+    }, []); // Dependencia vacía para que se ejecute solo una vez al cargar el componente
 
     const handleSaveProfile = async () => {
         if (!username || !avatarUrl) {
@@ -82,8 +97,6 @@ export default function Navbar() {
             return;
         }
 
-        console.log('Email del usuario:', userEmail);
-
         let updateOrCreateError = null;
 
         if (profileExists) {
@@ -98,7 +111,7 @@ export default function Navbar() {
 
             updateOrCreateError = updateError;
         } else {
-            // Si no existe el perfil, lo creamos, pero no incluimos el campo 'id' porque se generará automáticamente
+            // Si no existe el perfil, lo creamos
             const { error: insertError } = await supabase
                 .from("profiles")
                 .insert([{
@@ -245,4 +258,3 @@ export default function Navbar() {
         </div>
     );
 }
-
