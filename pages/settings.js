@@ -1,17 +1,18 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../utils/supabaseClient';
-import { useRouter } from 'next/router'; // Asegúrate de importar el useRouter
+import { useRouter } from 'next/router';
 
 export default function Settings() {
     const [user, setUser] = useState(null);
     const [name, setName] = useState('');
+    const [email, setEmail] = useState('');
     const [avatarUrl, setAvatarUrl] = useState('https://i.ibb.co/d0mWy0kP/perfildef.png');
     const [loading, setLoading] = useState(true);
     const [statusMessage, setStatusMessage] = useState('');
-    const [isNameAvailable, setIsNameAvailable] = useState(true);  // Para verificar si el nombre está disponible
-    const [showMenu, setShowMenu] = useState(false); // Para controlar el menú de usuario
-    const [showLogoutModal, setShowLogoutModal] = useState(false); // Para mostrar modal de logout
-    const router = useRouter(); // Instanciamos el router
+    const [isNameAvailable, setIsNameAvailable] = useState(true);  
+    const [showMenu, setShowMenu] = useState(false);
+    const [showLogoutModal, setShowLogoutModal] = useState(false);
+    const router = useRouter();
 
     useEffect(() => {
         const fetchUserProfile = async () => {
@@ -23,20 +24,25 @@ export default function Settings() {
             }
             const currentUser = userData.user;
             setUser(currentUser);
+            setEmail(currentUser.email);
+
+            // Aseguramos que el usuario esté en la tabla profiles
+            await supabase.from('profiles').upsert({ id: currentUser.id, email: currentUser.email }, { onConflict: ['id'] });
 
             // Obtener perfil desde la tabla profiles
             const { data: profileData, error: profileError } = await supabase
                 .from('profiles')
                 .select('name, avatar_url')
-                .eq('id', currentUser.id)
-                .single(); // Usamos `.single()` para asegurarnos de que devuelva solo un registro.
+                .eq('id', currentUser.id);  // Eliminamos .single() para manejar múltiples o ninguna fila
 
             if (profileError) {
                 console.error('Error fetching profile data:', profileError);
                 setStatusMessage(`Hubo un error al obtener los datos del perfil: ${profileError.message}`);
+            } else if (profileData && profileData.length > 0) {
+                setName(profileData[0]?.name || '');
+                setAvatarUrl(profileData[0]?.avatar_url || 'https://i.ibb.co/d0mWy0kP/perfildef.png');
             } else {
-                setName(profileData?.name || '');
-                setAvatarUrl(profileData?.avatar_url || 'https://i.ibb.co/d0mWy0kP/perfildef.png');
+                setStatusMessage('Perfil no encontrado.');
             }
             setLoading(false);
         };
@@ -75,10 +81,37 @@ export default function Settings() {
             return;
         }
 
+        // Validar si la foto de perfil es obligatoria (no debe ser la URL predeterminada)
+        if (avatarUrl === 'https://i.ibb.co/d0mWy0kP/perfildef.png' || avatarUrl.trim() === '') {
+            setStatusMessage('La foto de perfil es obligatoria.');
+            return;
+        }
+
         // Verificar disponibilidad del nombre antes de actualizar
         if (!isNameAvailable) {
             setStatusMessage('El nombre de usuario ya está en uso.');
             return;
+        }
+
+        const { data: profileData, error: profileError } = await supabase
+            .from('profiles')
+            .select('email, name, avatar_url')
+            .eq('id', user.id)
+            .single();
+
+        if (profileError) {
+            console.error('Error fetching profile data for update:', profileError);
+            setStatusMessage(`Hubo un error al intentar obtener los datos del perfil para actualizar: ${profileError.message}`);
+            return;
+        }
+
+        const emailChanged = profileData.email !== email;
+        const nameChanged = profileData.name !== name;
+        const avatarChanged = profileData.avatar_url !== avatarUrl;
+
+        if (!emailChanged && !nameChanged && !avatarChanged) {
+            setStatusMessage('No hay cambios para guardar.');
+            return; // No actualiza si no hay cambios
         }
 
         // Realizamos el upsert en la base de datos
@@ -86,6 +119,7 @@ export default function Settings() {
             .from('profiles')
             .upsert({
                 id: user.id,
+                email: email, // Actualiza email siempre
                 name: name, // Cambié `username` por `name`
                 avatar_url: avatarUrl === 'https://i.ibb.co/d0mWy0kP/perfildef.png' ? null : avatarUrl, // Solo actualiza avatar_url si no es el predeterminado
                 updated_at: new Date().toISOString(), // Actualiza el campo 'updated_at'
@@ -161,7 +195,7 @@ export default function Settings() {
                 {user && (
                     <div className="relative">
                         <img
-                            src={avatarUrl || 'https://i.ibb.co/d0mWy0kP/perfildef.png'} // Cambié esto para usar avatarUrl
+                            src={avatarUrl || 'https://i.ibb.co/d0mWy0kP/perfildef.png'}
                             alt="Avatar"
                             className="w-12 h-12 rounded-full cursor-pointer"
                             onClick={toggleMenu} // Al hacer clic en la imagen, toggle el menú
@@ -211,6 +245,17 @@ export default function Settings() {
                                     src={avatarUrl} 
                                     alt="Avatar" 
                                     className="w-32 h-32 rounded-full border-4 border-gray-700"
+                                />
+                            </div>
+
+                            {/* Email */}
+                            <div>
+                                <label className="block text-sm">Email</label>
+                                <input
+                                    type="text"
+                                    value={email}
+                                    disabled
+                                    className="px-4 py-2 text-black rounded w-full bg-gray-700 cursor-not-allowed"
                                 />
                             </div>
 
