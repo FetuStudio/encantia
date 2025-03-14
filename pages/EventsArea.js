@@ -8,6 +8,14 @@ export default function Navbar() {
     const [showMenu, setShowMenu] = useState(false);
     const [userProfile, setUserProfile] = useState(null);
     const [events, setEvents] = useState([]); // Estado para los eventos
+    const [username, setUsername] = useState(""); // Variable para el nombre de usuario
+    const [avatarUrl, setAvatarUrl] = useState(""); // Variable para la URL del avatar
+    const [userEmail, setUserEmail] = useState(""); // Variable para el correo electrónico
+    const [profileExists, setProfileExists] = useState(true); // Variable para saber si el perfil existe
+    const [loading, setLoading] = useState(false); // Variable para el estado de carga
+    const [errorMessage, setErrorMessage] = useState(""); // Variable para mensajes de error
+    const [profileSaved, setProfileSaved] = useState(false); // Variable para saber si el perfil se guardó correctamente
+
     const router = useRouter();
 
     useEffect(() => {
@@ -28,25 +36,93 @@ export default function Navbar() {
             // Obtener perfil del usuario
             const { data: profileData, error: profileError } = await supabase
                 .from('profiles')
-                .select('avatar_url')
-                .eq('id', user.id)
+                .select('*')
+                .eq('email', user.email)
                 .single();
 
-            if (!profileError) {
+            if (!profileError && profileData) {
                 setUserProfile(profileData);
-            }
-        };
-
-        const fetchEvents = async () => {
-            const { data, error } = await supabase.from('events').select('*');
-            if (!error) {
-                setEvents(data);
+                setUserEmail(profileData.email);
+                setUsername(profileData.name || '');
+                setAvatarUrl(profileData.avatar_url || '');
+                
+                if (!profileData.avatar_url || !profileData.name) {
+                    setProfileExists(false);
+                } else {
+                    setProfileExists(true);
+                }
+            } else {
+                setProfileExists(false);
+                setUserEmail(user.email);
             }
         };
 
         fetchUserProfile();
-        fetchEvents();
     }, []);
+
+    const handleSaveProfile = async () => {
+        if (!username || !avatarUrl) {
+            setErrorMessage("El nombre de usuario y la foto de perfil son obligatorios.");
+            return;
+        }
+
+        setLoading(true);
+        setErrorMessage("");
+
+        const { data: { user }, error: authError } = await supabase.auth.getUser();
+        if (authError || !user) {
+            setErrorMessage("No se pudo obtener el usuario.");
+            setLoading(false);
+            return;
+        }
+
+        if (!userEmail) {
+            setErrorMessage("No se pudo obtener el correo electrónico del usuario.");
+            setLoading(false);
+            return;
+        }
+
+        console.log('Email del usuario:', userEmail);
+
+        let updateOrCreateError = null;
+
+        if (profileExists) {
+            // Si el perfil existe, actualizamos los datos
+            const { error: updateError } = await supabase
+                .from("profiles")
+                .update({
+                    name: username,
+                    avatar_url: avatarUrl
+                })
+                .eq("email", userEmail);
+
+            updateOrCreateError = updateError;
+        } else {
+            // Si no existe el perfil, lo creamos, pero no incluimos el campo 'id' porque se generará automáticamente
+            const { error: insertError } = await supabase
+                .from("profiles")
+                .insert([{
+                    email: userEmail,
+                    name: username,
+                    avatar_url: avatarUrl,
+                }]);
+
+            updateOrCreateError = insertError;
+        }
+
+        setLoading(false);
+
+        if (updateOrCreateError) {
+            setErrorMessage(updateOrCreateError.message);
+            return;
+        }
+
+        setProfileSaved(true);
+        setErrorMessage("");
+        window.location.reload();
+    };
+
+    const toggleMenu = () => setShowMenu(!showMenu);
 
     const handleLogout = () => setShowLogoutModal(true);
 
@@ -54,8 +130,6 @@ export default function Navbar() {
         await supabase.auth.signOut();
         router.push("/");
     };
-
-    const toggleMenu = () => setShowMenu(!showMenu);
 
     const navButtons = [
         { name: 'Inicio', url: 'https://www.encantia.lat/' },
@@ -171,3 +245,4 @@ export default function Navbar() {
         </div>
     );
 }
+
