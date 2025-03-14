@@ -26,15 +26,15 @@ export default function Settings() {
             setUser(currentUser);
             setEmail(currentUser.email);
 
-            // Aseguramos que el perfil del usuario esté en la tabla profiles (upsert)
+            // Aseguramos que el perfil del usuario esté en la tabla profiles (upsert) usando su correo
             const { error: upsertError } = await supabase
                 .from('profiles')
                 .upsert({
-                    id: currentUser.id,
                     email: currentUser.email,
+                    id: currentUser.id,  // Aunque se usa el correo, también guardamos el id para tener la referencia
                     name: currentUser.user_metadata?.name || '',
                     avatar_url: currentUser.user_metadata?.avatar_url || 'https://i.ibb.co/d0mWy0kP/perfildef.png',
-                }, { onConflict: ['id'] });
+                }, { onConflict: ['email'] });
 
             if (upsertError) {
                 console.error('Error al asegurarse de que el perfil existe:', upsertError);
@@ -43,18 +43,19 @@ export default function Settings() {
                 return;
             }
 
-            // Obtener el perfil desde la tabla profiles
+            // Obtener el perfil desde la tabla profiles usando el correo del usuario
             const { data: profileData, error: profileError } = await supabase
                 .from('profiles')
                 .select('name, avatar_url')
-                .eq('id', currentUser.id);
+                .eq('email', currentUser.email)  // Consultamos por el correo del usuario
+                .single();  // Usamos .single() porque se espera que haya solo un resultado
 
             if (profileError) {
                 console.error('Error fetching profile data:', profileError);
                 setStatusMessage(`Hubo un error al obtener los datos del perfil: ${profileError.message}`);
-            } else if (profileData && profileData.length > 0) {
-                setName(profileData[0]?.name || '');
-                setAvatarUrl(profileData[0]?.avatar_url || 'https://i.ibb.co/d0mWy0kP/perfildef.png');
+            } else if (profileData) {
+                setName(profileData?.name || '');
+                setAvatarUrl(profileData?.avatar_url || 'https://i.ibb.co/d0mWy0kP/perfildef.png');
             } else {
                 setStatusMessage('Perfil no encontrado.');
             }
@@ -71,7 +72,7 @@ export default function Settings() {
             .from('profiles')
             .select('name')
             .eq('name', newName)
-            .neq('id', user?.id); // Excluimos el usuario actual por si su nombre es el mismo
+            .neq('email', user?.email); // Excluimos el correo actual por si su nombre es el mismo
 
         if (error) {
             console.error('Error checking name availability:', error);
@@ -110,7 +111,7 @@ export default function Settings() {
         const { data: profileData, error: profileError } = await supabase
             .from('profiles')
             .select('email, name, avatar_url')
-            .eq('id', user.id)
+            .eq('email', user.email) // Buscamos por correo
             .single();
 
         if (profileError) {
@@ -128,12 +129,12 @@ export default function Settings() {
             return; // No actualiza si no hay cambios
         }
 
-        // Realizamos el upsert en la base de datos
+        // Realizamos el upsert en la base de datos usando el correo
         const { error } = await supabase
             .from('profiles')
             .upsert({
+                email: email, // Siempre actualizamos el correo
                 id: user.id,
-                email: email, // Actualiza email siempre
                 name: name, // Cambié `username` por `name`
                 avatar_url: avatarUrl === 'https://i.ibb.co/d0mWy0kP/perfildef.png' ? null : avatarUrl, // Solo actualiza avatar_url si no es el predeterminado
                 updated_at: new Date().toISOString(), // Actualiza el campo 'updated_at'
