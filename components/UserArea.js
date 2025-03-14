@@ -84,7 +84,7 @@ export default function Navbar() {
     let updateOrCreateError = null;
 
     if (profileExists) {
-      // Si el perfil existe, actualizamos los datos.
+      // Si el perfil existe, actualizamos los datos
       const { error: updateError } = await supabase
         .from("profiles")
         .update({
@@ -95,14 +95,14 @@ export default function Navbar() {
 
       updateOrCreateError = updateError;
     } else {
-      // Si no existe el perfil, lo creamos, pero no incluimos el campo 'id' ya que será autogenerado por la base de datos.
+      // Si no existe el perfil, lo creamos, pero no incluimos el campo 'id' porque se generará automáticamente
       const { error: insertError } = await supabase
         .from("profiles")
         .insert([{
           email: userEmail,
           name: username,
           avatar_url: avatarUrl,
-          // No incluimos el campo 'id' ya que la base de datos lo generará automáticamente como un UUID.
+          // No se incluye 'id' porque lo genera automáticamente la base de datos.
         }]);
 
       updateOrCreateError = insertError;
@@ -183,35 +183,31 @@ export default function Navbar() {
       ) : (
         <div className="w-full max-w-sm bg-gray-800 p-6 rounded-lg shadow-xl">
           <h2 className="text-2xl font-semibold text-center mb-4">Crear o Editar Perfil</h2>
-          <div>
-            <input
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              placeholder="Nombre de usuario"
-              className="w-full p-2 mb-2 bg-gray-700 text-white rounded"
-            />
-            <input
-              type="text"
-              value={avatarUrl}
-              onChange={(e) => setAvatarUrl(e.target.value)}
-              placeholder="URL de foto de perfil"
-              className="w-full p-2 mb-2 bg-gray-700 text-white rounded"
-            />
-            {errorMessage && (
-              <p className="text-red-500 text-sm mt-2">{errorMessage}</p>
-            )}
-            <button
-              onClick={handleSaveProfile}
-              className="w-full p-2 mt-4 bg-blue-500 text-white rounded hover:bg-blue-400 transition-colors"
-              disabled={loading}
-            >
-              {loading ? 'Guardando...' : 'Guardar Perfil'}
-            </button>
-          </div>
+          {/* Campos de formulario para editar el perfil */}
+          <input 
+            type="text"
+            placeholder="Nombre de usuario"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            className="w-full p-2 mb-4 bg-gray-700 text-white rounded"
+          />
+          <input
+            type="text"
+            placeholder="URL de la foto de perfil"
+            value={avatarUrl}
+            onChange={(e) => setAvatarUrl(e.target.value)}
+            className="w-full p-2 mb-4 bg-gray-700 text-white rounded"
+          />
+          {errorMessage && <p className="text-red-500 text-sm">{errorMessage}</p>}
+          <button
+            onClick={handleSaveProfile}
+            disabled={loading}
+            className="w-full py-2 bg-blue-500 text-white rounded hover:bg-blue-400 transition-colors"
+          >
+            {loading ? "Guardando..." : "Guardar Perfil"}
+          </button>
         </div>
       )}
     </div>
   );
 }
-
