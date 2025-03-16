@@ -6,12 +6,7 @@ export default function Navbar() {
     const [role, setRole] = useState("");
     const [showLogoutModal, setShowLogoutModal] = useState(false);
     const [showMenu, setShowMenu] = useState(false);
-    const [userProfile, setUserProfile] = useState(null);
     const [events, setEvents] = useState([]); // Estado para los eventos
-    const [username, setUsername] = useState(""); // Variable para el nombre de usuario
-    const [avatarUrl, setAvatarUrl] = useState(""); // Variable para la URL del avatar
-    const [userEmail, setUserEmail] = useState(""); // Variable para el correo electrónico
-    const [profileExists, setProfileExists] = useState(true); // Variable para saber si el perfil existe
     const [loading, setLoading] = useState(false); // Variable para el estado de carga
     const [errorMessage, setErrorMessage] = useState(""); // Variable para mensajes de error
     const [profileSaved, setProfileSaved] = useState(false); // Variable para saber si el perfil se guardó correctamente
@@ -19,8 +14,8 @@ export default function Navbar() {
     const router = useRouter();
 
     useEffect(() => {
-        // Obtener perfil del usuario
-        const fetchUserProfile = async () => {
+        // Obtener rol del usuario
+        const fetchUserRole = async () => {
             const { data: { user }, error: authError } = await supabase.auth.getUser();
             if (authError || !user) return;
 
@@ -32,28 +27,6 @@ export default function Navbar() {
 
             if (!error) {
                 setRole(data?.role);
-            }
-
-            const { data: profileData, error: profileError } = await supabase
-                .from('profiles')
-                .select('*')
-                .eq('email', user.email)
-                .single();
-
-            if (!profileError && profileData) {
-                setUserProfile(profileData);
-                setUserEmail(profileData.email);
-                setUsername(profileData.name || '');
-                setAvatarUrl(profileData.avatar_url || '');
-                
-                if (!profileData.avatar_url || !profileData.name) {
-                    setProfileExists(false);
-                } else {
-                    setProfileExists(true);
-                }
-            } else {
-                setProfileExists(false);
-                setUserEmail(user.email);
             }
         };
 
@@ -70,70 +43,10 @@ export default function Navbar() {
             }
         };
 
-        fetchUserProfile();
+        fetchUserRole();
         fetchEvents(); // Llamada para obtener los eventos
 
     }, []); // Dependencia vacía para que se ejecute solo una vez al cargar el componente
-
-    const handleSaveProfile = async () => {
-        if (!username || !avatarUrl) {
-            setErrorMessage("El nombre de usuario y la foto de perfil son obligatorios.");
-            return;
-        }
-
-        setLoading(true);
-        setErrorMessage("");
-
-        const { data: { user }, error: authError } = await supabase.auth.getUser();
-        if (authError || !user) {
-            setErrorMessage("No se pudo obtener el usuario.");
-            setLoading(false);
-            return;
-        }
-
-        if (!userEmail) {
-            setErrorMessage("No se pudo obtener el correo electrónico del usuario.");
-            setLoading(false);
-            return;
-        }
-
-        let updateOrCreateError = null;
-
-        if (profileExists) {
-            // Si el perfil existe, actualizamos los datos
-            const { error: updateError } = await supabase
-                .from("profiles")
-                .update({
-                    name: username,
-                    avatar_url: avatarUrl
-                })
-                .eq("email", userEmail);
-
-            updateOrCreateError = updateError;
-        } else {
-            // Si no existe el perfil, lo creamos
-            const { error: insertError } = await supabase
-                .from("profiles")
-                .insert([{
-                    email: userEmail,
-                    name: username,
-                    avatar_url: avatarUrl,
-                }]);
-
-            updateOrCreateError = insertError;
-        }
-
-        setLoading(false);
-
-        if (updateOrCreateError) {
-            setErrorMessage(updateOrCreateError.message);
-            return;
-        }
-
-        setProfileSaved(true);
-        setErrorMessage("");
-        window.location.reload();
-    };
 
     const toggleMenu = () => setShowMenu(!showMenu);
 
@@ -176,11 +89,11 @@ export default function Navbar() {
                     ))}
                 </div>
 
-                {/* Foto de perfil */}
-                {userProfile && (
+                {/* Menú de usuario */}
+                {role && (
                     <div className="relative">
                         <img
-                            src={userProfile.avatar_url || 'https://i.ibb.co/d0mWy0kP/perfildef.png'}
+                            src='https://i.ibb.co/d0mWy0kP/perfildef.png'
                             alt="Avatar"
                             className="w-12 h-12 rounded-full cursor-pointer"
                             onClick={toggleMenu}
@@ -258,3 +171,4 @@ export default function Navbar() {
         </div>
     );
 }
+
