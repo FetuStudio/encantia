@@ -181,8 +181,8 @@ export default function Navbar() {
           </div>
         </>
       ) : (
-        <div className="text-center text-white">
-          <p>No se ha creado un perfil aún. Por favor, completa tu perfil.</p>
+        <div className="flex justify-center items-center w-full h-full">
+          <p className="text-center text-white">No se ha creado un perfil aún.</p>
         </div>
       )}
     </div>
