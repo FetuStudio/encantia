@@ -181,31 +181,8 @@ export default function Navbar() {
           </div>
         </>
       ) : (
-        <div className="w-full max-w-sm bg-gray-800 p-6 rounded-lg shadow-xl">
-          <h2 className="text-2xl font-semibold text-center mb-4">Crear o Editar Perfil</h2>
-          {/* Campos de formulario para editar el perfil */}
-          <input 
-            type="text"
-            placeholder="Nombre de usuario"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            className="w-full p-2 mb-4 bg-gray-700 text-white rounded"
-          />
-          <input
-            type="text"
-            placeholder="URL de la foto de perfil"
-            value={avatarUrl}
-            onChange={(e) => setAvatarUrl(e.target.value)}
-            className="w-full p-2 mb-4 bg-gray-700 text-white rounded"
-          />
-          {errorMessage && <p className="text-red-500 text-sm">{errorMessage}</p>}
-          <button
-            onClick={handleSaveProfile}
-            disabled={loading}
-            className="w-full py-2 bg-blue-500 text-white rounded hover:bg-blue-400 transition-colors"
-          >
-            {loading ? "Guardando..." : "Guardar Perfil"}
-          </button>
+        <div className="text-center text-white">
+          <p>No se ha creado un perfil aún. Por favor, completa tu perfil.</p>
         </div>
       )}
     </div>
