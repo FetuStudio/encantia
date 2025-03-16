@@ -86,12 +86,6 @@ export default function UserProfile() {
                         Eventos
                     </button>
                     <button
-                        onClick={() => router.push('/chat')}  // Redirige al área de chat
-                        className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
-                    >
-                        Chat
-                    </button>
-                    <button
                         onClick={() => router.push('/libros')}  // Redirige a la página de libros
                         className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors"
                     >
