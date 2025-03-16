@@ -5,11 +5,7 @@ import { useRouter } from "next/router";
 export default function Navbar() {
     const [role, setRole] = useState("");
     const [showLogoutModal, setShowLogoutModal] = useState(false);
-    const [showMenu, setShowMenu] = useState(false);
     const [events, setEvents] = useState([]); // Estado para los eventos
-    const [loading, setLoading] = useState(false); // Variable para el estado de carga
-    const [errorMessage, setErrorMessage] = useState(""); // Variable para mensajes de error
-    const [profileSaved, setProfileSaved] = useState(false); // Variable para saber si el perfil se guardó correctamente
 
     const router = useRouter();
 
@@ -47,8 +43,6 @@ export default function Navbar() {
         fetchEvents(); // Llamada para obtener los eventos
 
     }, []); // Dependencia vacía para que se ejecute solo una vez al cargar el componente
-
-    const toggleMenu = () => setShowMenu(!showMenu);
 
     const handleLogout = () => setShowLogoutModal(true);
 
@@ -88,46 +82,6 @@ export default function Navbar() {
                         </button>
                     ))}
                 </div>
-
-                {/* Menú de usuario */}
-                {role && (
-                    <div className="relative">
-                        {/* Aquí hemos eliminado la imagen de perfil por defecto */}
-                        <div
-                            className="w-12 h-12 bg-gray-700 rounded-full cursor-pointer flex items-center justify-center"
-                            onClick={toggleMenu}
-                        >
-                            {/* Puedes agregar un ícono o solo las iniciales del usuario aquí si lo deseas */}
-                            <span className="text-white font-bold">U</span>
-                        </div>
-
-                        {/* Menú desplegable */}
-                        {showMenu && (
-                            <div className="absolute right-0 mt-2 w-48 bg-gray-800 text-white rounded-lg shadow-lg z-10">
-                                <ul className="py-2">
-                                    <li
-                                        className="px-4 py-2 cursor-pointer hover:bg-gray-700"
-                                        onClick={() => router.push('/settings')}
-                                    >
-                                        Configuración
-                                    </li>
-                                    <li
-                                        className="px-4 py-2 cursor-pointer hover:bg-gray-700"
-                                        onClick={() => router.push('/profile')}
-                                    >
-                                        Perfil
-                                    </li>
-                                    <li
-                                        className="px-4 py-2 text-red-500 cursor-pointer hover:bg-gray-700"
-                                        onClick={handleLogout}
-                                    >
-                                        Cerrar sesión
-                                    </li>
-                                </ul>
-                            </div>
-                        )}
-                    </div>
-                )}
             </div>
 
             {/* Modal de Logout */}
