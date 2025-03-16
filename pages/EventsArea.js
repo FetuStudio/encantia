@@ -54,7 +54,6 @@ export default function Navbar() {
     const navButtons = [
         { name: 'Inicio', url: 'https://www.encantia.lat/' },
         { name: 'Eventos', url: '/EventsArea' },
-        { name: 'Chat', url: '/chat' },
         { name: 'Libros', url: '/libros' },
         { name: 'Discord', url: 'https://discord.gg/dxcX8S3mrF', target: '_blank' },
     ];
