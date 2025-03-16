@@ -41,6 +41,17 @@ export default function Libros() {
         fetchUserProfile();
     }, []);
 
+    // Función para verificar si una URL es válida
+    const isValidImageUrl = (url) => {
+        return url && (url.startsWith("http://") || url.startsWith("https://"));
+    };
+
+    // Función para manejar errores de imagen
+    const handleImageError = (e) => {
+        e.target.onerror = null; // Evita que se entre en un bucle si no se puede cargar la imagen
+        e.target.src = "https://www.w3schools.com/w3images/fjords.jpg"; // Imagen predeterminada
+    };
+
     return (
         <div className="flex flex-col h-screen p-4 bg-gray-900 text-white relative">
             <div className="flex justify-between items-center mb-4">
@@ -92,14 +103,26 @@ export default function Libros() {
                             key={book.id}
                             className="bg-gray-800 p-4 rounded-lg cursor-pointer hover:bg-gray-700 transition-colors"
                         >
-                            <img
-                                src={book.cover_url}
-                                alt={book.title}
-                                className="w-full h-48 object-cover rounded-lg"
-                            />
+                            {/* Mostrar la imagen de la portada desde portada_url */}
+                            {isValidImageUrl(book.portada_url) ? (
+                                <div className="relative w-full h-64 bg-gray-500 rounded-lg overflow-hidden">
+                                    <img
+                                        src={book.portada_url}
+                                        alt={book.title}
+                                        className="w-full h-full object-contain rounded-lg"
+                                        onError={handleImageError} // En caso de error, se cambia la imagen por una predeterminada
+                                    />
+                                </div>
+                            ) : (
+                                <div className="w-full h-64 bg-gray-500 rounded-lg flex items-center justify-center text-white">
+                                    {book.portada_url ? "Portada no válida" : "Sin portada"}
+                                </div>
+                            )}
                             <h2 className="text-xl font-bold mt-2">{book.title}</h2>
                             <p className="text-gray-400">{book.description}</p>
-                            <a href={book.cover_url} target="_blank" className="text-blue-500 mt-2">Ver el libro</a>
+                            {isValidImageUrl(book.portada_url) && (
+                                <a href={book.portada_url} target="_blank" className="text-blue-500 mt-2">Ver el libro</a>
+                            )}
                         </div>
                     ))
                 )}
