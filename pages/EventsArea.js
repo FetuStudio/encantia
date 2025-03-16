@@ -92,12 +92,14 @@ export default function Navbar() {
                 {/* Menú de usuario */}
                 {role && (
                     <div className="relative">
-                        <img
-                            src='https://i.ibb.co/d0mWy0kP/perfildef.png'
-                            alt="Avatar"
-                            className="w-12 h-12 rounded-full cursor-pointer"
+                        {/* Aquí hemos eliminado la imagen de perfil por defecto */}
+                        <div
+                            className="w-12 h-12 bg-gray-700 rounded-full cursor-pointer flex items-center justify-center"
                             onClick={toggleMenu}
-                        />
+                        >
+                            {/* Puedes agregar un ícono o solo las iniciales del usuario aquí si lo deseas */}
+                            <span className="text-white font-bold">U</span>
+                        </div>
 
                         {/* Menú desplegable */}
                         {showMenu && (
@@ -171,4 +173,3 @@ export default function Navbar() {
         </div>
     );
 }
-
