@@ -4,7 +4,6 @@ import { useRouter } from 'next/router';
 
 export default function Chat() {
     const [showLogoutModal, setShowLogoutModal] = useState(false);
-    const [showMenu, setShowMenu] = useState(false);
     const [contacts, setContacts] = useState([]);
     const [selectedContact, setSelectedContact] = useState(null);
     const [message, setMessage] = useState('');
@@ -13,7 +12,6 @@ export default function Chat() {
     const [user, setUser] = useState(null);
     const [error, setError] = useState(null);
     const [role, setRole] = useState('');
-    const [userProfile, setUserProfile] = useState(null);
     const router = useRouter();
 
     useEffect(() => {
@@ -29,14 +27,6 @@ export default function Chat() {
                 .single();
 
             if (!error) setRole(data?.role);
-
-            const { data: profileData, error: profileError } = await supabase
-                .from('profiles')
-                .select('avatar_url')
-                .eq('id', user.id)
-                .single();
-
-            if (!profileError) setUserProfile(profileData);
         };
 
         fetchUserProfile();
@@ -86,20 +76,6 @@ export default function Chat() {
                     <button onClick={() => router.push('/libros')} className="px-4 py-2 bg-blue-500 rounded-lg hover:bg-blue-400">Libros</button>
                     <button onClick={() => window.open("https://discord.gg/dxcX8S3mrF", "_blank")} className="px-4 py-2 bg-blue-500 rounded-lg hover:bg-blue-400">Discord</button>
                 </div>
-                {userProfile && (
-                    <div className="relative">
-                        <img src={userProfile.avatar_url || 'https://i.ibb.co/d0mWy0kP/perfildef.png'} alt="Avatar" className="w-12 h-12 rounded-full cursor-pointer" onClick={() => setShowMenu(!showMenu)} />
-                        {showMenu && (
-                            <div className="absolute right-0 mt-2 w-48 bg-gray-800 text-white rounded-lg shadow-lg z-10">
-                                <ul className="py-2">
-                                    <li className="px-4 py-2 cursor-pointer hover:bg-gray-700" onClick={() => router.push('/settings')}>Configuración</li>
-                                    <li className="px-4 py-2 cursor-pointer hover:bg-gray-700" onClick={() => router.push('/profile')}>Perfil</li>
-                                    <li className="px-4 py-2 text-red-500 cursor-pointer hover:bg-gray-700" onClick={handleLogout}>Cerrar sesión</li>
-                                </ul>
-                            </div>
-                        )}
-                    </div>
-                )}
             </div>
 
             <div className="flex gap-6">
