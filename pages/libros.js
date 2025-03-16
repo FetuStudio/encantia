@@ -120,8 +120,9 @@ export default function Libros() {
                             )}
                             <h2 className="text-xl font-bold mt-2">{book.title}</h2>
                             <p className="text-gray-400">{book.description}</p>
-                            {isValidImageUrl(book.portada_url) && (
-                                <a href={book.portada_url} target="_blank" className="text-blue-500 mt-2">Ver el libro</a>
+                            {/* Enlace corregido a cover_url */}
+                            {isValidImageUrl(book.cover_url) && (
+                                <a href={book.cover_url} target="_blank" className="text-blue-500 mt-2">Ver el libro</a>
                             )}
                         </div>
                     ))
