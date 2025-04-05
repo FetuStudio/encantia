@@ -5,7 +5,10 @@ import { supabase } from "../utils/supabaseClient";
 export default function Navbar() {
     const [userProfile, setUserProfile] = useState(null);
     const [users, setUsers] = useState([]);
-    const [menuOpen, setMenuOpen] = useState(false); // Estado para controlar la visibilidad del menú
+    const [nickname, setNickname] = useState("");
+    const [avatarUrl, setAvatarUrl] = useState("");
+    const [errorMessage, setErrorMessage] = useState(""); // Estado para mostrar mensajes de error
+    const [isProfileExisting, setIsProfileExisting] = useState(false); // Estado para saber si el nickname ya existe
     const router = useRouter();
 
     const fetchUserProfile = useCallback(async () => {
@@ -15,10 +18,12 @@ export default function Navbar() {
         const { data: profileData } = await supabase
             .from('profiles')
             .select('*')
-            .eq('email', user.email)
+            .eq('user_id', user.id) // Comprobamos por user_id
             .single();
 
-        if (profileData) setUserProfile(profileData);
+        if (profileData) {
+            setUserProfile(profileData);
+        }
     }, []);
 
     const fetchUsers = useCallback(async () => {
@@ -26,7 +31,7 @@ export default function Navbar() {
         if (error) {
             console.error('Error fetching users:', error);
         } else {
-            setUsers(data);
+            setUsers(data); // Set users data here
         }
     }, []);
 
@@ -40,7 +45,37 @@ export default function Navbar() {
         if (error) {
             console.error('Error signing out:', error);
         } else {
-            router.push('/login'); // Redirigir al login después de cerrar sesión
+            router.push('/'); // Redirigir al login después de cerrar sesión
+        }
+    };
+
+    const handleProfileSubmit = async () => {
+        // Verificar si el nickname ya existe
+        const existingUser = users.find(user => user.name.toLowerCase() === nickname.toLowerCase());
+        if (existingUser) {
+            setIsProfileExisting(true);
+            return;
+        }
+
+        // Si no existe, crear el perfil
+        const { data: { user }, error } = await supabase.auth.getUser();
+        if (error || !user) return;
+
+        const { error: insertError } = await supabase
+            .from('profiles')
+            .insert([
+                {
+                    user_id: user.id,
+                    name: nickname,
+                    avatar_url: avatarUrl,
+                    email: user.email,
+                },
+            ]);
+
+        if (insertError) {
+            console.error('Error creating profile:', insertError);
+        } else {
+            setUserProfile({ user_id: user.id, name: nickname, avatar_url: avatarUrl });
         }
     };
 
@@ -51,9 +86,46 @@ export default function Navbar() {
         { icon: "https://images.encantia.lat/adv.png", name: "Advertencias", url: '/advert' }
     ];
 
+    if (!userProfile) {
+        return (
+            <div className="bg-gray-900 min-h-screen flex flex-col justify-center items-center">
+                <div className="text-white font-bold text-lg mb-4">¡Hola! Completa tu perfil</div>
+                
+                <input
+                    type="text"
+                    placeholder="Nombre de usuario"
+                    value={nickname}
+                    onChange={(e) => setNickname(e.target.value)}
+                    className="p-2 mb-4 text-black rounded"
+                />
+                <input
+                    type="text"
+                    placeholder="URL de tu foto de perfil"
+                    value={avatarUrl}
+                    onChange={(e) => setAvatarUrl(e.target.value)}
+                    className="p-2 mb-4 text-black rounded"
+                />
+                <button
+                    onClick={handleProfileSubmit}
+                    className="p-2 bg-blue-500 text-white rounded"
+                >
+                    Guardar perfil
+                </button>
+
+                {isProfileExisting && (
+                    <div className="text-red-500 mt-2">Este nombre de usuario ya está en uso. Por favor, elige otro.</div>
+                )}
+
+                {errorMessage && (
+                    <div className="text-red-500 mt-2">{errorMessage}</div>
+                )}
+            </div>
+        );
+    }
+
     return (
         <div className="bg-gray-900 min-h-screen">
-            {/* Texto de "Inicio" encima del navbar, con margen desde la parte superior */}
+            {/* Texto de "Inicio" encima del navbar */}
             <div className="absolute top-209 left-1/2 transform -translate-x-1/2 text-white font-bold text-sm">
                 Inicio
             </div>
@@ -84,34 +156,13 @@ export default function Navbar() {
 
                 {/* Avatar del usuario */}
                 {userProfile && (
-                    <button 
-                        onClick={() => setMenuOpen(!menuOpen)} 
-                        className="p-2 rounded-full bg-gray-800 text-white text-xl transition-transform transform hover:scale-110"
-                    >
+                    <button onClick={() => router.push(`/profile/${userProfile.user_id}`)} className="p-2 rounded-full bg-gray-800 text-white text-xl transition-transform transform hover:scale-110">
                         <img
                             src={userProfile.avatar_url || 'https://i.ibb.co/d0mWy0kP/perfildef.png'}
                             alt="Avatar"
                             className="w-8 h-8 rounded-full"
                         />
                     </button>
-                )}
-
-                {/* Menú desplegable de opciones */}
-                {menuOpen && (
-                    <div className="absolute bottom-16 right-0 bg-gray-800 text-white rounded-lg shadow-lg p-4 w-48">
-                        <button 
-                            onClick={() => router.push(`/profile/${userProfile.user_id}`)}
-                            className="block w-full text-left py-2 px-4 hover:bg-gray-700 rounded"
-                        >
-                            Ver Perfil
-                        </button>
-                        <button 
-                            onClick={handleSignOut}
-                            className="block w-full text-left py-2 px-4 hover:bg-gray-700 rounded"
-                        >
-                            Cerrar Sesión
-                        </button>
-                    </div>
                 )}
             </div>
 
@@ -122,3 +173,4 @@ export default function Navbar() {
         </div>
     );
 }
+
