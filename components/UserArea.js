@@ -9,9 +9,9 @@ export default function Navbar() {
     const [avatarUrl, setAvatarUrl] = useState("");
     const [errorMessage, setErrorMessage] = useState("");
     const [isProfileExisting, setIsProfileExisting] = useState(false);
+    const [isDropdownOpen, setIsDropdownOpen] = useState(false); // Para controlar el menú desplegable
     const router = useRouter();
 
-    // Fetch the current user's profile
     const fetchUserProfile = useCallback(async () => {
         const { data: { user }, error } = await supabase.auth.getUser();
         if (error || !user) return;
@@ -27,7 +27,6 @@ export default function Navbar() {
         }
     }, []);
 
-    // Fetch users from the profiles table
     const fetchUsers = useCallback(async () => {
         const { data, error } = await supabase.from('profiles').select('*');
         if (error) {
@@ -47,52 +46,47 @@ export default function Navbar() {
         if (error) {
             console.error('Error signing out:', error);
         } else {
-            router.push('/login');
+            router.push('/');
         }
     };
 
     const handleProfileSubmit = async () => {
+        setErrorMessage(""); // Limpiar errores previos
+        setIsProfileExisting(false); // Reset del flag de duplicado
+    
+        const { data: { user }, error: userError } = await supabase.auth.getUser();
+    
+        if (userError || !user) {
+            console.error("❌ No se pudo obtener el usuario", userError);
+            setErrorMessage("No se pudo obtener el usuario. Intenta iniciar sesión nuevamente.");
+            return;
+        }
+
         // Verificar si el nickname ya existe
-        const existingUser = users.find(user => user.name.toLowerCase() === nickname.toLowerCase());
+        const existingUser = users.find(u => u.name.toLowerCase() === nickname.toLowerCase());
         if (existingUser) {
             setIsProfileExisting(true);
             return;
         }
 
-        // Si no existe, crear el perfil
-        const { data: { user }, error } = await supabase.auth.getUser();
-        if (error || !user) return;
-
-        const { error: insertError } = await supabase
+        const newProfile = {
+            user_id: user.id,
+            name: nickname,
+            avatar_url: avatarUrl,
+            email: user.email,
+        };
+    
+        const { error: upsertError } = await supabase
             .from('profiles')
-            .insert([
-                {
-                    user_id: user.id,
-                    name: nickname,
-                    avatar_url: avatarUrl,
-                    email: user.email,
-                },
-            ]);
-
-        // Agregar verificación para errores
-        if (insertError) {
-            console.error('Error creating profile:', insertError);
-            setErrorMessage('Hubo un error al guardar tu perfil. Intenta nuevamente.');
-        } else {
-            // Verificamos que los datos se hayan guardado correctamente
-            console.log("Perfil guardado correctamente", { user_id: user.id, nickname, avatarUrl });
-            
-            // Actualizamos el estado con el nuevo perfil
-            setUserProfile({
-                user_id: user.id,
-                name: nickname,
-                avatar_url: avatarUrl,
-                email: user.email,
-            });
-
-            // Redirigir a la página del perfil o al inicio
-            router.push('/'); // O la ruta que prefieras
+            .upsert([newProfile], { onConflict: ['user_id'] });
+    
+        if (upsertError) {
+            setErrorMessage(`Error: ${upsertError.message}`);
+            return;
         }
+    
+        setUserProfile(newProfile);
+        router.push('/');
     };
 
     const navButtons = [
@@ -102,12 +96,12 @@ export default function Navbar() {
         { icon: "https://images.encantia.lat/adv.png", name: "Advertencias", url: '/advert' }
     ];
 
-    // Si no hay un perfil, mostramos el formulario
+    // Si no hay perfil, mostramos el formulario
     if (!userProfile) {
         return (
             <div className="bg-gray-900 min-h-screen flex flex-col justify-center items-center">
                 <div className="text-white font-bold text-lg mb-4">¡Hola! Completa tu perfil</div>
-                
+
                 <input
                     type="text"
                     placeholder="Nombre de usuario"
@@ -140,7 +134,6 @@ export default function Navbar() {
         );
     }
 
-    // Si el perfil está guardado, mostramos el navbar
     return (
         <div className="bg-gray-900 min-h-screen">
             <div className="absolute top-209 left-1/2 transform -translate-x-1/2 text-white font-bold text-sm">
@@ -156,7 +149,7 @@ export default function Navbar() {
 
                 {navButtons.map((button, index) => (
                     <div key={index} className="relative group">
-                        <button 
+                        <button
                             onClick={() => router.push(button.url)}
                             className="p-2 rounded-full bg-gray-800 text-white text-xl transition-transform transform group-hover:scale-110"
                         >
@@ -169,13 +162,33 @@ export default function Navbar() {
                 ))}
 
                 {userProfile && (
-                    <button onClick={() => router.push(`/profile/${userProfile.user_id}`)} className="p-2 rounded-full bg-gray-800 text-white text-xl transition-transform transform hover:scale-110">
-                        <img
-                            src={userProfile.avatar_url || 'https://i.ibb.co/d0mWy0kP/perfildef.png'}
-                            alt="Avatar"
-                            className="w-8 h-8 rounded-full"
-                        />
-                    </button>
+                    <div className="relative">
+                        <button onClick={() => setIsDropdownOpen(!isDropdownOpen)} className="p-2 rounded-full bg-gray-800 text-white text-xl transition-transform transform hover:scale-110">
+                            <img
+                                src={userProfile.avatar_url || 'https://i.ibb.co/d0mWy0kP/perfildef.png'}
+                                alt="Avatar"
+                                className="w-8 h-8 rounded-full"
+                            />
+                        </button>
+
+                        {/* Menú desplegable encima de la foto */}
+                        {isDropdownOpen && (
+                            <div className="absolute bottom-12 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-sm rounded-lg shadow-md mt-2 w-40">
+                                <button
+                                    onClick={() => router.push(`/profile/${userProfile.user_id}`)}
+                                    className="w-full text-left px-4 py-2 hover:bg-gray-700"
+                                >
+                                    Ver mi perfil
+                                </button>
+                                <button
+                                    onClick={handleSignOut}
+                                    className="w-full text-left px-4 py-2 text-red-500 hover:bg-gray-700"
+                                >
+                                    Cerrar sesión
+                                </button>
+                            </div>
+                        )}
+                    </div>
                 )}
             </div>
 
