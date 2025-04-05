@@ -11,6 +11,7 @@ export default function Navbar() {
     const [isProfileExisting, setIsProfileExisting] = useState(false); // Estado para saber si el nickname ya existe
     const router = useRouter();
 
+    // Fetch the current user's profile
     const fetchUserProfile = useCallback(async () => {
         const { data: { user }, error } = await supabase.auth.getUser();
         if (error || !user) return;
@@ -18,26 +19,27 @@ export default function Navbar() {
         const { data: profileData } = await supabase
             .from('profiles')
             .select('*')
-            .eq('user_id', user.id) // Comprobamos por user_id
+            .eq('user_id', user.id) // Buscamos el perfil por el user_id
             .single();
 
         if (profileData) {
-            setUserProfile(profileData);
+            setUserProfile(profileData); // Si ya tiene perfil, lo seteamos
         }
     }, []);
 
+    // Fetch users from the profiles table
     const fetchUsers = useCallback(async () => {
         const { data, error } = await supabase.from('profiles').select('*');
         if (error) {
             console.error('Error fetching users:', error);
         } else {
-            setUsers(data); // Set users data here
+            setUsers(data); // Guardamos los usuarios
         }
     }, []);
 
     useEffect(() => {
         fetchUserProfile();
-        fetchUsers(); // Fetch users when the component mounts
+        fetchUsers(); // Traemos todos los usuarios cuando el componente se monta
     }, [fetchUserProfile, fetchUsers]);
 
     const handleSignOut = async () => {
@@ -45,19 +47,19 @@ export default function Navbar() {
         if (error) {
             console.error('Error signing out:', error);
         } else {
-            router.push('/'); // Redirigir al login después de cerrar sesión
+            router.push('/login'); // Redirigir al login después de cerrar sesión
         }
     };
 
     const handleProfileSubmit = async () => {
-        // Verificar si el nickname ya existe
+        // Verificar si el nickname ya existe en la tabla profiles
         const existingUser = users.find(user => user.name.toLowerCase() === nickname.toLowerCase());
         if (existingUser) {
             setIsProfileExisting(true);
             return;
         }
 
-        // Si no existe, crear el perfil
+        // Si no existe, creamos el perfil
         const { data: { user }, error } = await supabase.auth.getUser();
         if (error || !user) return;
 
@@ -75,7 +77,13 @@ export default function Navbar() {
         if (insertError) {
             console.error('Error creating profile:', insertError);
         } else {
-            setUserProfile({ user_id: user.id, name: nickname, avatar_url: avatarUrl });
+            // Actualizar el estado con el nuevo perfil
+            setUserProfile({
+                user_id: user.id,
+                name: nickname,
+                avatar_url: avatarUrl,
+                email: user.email,
+            });
         }
     };
 
@@ -86,6 +94,7 @@ export default function Navbar() {
         { icon: "https://images.encantia.lat/adv.png", name: "Advertencias", url: '/advert' }
     ];
 
+    // Si no hay un perfil, mostramos el formulario para crearlo
     if (!userProfile) {
         return (
             <div className="bg-gray-900 min-h-screen flex flex-col justify-center items-center">
@@ -123,6 +132,7 @@ export default function Navbar() {
         );
     }
 
+    // Si ya tiene perfil, mostramos el navbar
     return (
         <div className="bg-gray-900 min-h-screen">
             {/* Texto de "Inicio" encima del navbar */}
@@ -173,4 +183,3 @@ export default function Navbar() {
         </div>
     );
 }
-
