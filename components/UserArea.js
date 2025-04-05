@@ -7,8 +7,8 @@ export default function Navbar() {
     const [users, setUsers] = useState([]);
     const [nickname, setNickname] = useState("");
     const [avatarUrl, setAvatarUrl] = useState("");
-    const [errorMessage, setErrorMessage] = useState(""); // Estado para mostrar mensajes de error
-    const [isProfileExisting, setIsProfileExisting] = useState(false); // Estado para saber si el nickname ya existe
+    const [errorMessage, setErrorMessage] = useState("");
+    const [isProfileExisting, setIsProfileExisting] = useState(false);
     const router = useRouter();
 
     // Fetch the current user's profile
@@ -19,11 +19,11 @@ export default function Navbar() {
         const { data: profileData } = await supabase
             .from('profiles')
             .select('*')
-            .eq('user_id', user.id) // Buscamos el perfil por el user_id
+            .eq('user_id', user.id)
             .single();
 
         if (profileData) {
-            setUserProfile(profileData); // Si ya tiene perfil, lo seteamos
+            setUserProfile(profileData);
         }
     }, []);
 
@@ -33,13 +33,13 @@ export default function Navbar() {
         if (error) {
             console.error('Error fetching users:', error);
         } else {
-            setUsers(data); // Guardamos los usuarios
+            setUsers(data);
         }
     }, []);
 
     useEffect(() => {
         fetchUserProfile();
-        fetchUsers(); // Traemos todos los usuarios cuando el componente se monta
+        fetchUsers();
     }, [fetchUserProfile, fetchUsers]);
 
     const handleSignOut = async () => {
@@ -47,19 +47,19 @@ export default function Navbar() {
         if (error) {
             console.error('Error signing out:', error);
         } else {
-            router.push('/login'); // Redirigir al login después de cerrar sesión
+            router.push('/login');
         }
     };
 
     const handleProfileSubmit = async () => {
-        // Verificar si el nickname ya existe en la tabla profiles
+        // Verificar si el nickname ya existe
         const existingUser = users.find(user => user.name.toLowerCase() === nickname.toLowerCase());
         if (existingUser) {
             setIsProfileExisting(true);
             return;
         }
 
-        // Si no existe, creamos el perfil
+        // Si no existe, crear el perfil
         const { data: { user }, error } = await supabase.auth.getUser();
         if (error || !user) return;
 
@@ -74,16 +74,24 @@ export default function Navbar() {
                 },
             ]);
 
+        // Agregar verificación para errores
         if (insertError) {
             console.error('Error creating profile:', insertError);
+            setErrorMessage('Hubo un error al guardar tu perfil. Intenta nuevamente.');
         } else {
-            // Actualizar el estado con el nuevo perfil
+            // Verificamos que los datos se hayan guardado correctamente
+            console.log("Perfil guardado correctamente", { user_id: user.id, nickname, avatarUrl });
+            
+            // Actualizamos el estado con el nuevo perfil
             setUserProfile({
                 user_id: user.id,
                 name: nickname,
                 avatar_url: avatarUrl,
                 email: user.email,
             });
+
+            // Redirigir a la página del perfil o al inicio
+            router.push('/'); // O la ruta que prefieras
         }
     };
 
@@ -94,7 +102,7 @@ export default function Navbar() {
         { icon: "https://images.encantia.lat/adv.png", name: "Advertencias", url: '/advert' }
     ];
 
-    // Si no hay un perfil, mostramos el formulario para crearlo
+    // Si no hay un perfil, mostramos el formulario
     if (!userProfile) {
         return (
             <div className="bg-gray-900 min-h-screen flex flex-col justify-center items-center">
@@ -132,24 +140,20 @@ export default function Navbar() {
         );
     }
 
-    // Si ya tiene perfil, mostramos el navbar
+    // Si el perfil está guardado, mostramos el navbar
     return (
         <div className="bg-gray-900 min-h-screen">
-            {/* Texto de "Inicio" encima del navbar */}
             <div className="absolute top-209 left-1/2 transform -translate-x-1/2 text-white font-bold text-sm">
                 Inicio
             </div>
 
-            {/* Navbar de abajo */}
             <div className="fixed bottom-3 left-1/2 transform -translate-x-1/2 flex items-center bg-gray-900 p-2 rounded-full shadow-lg space-x-4 w-max">
-                {/* Logo a la izquierda en el navbar inferior */}
                 <img
                     src="https://images.encantia.lat/encantia-logo-2025.webp"
                     alt="Logo"
                     className="h-13 w-auto"
                 />
 
-                {/* Botones de navegación */}
                 {navButtons.map((button, index) => (
                     <div key={index} className="relative group">
                         <button 
@@ -164,7 +168,6 @@ export default function Navbar() {
                     </div>
                 ))}
 
-                {/* Avatar del usuario */}
                 {userProfile && (
                     <button onClick={() => router.push(`/profile/${userProfile.user_id}`)} className="p-2 rounded-full bg-gray-800 text-white text-xl transition-transform transform hover:scale-110">
                         <img
@@ -176,7 +179,6 @@ export default function Navbar() {
                 )}
             </div>
 
-            {/* Texto de licencia en la esquina inferior derecha */}
             <div className="fixed bottom-3 right-3 text-gray-400 text-xs bg-gray-900 p-2 rounded-md shadow-md">
                 © 2025 by Encantia is licensed under CC BY-NC-ND 4.0.
             </div>
