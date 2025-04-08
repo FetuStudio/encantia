@@ -130,6 +130,7 @@ export default function Navbar() {
         { icon: "https://images.encantia.lat/notas.png", name: "Notas", url: '/notes' },
         { icon: "https://images.encantia.lat/adv.png", name: "Advertencias", url: '/advert' }
         { icon: "https://images.encantia.lat/music.png", name: "Musica", url: '/music' }
+        { icon: "https://images.encantia.lat/discord.png", name: "Discord", url: 'https://discord.gg/BRqvv9nWHZ' }
     ];
 
     return (
