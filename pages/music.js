@@ -124,11 +124,9 @@ export default function Navbar() {
 
     const navButtons = [
         { icon: "https://images.encantia.lat/home.png", name: "Inicio", url: '/' },
-        { icon: "https://images.encantia.lat/libros.png", name: "Libros", url: '/libros' },
-        { icon: "https://images.encantia.lat/eventos.png", name: "Eventos", url: '/EventsArea' },
-        { icon: "https://images.encantia.lat/luminus-s.png", name: "Luminus Studios", url: '/luminus' },
-        { icon: "https://images.encantia.lat/music.png", name: "Musica", url: '/music' },
-        { icon: "https://images.encantia.lat/discord.png", name: "Discord", url: 'https://discord.gg/BRqvv9nWHZ' }
+        { icon: "https://images.encantia.lat/mensaje.png", name: "Mensajes", url: '/bdm' },
+        { icon: "https://images.encantia.lat/notas.png", name: "Notas", url: '/notes' },
+        { icon: "https://images.encantia.lat/adv.png", name: "Advertencias", url: '/advert' }
     ];
 
     return (
@@ -156,11 +154,11 @@ export default function Navbar() {
                             </div>
                         </div>
                         <div className="flex items-center space-x-6">
-                            <button onClick={(e) => { e.stopPropagation(); handlePrev(); }} className="text-xl">⏮️</button>
-                            <button onClick={(e) => { e.stopPropagation(); handlePlayPause(); }} className="text-3xl">
+                            <button onClick={(e) => { e.stopPropagation(); handlePrev(); }}>⏮️</button>
+                            <button onClick={(e) => { e.stopPropagation(); handlePlayPause(); }}>
                                 {isPlaying ? "⏸️" : "▶️"}
                             </button>
-                            <button onClick={(e) => { e.stopPropagation(); handleNext(); }} className="text-xl">⏭️</button>
+                            <button onClick={(e) => { e.stopPropagation(); handleNext(); }}>⏭️</button>
                         </div>
                     </div>
 
@@ -204,30 +202,36 @@ export default function Navbar() {
                 </>
             )}
 
-            {/* --- Lista de canciones (Cuadrícula con desplazamiento horizontal) --- */}
-            <div className="fixed top-20 left-1/2 transform -translate-x-1/2 w-full max-w-full bg-gray-800 text-white p-4 rounded-lg shadow-lg z-40 overflow-x-auto flex space-x-4">
-                {musicas.map((musica, index) => (
-                    <div
-                        key={musica.id}
-                        className="flex-shrink-0 w-[150px] h-[150px] bg-gray-700 rounded-lg p-2 cursor-pointer hover:bg-gray-600 transform hover:scale-105 transition-transform duration-300"
-                        onClick={() => {
-                            setCurrentIndex(index);
-                            setProgress(0);
-                            setIsPlaying(false);
-                            setHasEnded(false);
-                        }}
-                    >
-                        <img
-                            src={musica.portada_url}
-                            alt="Portada"
-                            className="w-full h-full object-cover rounded"
-                        />
-                        <div className="mt-2 text-center">
-                            <h3 className="text-sm font-semibold">{musica.titulo}</h3>
-                            <p className="text-xs text-gray-400">{musica.autor}</p>
+            {/* --- Lista de canciones --- */}
+            <div className="fixed bottom-[250px] left-1/2 transform -translate-x-1/2 w-full max-w-full bg-gray-800 text-white p-4 rounded-lg shadow-lg z-40">
+                <h2 className="text-xl font-semibold mb-4">Lista de Canciones</h2>
+                <div className="space-y-3">
+                    {musicas.map((musica, index) => (
+                        <div
+                            key={musica.id}
+                            className="flex items-center justify-between p-3 bg-gray-700 rounded-lg cursor-pointer hover:bg-gray-600"
+                            onClick={() => {
+                                setCurrentIndex(index);
+                                setProgress(0);
+                                setIsPlaying(false);
+                                setHasEnded(false);
+                            }}
+                        >
+                            <div className="flex items-center space-x-4">
+                                <img
+                                    src={musica.portada_url}
+                                    alt="Portada"
+                                    className="w-12 h-12 object-cover rounded"
+                                />
+                                <div>
+                                    <h3 className="text-lg font-semibold">{musica.titulo}</h3>
+                                    <p className="text-sm text-gray-400">{musica.autor}</p>
+                                </div>
+                            </div>
+                            <div className="text-xs text-gray-400">{musica.categoria}</div>
                         </div>
-                    </div>
-                ))}
+                    ))}
+                </div>
             </div>
 
             {/* --- NAVBAR (quedará debajo del reproductor) --- */}
