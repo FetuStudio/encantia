@@ -1,10 +1,8 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/router";
 import { supabase } from "../utils/supabaseClient";
-import { useMusic } from '../context/MusicContext';
 
 export default function Navbar() {
-    
     const [userProfile, setUserProfile] = useState(null);
     const [musicas, setMusicas] = useState([]);
     const [currentIndex, setCurrentIndex] = useState(0);
@@ -126,10 +124,9 @@ export default function Navbar() {
 
     const navButtons = [
         { icon: "https://images.encantia.lat/home.png", name: "Inicio", url: '/' },
-        { icon: "https://images.encantia.lat/libros.png", name: "Libros", url: '/libros' },
-        { icon: "https://images.encantia.lat/eventos.png", name: "Eventos", url: '/EventsArea' },
-        { icon: "https://images.encantia.lat/luminus-s.png", name: "Luminus Studios", url: '/luminus' },
-        { icon: "https://images.encantia.lat/discord.png", name: "Discord", url: 'https://discord.gg/BRqvv9nWHZ' }
+        { icon: "https://images.encantia.lat/mensaje.png", name: "Mensajes", url: '/bdm' },
+        { icon: "https://images.encantia.lat/notas.png", name: "Notas", url: '/notes' },
+        { icon: "https://images.encantia.lat/adv.png", name: "Advertencias", url: '/advert' }
     ];
 
     return (
@@ -206,32 +203,29 @@ export default function Navbar() {
             )}
 
             {/* --- Lista de canciones (Cuadrícula con desplazamiento horizontal) --- */}
-            <div className="absolute top-[180px] left-0 right-0 bottom-[130px] overflow-x-auto flex space-x-4 px-4">
-                <div className="w-full h-full flex overflow-x-auto space-x-4">
-                    {musicas.map((musica, index) => (
-                        <div
-                            key={musica.id}
-                            className="flex-shrink-0 w-[200px] h-[200px] bg-gray-700 rounded-lg p-4 cursor-pointer hover:bg-gray-600 transform hover:scale-105 transition-transform duration-300"
-                            onClick={() => {
-                                setCurrentIndex(index);
-                                setProgress(0);
-                                setIsPlaying(false);
-                                setHasEnded(false);
-                            }}
-                        >
-                            <img
-                                src={musica.portada_url}
-                                alt="Portada"
-                                className="w-full h-full object-cover rounded mb-2"
-                            />
-                            <div className="text-center">
-                                <h3 className="text-sm font-semibold">{musica.titulo}</h3>
-                                <p className="text-xs text-gray-400">{musica.autor}</p>
-                                <div className="text-xs mt-2 inline-block bg-blue-500 text-white px-2 py-1 rounded-full">{musica.categoria}</div>
-                            </div>
+            <div className="fixed top-20 left-1/2 transform -translate-x-1/2 w-full max-w-full bg-gray-800 text-white p-4 rounded-lg shadow-lg z-40 overflow-x-auto flex space-x-4">
+                {musicas.map((musica, index) => (
+                    <div
+                        key={musica.id}
+                        className="flex-shrink-0 w-[150px] h-[150px] bg-gray-700 rounded-lg p-2 cursor-pointer hover:bg-gray-600 transform hover:scale-105 transition-transform duration-300"
+                        onClick={() => {
+                            setCurrentIndex(index);
+                            setProgress(0);
+                            setIsPlaying(false);
+                            setHasEnded(false);
+                        }}
+                    >
+                        <img
+                            src={musica.portada_url}
+                            alt="Portada"
+                            className="w-full h-full object-cover rounded"
+                        />
+                        <div className="mt-2 text-center">
+                            <h3 className="text-sm font-semibold">{musica.titulo}</h3>
+                            <p className="text-xs text-gray-400">{musica.autor}</p>
                         </div>
-                    ))}
-                </div>
+                    </div>
+                ))}
             </div>
 
             {/* --- NAVBAR (quedará debajo del reproductor) --- */}
