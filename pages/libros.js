@@ -167,6 +167,18 @@ export default function Libros() {
 
                 <div className="relative group">
                     <button
+                        onClick={() => router.push('/music')}
+                        className="p-2 rounded-full bg-gray-800 text-white text-xl transition-transform transform group-hover:scale-110"
+                    >
+                        <img src="https://images.encantia.lat/music.png" alt="Luminus" className="w-8 h-8" />
+                    </button>
+                    <span className="absolute bottom-14 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 bg-gray-700 text-white text-xs rounded px-2 py-1 transition-opacity">
+                        Musica
+                    </span>
+                </div>
+
+                <div className="relative group">
+                    <button
                         onClick={() => window.open("https://discord.gg/dxcX8S3mrF", "_blank")}
                         className="p-2 rounded-full bg-gray-800 text-white text-xl transition-transform transform group-hover:scale-110"
                     >
