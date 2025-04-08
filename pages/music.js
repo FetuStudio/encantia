@@ -1,7 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/router";
-import { supabase } from "../utils/supabaseClient";
-import { useMusic } from '../context/MusicContext';
 
 export default function Navbar() {
     
