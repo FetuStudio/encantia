@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/router";
+import { supabase } from "../utils/supabaseClient";
+import { useMusic } from '../context/MusicContext';
 
 export default function Navbar() {
     
@@ -124,9 +126,9 @@ export default function Navbar() {
 
     const navButtons = [
         { icon: "https://images.encantia.lat/home.png", name: "Inicio", url: '/' },
-        { icon: "https://images.encantia.lat/mensaje.png", name: "Mensajes", url: '/bdm' },
-        { icon: "https://images.encantia.lat/notas.png", name: "Notas", url: '/notes' },
-        { icon: "https://images.encantia.lat/adv.png", name: "Advertencias", url: '/advert' }
+        { icon: "https://images.encantia.lat/libros.png", name: "Libros", url: '/libros' },
+        { icon: "https://images.encantia.lat/eventos.png", name: "Eventos", url: '/EventsArea' },
+        { icon: "https://images.encantia.lat/luminus-s.png", name: "Luminus Studios", url: '/luminus' },
         { icon: "https://images.encantia.lat/discord.png", name: "Discord", url: 'https://discord.gg/BRqvv9nWHZ' }
     ];
 
