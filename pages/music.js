@@ -12,6 +12,7 @@ export default function Navbar() {
     const [duration, setDuration] = useState(0);
     const [expanded, setExpanded] = useState(false);
     const [hasEnded, setHasEnded] = useState(false);
+    const [listExpanded, setListExpanded] = useState(false); // Nuevo estado para la expansión de la lista
     const audioRef = useRef(null);
     const router = useRouter();
 
@@ -121,6 +122,7 @@ export default function Navbar() {
     };
 
     const toggleExpand = () => setExpanded(!expanded);
+    const toggleListExpand = () => setListExpanded(!listExpanded); // Alternar la expansión de la lista de canciones
 
     const navButtons = [
         { icon: "https://images.encantia.lat/home.png", name: "Inicio", url: '/' },
@@ -135,12 +137,10 @@ export default function Navbar() {
             {/* --- SPOTIFY PLAYER encima del navbar --- */}
             {currentMusic && (
                 <>
-                    {/* Barra de progreso (solo la barra verde sin línea gris de fondo) */}
                     <div className="fixed bottom-[100px] left-0 w-full h-1 bg-transparent z-50">
                         <div className="h-full bg-green-500" style={{ width: `${progress}%` }} />
                     </div>
 
-                    {/* Mini reproductor tipo Spotify */}
                     <div className={`fixed bottom-[104px] left-1/2 transform -translate-x-1/2 bg-gray-800 text-white w-full max-w-full flex items-center justify-between px-8 py-2 rounded-t-lg z-50 shadow-lg cursor-pointer ${expanded ? 'h-[250px]' : 'h-[70px]'}`} onClick={toggleExpand}>
                         <div className="flex items-center space-x-4 w-full">
                             <img
@@ -162,7 +162,6 @@ export default function Navbar() {
                         </div>
                     </div>
 
-                    {/* Expansión estilo Spotify */}
                     {expanded && (
                         <div className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-full bg-gray-900 p-6 rounded-t-xl shadow-2xl z-50">
                             <div className="flex flex-col items-center w-full">
@@ -180,7 +179,6 @@ export default function Navbar() {
                                     </button>
                                     <button onClick={handleNext} className="text-4xl">⏭️</button>
                                 </div>
-                                {/* Barra de progreso completa (solo barra verde) */}
                                 <div className="w-full mb-4">
                                     <input
                                         type="range"
@@ -203,10 +201,17 @@ export default function Navbar() {
             )}
 
             {/* --- Lista de canciones --- */}
-            <div className="fixed bottom-[250px] left-1/2 transform -translate-x-1/2 w-full max-w-full bg-gray-800 text-white p-4 rounded-lg shadow-lg z-40">
+            <div className="pt-20 px-4 bg-gray-900 text-white">
+                {/* Limitar a 10 canciones para mostrar */}
                 <h2 className="text-xl font-semibold mb-4">Lista de Canciones</h2>
-                <div className="space-y-3">
-                    {musicas.map((musica, index) => (
+                <button 
+                    onClick={toggleListExpand} 
+                    className="text-sm text-gray-400 mb-4 hover:text-gray-200">
+                    {listExpanded ? 'Ver menos' : 'Ver más'}
+                </button>
+
+                <div className={`space-y-3 max-h-[${listExpanded ? '400px' : '60px'}] overflow-y-auto`}>
+                    {musicas.slice(0, 10).map((musica, index) => (
                         <div
                             key={musica.id}
                             className="flex items-center justify-between p-3 bg-gray-700 rounded-lg cursor-pointer hover:bg-gray-600"
