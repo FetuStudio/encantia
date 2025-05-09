@@ -1,0 +1,7 @@
+/* Estilos personalizados (si los necesitas) */
+@import "tailwindcss";  /* Asegúrate de que esta línea esté incluida */
+
+// Estilo para deshabilitar la UI
+body.disabled {
+  @apply pointer-events-none opacity-50; /* Usa clases de Tailwind para deshabilitar la UI */
+}
