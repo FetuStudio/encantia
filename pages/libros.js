@@ -9,31 +9,32 @@ export default function Libros() {
     const router = useRouter();
 
     useEffect(() => {
-        const fetchBooks = async () => {
-            const { data, error } = await supabase.from('books').select('*');
-            if (error) console.error("Error al obtener los libros:", error.message);
-            else setBooks(data);
-        };
+        const fetchBooksAndUserProfile = async () => {
+            // Fetching books
+            const { data: booksData, error: booksError } = await supabase.from('books').select('*');
+            if (booksError) {
+                console.error("Error al obtener los libros:", booksError.message);
+            } else {
+                setBooks(booksData);
+            }
 
-        const fetchUserProfile = async () => {
+            // Fetching user profile
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) return;
 
-            const { data } = await supabase
+            const { data: profileData } = await supabase
                 .from('profiles')
                 .select('*')
                 .eq('user_id', user.id)
                 .single();
 
-            if (data) setUserProfile(data);
+            if (profileData) setUserProfile(profileData);
         };
 
-        fetchBooks();
-        fetchUserProfile();
+        fetchBooksAndUserProfile();
     }, []);
 
-    const isValidImageUrl = (url) =>
-        url && (url.startsWith("http://") || url.startsWith("https://"));
+    const isValidImageUrl = (url) => /^https?:\/\/\S+\.(jpg|jpeg|png|gif|bmp|webp)$/i.test(url);
 
     const handleImageError = (e) => {
         e.target.onerror = null;
@@ -44,6 +45,15 @@ export default function Libros() {
         await supabase.auth.signOut();
         router.push('/');
     };
+
+    const navigationLinks = [
+        { icon: "home.png", name: "Inicio", url: '/' },
+        { icon: "libros.png", name: "Libros", url: '/libros' },
+        { icon: "eventos.png", name: "Eventos", url: '/EventsArea' },
+        { icon: "luminus-s.png", name: "Luminus Studios", url: '/luminus' },
+        { icon: "music.png", name: "Musica", url: '/music' },
+        { icon: "discord.png", name: "Discord", url: 'https://discord.gg/BRqvv9nWHZ', external: true }
+    ];
 
     return (
         <div className="flex flex-col min-h-screen bg-gray-900 text-white p-4">
@@ -85,23 +95,16 @@ export default function Libros() {
             <div className="fixed bottom-3 left-1/2 transform -translate-x-1/2 flex items-center bg-gray-900 p-2 rounded-full shadow-lg space-x-4 w-max">
                 <img src="https://images.encantia.lat/encantia-logo-2025.webp" alt="Logo" className="h-13 w-auto" />
 
-                {[
-                    { icon: "https://images.encantia.lat/home.png", name: "Inicio", url: '/' },
-                    { icon: "https://images.encantia.lat/libros.png", name: "Libros", url: '/libros' },
-                    { icon: "https://images.encantia.lat/eventos.png", name: "Eventos", url: '/EventsArea' },
-                    { icon: "https://images.encantia.lat/luminus-s.png", name: "Luminus Studios", url: '/luminus' },
-                    { icon: "https://images.encantia.lat/music.png", name: "Musica", url: '/music' },
-                    { icon: "https://images.encantia.lat/discord.png", name: "Discord", url: 'https://discord.gg/BRqvv9nWHZ' }
-                ].map(({ icon, alt, link, external }) => (
+                {navigationLinks.map(({ icon, name, url, external }) => (
                     <div key={icon} className="relative group">
                         <button
-                            onClick={() => external ? window.open(link, "_blank") : router.push(link)}
+                            onClick={() => external ? window.open(url, "_blank") : router.push(url)}
                             className="p-2 rounded-full bg-gray-800 text-white text-xl transition-transform transform group-hover:scale-110"
                         >
-                            <img src={`https://images.encantia.lat/${icon}.png`} alt={alt} className="w-8 h-8" />
+                            <img src={`https://images.encantia.lat/${icon}`} alt={name} className="w-8 h-8" />
                         </button>
                         <span className="absolute bottom-14 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 bg-gray-700 text-white text-xs rounded px-2 py-1 transition-opacity">
-                            {alt}
+                            {name}
                         </span>
                     </div>
                 ))}
