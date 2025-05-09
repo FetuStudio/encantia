@@ -12,7 +12,7 @@ export default function Navbar() {
     const [duration, setDuration] = useState(0);
     const [expanded, setExpanded] = useState(false);
     const [hasEnded, setHasEnded] = useState(false);
-    const [listExpanded, setListExpanded] = useState(false); // Nuevo estado para la expansión de la lista
+    const [listExpanded, setListExpanded] = useState(false);
     const audioRef = useRef(null);
     const router = useRouter();
 
@@ -122,7 +122,7 @@ export default function Navbar() {
     };
 
     const toggleExpand = () => setExpanded(!expanded);
-    const toggleListExpand = () => setListExpanded(!listExpanded); // Alternar la expansión de la lista de canciones
+    const toggleListExpand = () => setListExpanded(!listExpanded); 
 
     const navButtons = [
         { icon: "https://images.encantia.lat/home.png", name: "Inicio", url: '/' },
@@ -200,6 +200,18 @@ export default function Navbar() {
                     )}
                     <audio ref={audioRef} />
                 </>
+            )}
+
+            {/* --- Foto de perfil del usuario --- */}
+            {userProfile && (
+                <div className="absolute top-4 left-4 flex items-center space-x-4 z-50">
+                    <img
+                        src={userProfile.avatar_url || "https://via.placeholder.com/150"} // Si no tiene foto, una predeterminada
+                        alt="Foto de perfil"
+                        className="w-12 h-12 rounded-full object-cover"
+                    />
+                    <span className="text-lg font-semibold">{userProfile.nombre}</span>
+                </div>
             )}
 
             {/* --- Lista de canciones --- */}
