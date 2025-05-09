@@ -204,7 +204,6 @@ export default function Navbar() {
 
             {/* --- Lista de canciones --- */}
             <div className="pt-20 px-4 bg-gray-900 text-white">
-                {/* Limitar a 10 canciones para mostrar */}
                 <h2 className="text-xl font-semibold mb-4">Lista de Canciones</h2>
                 <button 
                     onClick={toggleListExpand} 
@@ -213,7 +212,7 @@ export default function Navbar() {
                 </button>
 
                 <div className={`space-y-3 max-h-[${listExpanded ? '400px' : '60px'}] overflow-y-auto`}>
-                    {musicas.slice(0, 10).map((musica, index) => (
+                    {musicas.map((musica, index) => (
                         <div
                             key={musica.id}
                             className="flex items-center justify-between p-3 bg-gray-700 rounded-lg cursor-pointer hover:bg-gray-600"
@@ -254,31 +253,12 @@ export default function Navbar() {
                             onClick={() => router.push(button.url)}
                             className="p-2 rounded-full bg-gray-800 text-white text-xl transition-transform transform group-hover:scale-110"
                         >
-                            <img src={button.icon} alt={button.name} className="w-8 h-8" />
+                            <img src={button.icon} alt={button.name} className="h-7 w-7" />
                         </button>
-                        <span className="absolute bottom-14 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 bg-gray-700 text-white text-xs rounded px-2 py-1 transition-opacity">
-                            {button.name}
-                        </span>
                     </div>
                 ))}
-                {userProfile && (
-                    <button
-                        onClick={() => router.push(`/profile/${userProfile.user_id}`)}
-                        className="p-2 rounded-full bg-gray-800 text-white text-xl transition-transform transform hover:scale-110"
-                    >
-                        <img
-                            src={userProfile.avatar_url || 'https://i.ibb.co/d0mWy0kP/perfildef.png'}
-                            alt="Avatar"
-                            className="w-8 h-8 rounded-full"
-                        />
-                    </button>
-                )}
-            </div>
-
-            {/* LICENCIA */}
-            <div className="fixed bottom-3 right-3 text-gray-400 text-xs bg-gray-900 p-2 rounded-md shadow-md">
-                © 2025 by Encantia is licensed under CC BY-NC-ND 4.0.
             </div>
         </div>
     );
 }
+
