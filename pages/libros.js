@@ -86,11 +86,12 @@ export default function Libros() {
                 <img src="https://images.encantia.lat/encantia-logo-2025.webp" alt="Logo" className="h-13 w-auto" />
 
                 {[
-                    { icon: "home", alt: "Inicio", link: "/" },
-                    { icon: "libros", alt: "Libros", link: "/libros" },
-                    { icon: "eventos", alt: "Eventos", link: "/EventsArea" },
-                    { icon: "luminus-s", alt: "Luminus", link: "/luminus" },
-                    { icon: "discord", alt: "Discord", link: "https://discord.gg/dxcX8S3mrF", external: true }
+        { icon: "https://images.encantia.lat/home.png", name: "Inicio", url: '/' },
+        { icon: "https://images.encantia.lat/libros.png", name: "Libros", url: '/libros' },
+        { icon: "https://images.encantia.lat/eventos.png", name: "Eventos", url: '/EventsArea' },
+        { icon: "https://images.encantia.lat/luminus-s.png", name: "Luminus Studios", url: '/luminus' },
+        { icon: "https://images.encantia.lat/music.png", name: "Musica", url: '/music' },
+        { icon: "https://images.encantia.lat/discord.png", name: "Discord", url: 'https://discord.gg/BRqvv9nWHZ' }
                 ].map(({ icon, alt, link, external }) => (
                     <div key={icon} className="relative group">
                         <button
