@@ -172,42 +172,40 @@ export default function Auth() {
                     )}
                 </button>
 
-                {/* OAuth buttons in a row */}
-                {!isSignUp && (
-                    <div className="mt-6 flex justify-center space-x-4">
-                        <button
-                            onClick={() => handleOAuthLogin('github')}
-                            className="p-2 rounded flex items-center justify-center gap-2 text-lg"
-                        >
-                            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg" alt="GitHub" className="w-8 h-8" />
-                        </button>
+                {/* OAuth buttons visible in both SignUp and SignIn */}
+                <div className="mt-6 flex justify-center space-x-4">
+                    <button
+                        onClick={() => handleOAuthLogin('github')}
+                        className="p-2 rounded flex items-center justify-center gap-2 text-lg"
+                    >
+                        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg" alt="GitHub" className="w-8 h-8" />
+                    </button>
 
-                        <button
-                            onClick={() => handleOAuthLogin('discord')}
-                            className="p-2 rounded flex items-center justify-center gap-2 text-lg"
-                        >
-                            <img src="https://th.bing.com/th/id/R.18caff5f9c259a9ba08aa5de464e217a?rik=3LUHiVA9UTofuA&pid=ImgRaw&r=0" alt="Discord" className="w-8 h-8" />
-                        </button>
+                    <button
+                        onClick={() => handleOAuthLogin('discord')}
+                        className="p-2 rounded flex items-center justify-center gap-2 text-lg"
+                    >
+                        <img src="https://th.bing.com/th/id/R.18caff5f9c259a9ba08aa5de464e217a?rik=3LUHiVA9UTofuA&pid=ImgRaw&r=0" alt="Discord" className="w-8 h-8" />
+                    </button>
 
-                        <button
-                            onClick={() => handleOAuthLogin('gitlab')}
-                            className="p-2 rounded flex items-center justify-center gap-2 text-lg"
-                        >
-                            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/gitlab/gitlab-original.svg" alt="GitLab" className="w-8 h-8" />
-                        </button>
+                    <button
+                        onClick={() => handleOAuthLogin('gitlab')}
+                        className="p-2 rounded flex items-center justify-center gap-2 text-lg"
+                    >
+                        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/gitlab/gitlab-original.svg" alt="GitLab" className="w-8 h-8" />
+                    </button>
 
-                        <button
-                            onClick={() => handleOAuthLogin('google')}
-                            className="p-2 rounded flex items-center justify-center gap-2 text-lg"
-                        >
-                            <img
-                                src="https://cdn4.iconfinder.com/data/icons/logos-brands-7/512/google_logo-google_icongoogle-1024.png"
-                                alt="Google"
-                                className="w-8 h-8"
-                            />
-                        </button>
-                    </div>
-                )}
+                    <button
+                        onClick={() => handleOAuthLogin('google')}
+                        className="p-2 rounded flex items-center justify-center gap-2 text-lg"
+                    >
+                        <img
+                            src="https://cdn4.iconfinder.com/data/icons/logos-brands-7/512/google_logo-google_icongoogle-1024.png"
+                            alt="Google"
+                            className="w-8 h-8"
+                        />
+                    </button>
+                </div>
 
                 <div className="mt-4 text-center">
                     {isSignUp ? (
@@ -264,7 +262,7 @@ export default function Auth() {
 
             {/* Ko-fi button */}
             <a
-                href="https://ko-fi.com/S6S71EQT6F"
+                href="https://ko-fi.com/S6S71EQT6F"               
                 target="_blank"
                 rel="noopener noreferrer"
                 className="fixed bottom-4 left-4 z-50"
