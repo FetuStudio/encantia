@@ -205,6 +205,18 @@ export default function Auth() {
                             className="w-8 h-8"
                         />
                     </button>
+
+                    {/* Spotify OAuth Button */}
+                    <button
+                        onClick={() => handleOAuthLogin('spotify')}
+                        className="p-2 rounded flex items-center justify-center gap-2 text-lg"
+                    >
+                        <img
+                            src="https://logospng.org/download/spotify/logo-spotify-icon-4096.png"
+                            alt="Spotify"
+                            className="w-8 h-8"
+                        />
+                    </button>
                 </div>
 
                 <div className="mt-4 text-center">
