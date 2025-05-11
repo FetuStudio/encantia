@@ -143,7 +143,7 @@ export default function Navbar() {
                     ¡Solicita ahora un Código de Creador!
                 </h1>
                 <a
-                    href="https://www.encantia.lat/"
+                    href="https://www.encantia.lat/cco/request/encantia/CreatorCodeForm"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-6 rounded-full transition"
