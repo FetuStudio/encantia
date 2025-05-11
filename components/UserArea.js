@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/router";
 import { supabase } from "../utils/supabaseClient";
-import Adsense from "../components/Adsense"
+import Adsense from "../components/Adsense";
 
 export default function Navbar() {
     const [userProfile, setUserProfile] = useState(null);
@@ -10,7 +10,7 @@ export default function Navbar() {
     const [avatarUrl, setAvatarUrl] = useState("");
     const [errorMessage, setErrorMessage] = useState("");
     const [isProfileExisting, setIsProfileExisting] = useState(false);
-    const [isDropdownOpen, setIsDropdownOpen] = useState(false); // Para controlar el menú desplegable
+    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const router = useRouter();
 
     const fetchUserProfile = useCallback(async () => {
@@ -52,18 +52,17 @@ export default function Navbar() {
     };
 
     const handleProfileSubmit = async () => {
-        setErrorMessage(""); // Limpiar errores previos
-        setIsProfileExisting(false); // Reset del flag de duplicado
-    
+        setErrorMessage("");
+        setIsProfileExisting(false);
+
         const { data: { user }, error: userError } = await supabase.auth.getUser();
-    
+
         if (userError || !user) {
             console.error("❌ No se pudo obtener el usuario", userError);
             setErrorMessage("No se pudo obtener el usuario. Intenta iniciar sesión nuevamente.");
             return;
         }
 
-        // Verificar si el nickname ya existe
         const existingUser = users.find(u => u.name.toLowerCase() === nickname.toLowerCase());
         if (existingUser) {
             setIsProfileExisting(true);
@@ -76,16 +75,16 @@ export default function Navbar() {
             avatar_url: avatarUrl,
             email: user.email,
         };
-    
+
         const { error: upsertError } = await supabase
             .from('profiles')
             .upsert([newProfile], { onConflict: ['user_id'] });
-    
+
         if (upsertError) {
             setErrorMessage(`Error: ${upsertError.message}`);
             return;
         }
-    
+
         setUserProfile(newProfile);
         router.push('/');
     };
@@ -99,7 +98,6 @@ export default function Navbar() {
         { icon: "https://images.encantia.lat/discord.png", name: "Discord", url: 'https://discord.gg/BRqvv9nWHZ' }
     ];
 
-    // Si no hay perfil, mostramos el formulario
     if (!userProfile) {
         return (
             <div className="bg-gray-900 min-h-screen flex flex-col justify-center items-center">
@@ -139,6 +137,29 @@ export default function Navbar() {
 
     return (
         <div className="bg-gray-900 min-h-screen">
+            {/* NUEVO BLOQUE: Solicita un Código de Creador */}
+            <div className="flex flex-col items-center justify-center text-center py-10">
+                <h1 className="text-white text-2xl font-bold mb-4">
+                    ¡Solicita ahora un Código de Creador!
+                </h1>
+                <a
+                    href="https://www.encantia.lat/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-6 rounded-full transition"
+                >
+                    Solicitar ahora
+                </a>
+                <a
+                    href="https://cco.encantia.lat"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-4 text-blue-400 hover:text-blue-300 underline text-sm"
+                >
+                    Revisa si cumples los requisitos para solicitar un Código de Creador
+                </a>
+            </div>
+
             <div className="absolute top-209 left-1/2 transform -translate-x-1/2 text-white font-bold text-sm">
                 Inicio
             </div>
@@ -174,7 +195,6 @@ export default function Navbar() {
                             />
                         </button>
 
-                        {/* Menú desplegable encima de la foto */}
                         {isDropdownOpen && (
                             <div className="absolute bottom-12 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-sm rounded-lg shadow-md mt-2 w-40">
                                 <button
