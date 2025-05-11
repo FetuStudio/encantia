@@ -172,7 +172,6 @@ export default function Auth() {
                     )}
                 </button>
 
-                {/* OAuth buttons visible in both SignUp and SignIn */}
                 <div className="mt-6 flex justify-center space-x-4">
                     <button
                         onClick={() => handleOAuthLogin('github')}
@@ -206,7 +205,6 @@ export default function Auth() {
                         />
                     </button>
 
-                    {/* Spotify OAuth Button */}
                     <button
                         onClick={() => handleOAuthLogin('spotify')}
                         className="p-2 rounded flex items-center justify-center gap-2 text-lg"
@@ -255,6 +253,15 @@ export default function Auth() {
                         </>
                     )}
                 </div>
+            </div>
+
+            {/* Powered by Encatia - Rectángulo verde pastel */}
+            <div className="absolute bottom-4 right-4 text-xs flex items-center gap-1">
+                <div>
+                    <span className="text-white">Powered</span>
+                </div>
+                <span className="text-white">by</span>
+                <span className="bg-green-400 py-1 px-2 rounded-xl">Encantia</span>
             </div>
 
             {/* Buy Me a Coffee button */}
