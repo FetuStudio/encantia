@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/router";
 import { supabase } from "../utils/supabaseClient";
-import { PlayIcon, PauseIcon, ForwardIcon, BackwardIcon } from '@heroicons/react/24/solid';
 
 export default function Navbar() {
     const [userProfile, setUserProfile] = useState(null);
