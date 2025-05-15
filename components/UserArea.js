@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/router";
 import { supabase } from "../utils/supabaseClient";
-import Adsense from "../components/Adsense";
 
 export default function Navbar() {
     const [userProfile, setUserProfile] = useState(null);
@@ -229,6 +228,4 @@ export default function Navbar() {
     );
 }
 
-
-}
 
