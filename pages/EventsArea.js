@@ -150,6 +150,12 @@ export default function Navbar() {
                         {isDropdownOpen && (
                             <div className="absolute bottom-12 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-sm rounded-lg shadow-md mt-2 w-40">
                                 <button
+                                    onClick={() => router.push(`/account`)}
+                                    className="w-full text-left px-4 py-2 hover:bg-gray-700"
+                                >
+                                    Configuración
+                                </button>
+                                <button
                                     onClick={() => router.push(`/profile/${userProfile.user_id}`)}
                                     className="w-full text-left px-4 py-2 hover:bg-gray-700"
                                 >
