@@ -24,6 +24,7 @@ const Perfil = () => {
         { icon: "https://images.encantia.lat/eventos.png", name: "Eventos", url: '/EventsArea' },
         { icon: "https://images.encantia.lat/luminus-s.png", name: "Luminus Studios", url: '/luminus' },
         { icon: "https://images.encantia.lat/music.png", name: "Musica", url: '/music' },
+        { icon: "https://images.encantia.lat/users2.png", name: "Usuarios", url: '/profiles' },
         { icon: "https://images.encantia.lat/discord.png", name: "Discord", url: 'https://discord.gg/BRqvv9nWHZ' }
     ];
 
