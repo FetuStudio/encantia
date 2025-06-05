@@ -9,7 +9,7 @@ export default function Navbar() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [profileComplete, setProfileComplete] = useState(null);
   const [jugadores, setJugadores] = useState([]);
-  const [filtroActivo, setFiltroActivo] = useState(null); // Estado que abre modal y define filtro
+  const [filtroActivo, setFiltroActivo] = useState(null);
 
   useEffect(() => {
     async function fetchProfile() {
@@ -71,7 +71,6 @@ export default function Navbar() {
     );
   }
 
-  // Calcular totales
   const totales = jugadores.reduce((acc, jugador) => {
     acc[jugador.estado] = (acc[jugador.estado] || 0) + 1;
     return acc;
@@ -89,7 +88,6 @@ export default function Navbar() {
     { count: totalDescalificados, label: "Descalificados", emoji: "🚫", bg: "from-gray-700 to-gray-900", border: "border-gray-400", estado: "descalificado" },
   ];
 
-  // Animación para la línea fina de reflejo con Framer Motion
   const reflejoVariants = {
     animate: {
       x: ["-100%", "100%"],
@@ -104,7 +102,6 @@ export default function Navbar() {
     }
   };
 
-  // Filtrar jugadores para modal
   const jugadoresFiltrados = filtroActivo
     ? jugadores.filter(j => j.estado === filtroActivo)
     : [];
@@ -116,7 +113,7 @@ export default function Navbar() {
         <img className="w-150 h-auto" src="https://images.encantia.lat/fg2.png" alt="FetuGames2Logo" />
       </div>
 
-      {/* Totales épicos */}
+      {/* Totales */}
       <div className="px-4 py-10">
         <h2 className="text-3xl font-extrabold text-center mb-6 animate-pulse">⚔️ Jugadores ⚔️</h2>
 
@@ -124,7 +121,7 @@ export default function Navbar() {
           {cards.map((card, index) => (
             <motion.div
               key={index}
-              onClick={() => setFiltroActivo(card.estado)} // Abre modal con filtro
+              onClick={() => setFiltroActivo(card.estado)}
               className={`select-none bg-gradient-to-br ${card.bg} p-4 rounded-xl shadow-xl border-2 cursor-pointer relative overflow-hidden
                 ${card.border} 
                 hover:scale-105 hover:rotate-1
@@ -134,7 +131,6 @@ export default function Navbar() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: index * 0.15 }}
             >
-              {/* Línea fina de reflejo animada */}
               <motion.div
                 className="absolute top-0 left-0 w-1/2 h-1 bg-white opacity-30 blur-sm"
                 variants={reflejoVariants}
@@ -149,10 +145,16 @@ export default function Navbar() {
           ))}
         </div>
 
-        {/* Lista completa de jugadores (sin filtro) */}
+        {/* Lista de jugadores */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {jugadores.map((jugador, index) => (
-            <div key={index} className="bg-gray-800 rounded-xl p-4 flex flex-col items-center shadow-lg">
+            <a
+              key={index}
+              href={`https://namemc.com/profile/${jugador.players}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="bg-gray-800 rounded-xl p-4 flex flex-col items-center shadow-lg hover:bg-gray-700 transition"
+            >
               <img
                 src={`https://minotar.net/avatar/${jugador.players}/100`}
                 alt={jugador.players}
@@ -172,12 +174,12 @@ export default function Navbar() {
               `}>
                 {jugador.estado}
               </span>
-            </div>
+            </a>
           ))}
         </div>
       </div>
 
-      {/* Modal con lista filtrada */}
+      {/* Modal filtrado */}
       <AnimatePresence>
         {filtroActivo && (
           <motion.div
@@ -185,14 +187,14 @@ export default function Navbar() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={() => setFiltroActivo(null)} // Cierra modal clickeando fondo
+            onClick={() => setFiltroActivo(null)}
           >
             <motion.div
               className="bg-gray-900 rounded-xl max-w-4xl w-full max-h-[80vh] overflow-y-auto p-6 relative shadow-2xl"
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.8, opacity: 0 }}
-              onClick={e => e.stopPropagation()} // Evitar cerrar modal al click dentro
+              onClick={e => e.stopPropagation()}
             >
               <button
                 onClick={() => setFiltroActivo(null)}
@@ -211,7 +213,13 @@ export default function Navbar() {
               ) : (
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   {jugadoresFiltrados.map((jugador, index) => (
-                    <div key={index} className="bg-gray-800 rounded-xl p-4 flex flex-col items-center shadow-lg">
+                    <a
+                      key={index}
+                      href={`https://namemc.com/profile/${jugador.players}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="bg-gray-800 rounded-xl p-4 flex flex-col items-center shadow-lg hover:bg-gray-700 transition"
+                    >
                       <img
                         src={`https://minotar.net/avatar/${jugador.players}/100`}
                         alt={jugador.players}
@@ -231,7 +239,7 @@ export default function Navbar() {
                       `}>
                         {jugador.estado}
                       </span>
-                    </div>
+                    </a>
                   ))}
                 </div>
               )}
@@ -239,8 +247,6 @@ export default function Navbar() {
           </motion.div>
         )}
       </AnimatePresence>
-
-      {/* Resto (barra inferior, dropdown, etc) aquí */}
     </div>
   );
 }
