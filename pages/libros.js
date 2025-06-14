@@ -50,7 +50,6 @@ export default function Libros() {
         { icon: "home.png", name: "Inicio", url: '/' },
         { icon: "libros.png", name: "Libros", url: '/libros' },
         { icon: "eventos.png", name: "Eventos", url: '/EventsArea' },
-        { icon: "luminus-s.png", name: "Luminus Studios", url: '/luminus' },
         { icon: "music.png", name: "Musica", url: '/music' },
         { icon: "https://images.encantia.lat/users2.png", name: "Usuarios", url: '/profiles' },
         { icon: "discord.png", name: "Discord", url: 'https://discord.gg/BRqvv9nWHZ', external: true }
