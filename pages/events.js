@@ -3,160 +3,141 @@ import { useRouter } from "next/router";
 import { supabase } from "../utils/supabaseClient";
 
 export default function Navbar() {
-  const [role, setRole] = useState("");
-  const [showLogoutModal, setShowLogoutModal] = useState(false);
-  const [events, setEvents] = useState([]);
   const [userProfile, setUserProfile] = useState(null);
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [alertMessage, setAlertMessage] = useState(null);
+  const [users, setUsers] = useState([]);
   const [nickname, setNickname] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
-  const [isProfileExisting, setIsProfileExisting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [isProfileExisting, setIsProfileExisting] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [alertMessage, setAlertMessage] = useState(null);
+  const [events, setEvents] = useState([]);
   const router = useRouter();
 
-  const fetchUserRole = useCallback(async () => {
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
-    if (authError || !user) return;
-
-    const { data, error } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", user.id)
-      .single();
-
-    if (!error) {
-      setRole(data?.role);
-    }
+  const fetchUserProfile = useCallback(async () => {
+    const { data: { user }, error } = await supabase.auth.getUser();
+    if (error || !user) return;
 
     const { data: profileData } = await supabase
-      .from("profiles")
-      .select("*")
-      .eq("user_id", user.id)
+      .from('profiles')
+      .select('*')
+      .eq('user_id', user.id)
       .single();
 
-    if (profileData) {
-      setUserProfile(profileData);
+    if (profileData) setUserProfile(profileData);
+  }, []);
+
+  const fetchUsers = useCallback(async () => {
+    const { data, error } = await supabase.from('profiles').select('*');
+    if (!error) setUsers(data);
+  }, []);
+
+  const fetchAlertMessage = useCallback(async () => {
+    const { data, error } = await supabase
+      .from('alerts')
+      .select('*')
+      .eq('active', true)
+      .order('id', { ascending: false })
+      .limit(1)
+      .single();
+
+    if (data) {
+      setAlertMessage({ message: data.message, type: data.type });
     }
   }, []);
 
   const fetchEvents = useCallback(async () => {
-    const { data, error } = await supabase.from("events").select("*");
-    if (error) {
-      console.error("Error al obtener eventos:", error);
-    } else {
+    const { data, error } = await supabase
+      .from('events')
+      .select('id, name, date, description')
+      .order('date', { ascending: true });
+
+    if (!error) {
       setEvents(data);
     }
   }, []);
 
   useEffect(() => {
-    fetchUserRole();
+    fetchUserProfile();
+    fetchUsers();
+    fetchAlertMessage();
     fetchEvents();
-  }, [fetchUserRole, fetchEvents]);
+  }, [fetchUserProfile, fetchUsers, fetchAlertMessage, fetchEvents]);
 
-  useEffect(() => {
-    if (alertMessage) {
-      const timeout = setTimeout(() => setAlertMessage(null), 3000);
-      return () => clearTimeout(timeout);
-    }
-  }, [alertMessage]);
-
-  const handleLogout = () => setShowLogoutModal(true);
-
-  const confirmLogout = async () => {
-    await supabase.auth.signOut();
-    router.push("/");
+  const handleSignOut = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (!error) router.push('/');
   };
 
   const handleProfileSubmit = async () => {
-    if (!nickname) {
-      setErrorMessage("El nombre de usuario es obligatorio");
+    setErrorMessage("");
+    setIsProfileExisting(false);
+
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) {
+      setErrorMessage("No se pudo obtener el usuario.");
       return;
     }
 
-    const { data: existingProfile } = await supabase
-      .from("profiles")
-      .select("nickname")
-      .eq("nickname", nickname);
-
-    if (existingProfile.length > 0) {
+    const existingUser = users.find(u => u.name.toLowerCase() === nickname.toLowerCase());
+    if (existingUser) {
       setIsProfileExisting(true);
       return;
     }
 
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    const newProfile = {
+      user_id: user.id,
+      name: nickname,
+      avatar_url: avatarUrl,
+      email: user.email,
+    };
 
-    const { error } = await supabase.from("profiles").insert([
-      {
-        user_id: user.id,
-        nickname,
-        avatar_url: avatarUrl,
-      },
-    ]);
+    const { error: upsertError } = await supabase
+      .from('profiles')
+      .upsert([newProfile], { onConflict: ['user_id'] });
 
-    if (!error) {
-      setAlertMessage({ type: "success", message: "Perfil guardado correctamente" });
-      fetchUserRole();
+    if (!upsertError) {
+      setUserProfile(newProfile);
+      router.push('/');
     } else {
-      setAlertMessage({ type: "error", message: "Error al guardar el perfil" });
+      setErrorMessage(upsertError.message);
     }
   };
 
   const navButtons = [
-    { icon: "https://images.encantia.lat/home.png", name: "Inicio", url: "/" },
-    { icon: "https://images.encantia.lat/libros.png", name: "Libros", url: "/libros" },
-    { icon: "https://images.encantia.lat/eventos.png", name: "Eventos", url: "/events" },
-    { icon: "https://images.encantia.lat/music.png", name: "Musica", url: "/music" },
-    { icon: "https://images.encantia.lat/users2.png", name: "Usuarios", url: "/profiles" },
-    { icon: "https://images.encantia.lat/discord.png", name: "Discord", url: "https://discord.gg/BRqvv9nWHZ" },
+    { icon: "https://images.encantia.lat/home.png", name: "Inicio", url: '/' },
+    { icon: "https://images.encantia.lat/libros.png", name: "Libros", url: '/libros' },
+    { icon: "https://images.encantia.lat/eventos.png", name: "Eventos", url: '/events' },
+    { icon: "https://images.encantia.lat/music.png", name: "Musica", url: '/music' },
+    { icon: "https://images.encantia.lat/users2.png", name: "Usuarios", url: '/profiles' },
+    { icon: "https://images.encantia.lat/discord.png", name: "Discord", url: 'https://discord.gg/BRqvv9nWHZ' }
   ];
 
-  const renderAlert = () =>
+  const renderAlert = () => (
     alertMessage && (
       <div
-        className={`fixed top-4 left-1/2 transform -translate-x-1/2 z-50 px-4 py-3 text-sm font-medium max-w-md w-full rounded shadow-lg text-center transition-opacity duration-300 ${
-          alertMessage.type === "info"
-            ? "bg-blue-100 text-blue-800"
-            : alertMessage.type === "success"
-            ? "bg-green-100 text-green-800"
-            : alertMessage.type === "warning"
-            ? "bg-yellow-100 text-yellow-800"
-            : alertMessage.type === "error"
-            ? "bg-red-100 text-red-800"
-            : "bg-gray-100 text-gray-800"
+        className={`flex items-start sm:items-center justify-center gap-3 px-4 py-3 text-sm font-medium w-full z-50 ${
+          alertMessage.type === 'info' ? 'bg-blue-100 text-blue-800' :
+          alertMessage.type === 'success' ? 'bg-green-100 text-green-800' :
+          alertMessage.type === 'warning' ? 'bg-yellow-100 text-yellow-800' :
+          alertMessage.type === 'error' ? 'bg-red-100 text-red-800' :
+          'bg-gray-100 text-gray-800'
         }`}
       >
-        {alertMessage.message}
+        {/* SVG ICON OMITTED FOR BREVITY */}
+        <div className="text-left max-w-3xl">{alertMessage.message}</div>
       </div>
-    );
+    )
+  );
 
   if (!userProfile) {
     return (
       <div className="bg-gray-900 min-h-screen flex flex-col items-center">
         {renderAlert()}
         <div className="text-white font-bold text-lg mt-8 mb-4">¡Hola! Completa tu perfil</div>
-        <input
-          type="text"
-          placeholder="Nombre de usuario"
-          value={nickname}
-          onChange={(e) => setNickname(e.target.value)}
-          className="p-2 mb-4 text-black rounded"
-        />
-        <input
-          type="text"
-          placeholder="URL de tu foto de perfil"
-          value={avatarUrl}
-          onChange={(e) => setAvatarUrl(e.target.value)}
-          className="p-2 mb-4 text-black rounded"
-        />
-        <button onClick={handleProfileSubmit} className="p-2 bg-blue-500 text-white rounded">
-          Guardar perfil
-        </button>
+        <input type="text" placeholder="Nombre de usuario" value={nickname} onChange={(e) => setNickname(e.target.value)} className="p-2 mb-4 text-black rounded" />
+        <input type="text" placeholder="URL de tu foto de perfil" value={avatarUrl} onChange={(e) => setAvatarUrl(e.target.value)} className="p-2 mb-4 text-black rounded" />
+        <button onClick={handleProfileSubmit} className="p-2 bg-blue-500 text-white rounded">Guardar perfil</button>
         {isProfileExisting && <div className="text-red-500 mt-2">Este nombre ya está en uso.</div>}
         {errorMessage && <div className="text-red-500 mt-2">{errorMessage}</div>}
       </div>
@@ -164,78 +145,45 @@ export default function Navbar() {
   }
 
   return (
-    <div className="bg-gray-900 min-h-screen relative">
+    <div className="bg-gray-900 min-h-screen text-white">
       {renderAlert()}
 
-      <div className="text-center mt-0">
-        <h1 className="text-3xl font-semibold text-white">Eventos Disponibles</h1>
-      </div>
-
-      <div className="flex-grow mt-8 space-y-4 px-4">
-        {events.length === 0 ? (
-          <div className="text-center text-gray-400">No hay eventos disponibles.</div>
-        ) : (
-          events.map((event) => (
-            <div key={event.id} className="bg-gray-800 p-4 rounded-md shadow-md">
-              <h2 className="text-xl font-semibold text-white">{event.name}</h2>
-              <p className="text-sm text-gray-400">{event.date}</p>
-              <p className="mt-2 text-white">{event.description}</p>
+      {/* Eventos */}
+      <div className="px-4 py-8">
+        <h2 className="text-2xl font-bold mb-4">Próximos Eventos</h2>
+        <div className="space-y-4">
+          {events.length === 0 && <p>No hay eventos próximos.</p>}
+          {events.map(event => (
+            <div key={event.id} className="border border-gray-700 rounded p-4">
+              <h3 className="text-xl font-semibold">{event.name}</h3>
+              <p className="text-sm text-gray-400">{new Date(event.date).toLocaleDateString()}</p>
+              <p className="mt-2">{event.description}</p>
             </div>
-          ))
-        )}
-      </div>
-
-      {showLogoutModal && (
-        <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 backdrop-blur-md">
-          <div className="bg-gray-900 text-white p-5 rounded-lg shadow-2xl text-center">
-            <p className="mb-4 text-lg font-semibold">¿Seguro que quieres cerrar sesión?</p>
-            <div className="flex justify-center gap-4">
-              <button onClick={confirmLogout} className="px-5 py-2 bg-red-500 rounded-lg hover:bg-red-400 transition-all">
-                Sí
-              </button>
-              <button onClick={() => setShowLogoutModal(false)} className="px-5 py-2 bg-gray-600 rounded-lg hover:bg-gray-500 transition-all">
-                No
-              </button>
-            </div>
-          </div>
+          ))}
         </div>
-      )}
+      </div>
 
+      {/* Navegación */}
       <div className="fixed bottom-3 left-1/2 transform -translate-x-1/2 flex items-center bg-gray-900 p-2 rounded-full shadow-lg space-x-4 w-max">
         <img src="https://images.encantia.lat/encantia-logo-2025.webp" alt="Logo" className="h-13 w-auto" />
         {navButtons.map((button, index) => (
           <div key={index} className="relative group">
-            <button
-              onClick={() => router.push(button.url)}
-              className="p-2 rounded-full bg-gray-800 text-white text-xl transition-transform transform group-hover:scale-110"
-            >
+            <button onClick={() => router.push(button.url)} className="p-2 rounded-full bg-gray-800 text-white text-xl transition-transform transform group-hover:scale-110">
               <img src={button.icon} alt={button.name} className="w-8 h-8" />
             </button>
-            <span className="absolute bottom-14 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 bg-gray-700 text-white text-xs rounded px-2 py-1 transition-opacity">
-              {button.name}
-            </span>
+            <span className="absolute bottom-14 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 bg-gray-700 text-white text-xs rounded px-2 py-1 transition-opacity">{button.name}</span>
           </div>
         ))}
         {userProfile && (
           <div className="relative">
-            <button onClick={() => setIsDropdownOpen(!isDropdownOpen)} className="p-2 rounded-full bg-gray-800 hover:scale-110 transition">
-              <img
-                src={userProfile.avatar_url || "https://i.ibb.co/d0mWy0kP/perfildef.png"}
-                alt="Avatar"
-                className="w-8 h-8 rounded-full"
-              />
+            <button onClick={() => setIsDropdownOpen(!isDropdownOpen)} className="p-2 rounded-full bg-gray-800 text-white text-xl hover:scale-110 transition-transform">
+              <img src={userProfile.avatar_url || 'https://i.ibb.co/d0mWy0kP/perfildef.png'} alt="Avatar" className="w-8 h-8 rounded-full" />
             </button>
             {isDropdownOpen && (
               <div className="absolute bottom-12 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-sm rounded-lg shadow-md mt-2 w-40">
-                <button onClick={() => router.push(`/account`)} className="w-full text-left px-4 py-2 hover:bg-gray-700">
-                  Configuración
-                </button>
-                <button onClick={() => router.push(`/profile/${userProfile.user_id}`)} className="w-full text-left px-4 py-2 hover:bg-gray-700">
-                  Ver mi perfil
-                </button>
-                <button onClick={handleLogout} className="w-full text-left px-4 py-2 text-red-500 hover:bg-gray-700">
-                  Cerrar sesión
-                </button>
+                <button onClick={() => router.push(`/account`)} className="w-full text-left px-4 py-2 hover:bg-gray-700">Configuración</button>
+                <button onClick={() => router.push(`/profile/${userProfile.user_id}`)} className="w-full text-left px-4 py-2 hover:bg-gray-700">Ver mi perfil</button>
+                <button onClick={handleSignOut} className="w-full text-left px-4 py-2 text-red-500 hover:bg-gray-700">Cerrar sesión</button>
               </div>
             )}
           </div>
@@ -248,3 +196,4 @@ export default function Navbar() {
     </div>
   );
 }
+
