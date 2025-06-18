@@ -10,7 +10,28 @@ export default function Navbar() {
     const [errorMessage, setErrorMessage] = useState("");
     const [isProfileExisting, setIsProfileExisting] = useState(false);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const [alertMessage, setAlertMessage] = useState(null);
     const router = useRouter();
+
+    // Fetch global alert
+    useEffect(() => {
+        const fetchAlert = async () => {
+            const { data, error } = await supabase
+                .from('alerts')
+                .select('*')
+                .eq('active', true)
+                .limit(1)
+                .single();
+
+            if (error) {
+                console.error('Error al obtener alerta:', error);
+            } else {
+                setAlertMessage(data);
+            }
+        };
+
+        fetchAlert();
+    }, []);
 
     const fetchUserProfile = useCallback(async () => {
         const { data: { user }, error } = await supabase.auth.getUser();
@@ -100,8 +121,18 @@ export default function Navbar() {
     if (!userProfile) {
         return (
             <div className="bg-gray-900 min-h-screen flex flex-col justify-center items-center">
-                <div className="text-white font-bold text-lg mb-4">¡Hola! Completa tu perfil</div>
+                {alertMessage && (
+                    <div className={`w-full p-4 text-center text-sm font-medium ${
+                        alertMessage.type === 'warning' ? 'bg-yellow-100 text-yellow-800' :
+                        alertMessage.type === 'error' ? 'bg-red-100 text-red-800' :
+                        alertMessage.type === 'success' ? 'bg-green-100 text-green-800' :
+                        'bg-blue-100 text-blue-800'
+                    }`}>
+                        {alertMessage.message}
+                    </div>
+                )}
 
+                <div className="text-white font-bold text-lg mb-4">¡Hola! Completa tu perfil</div>
                 <input
                     type="text"
                     placeholder="Nombre de usuario"
@@ -122,11 +153,9 @@ export default function Navbar() {
                 >
                     Guardar perfil
                 </button>
-
                 {isProfileExisting && (
                     <div className="text-red-500 mt-2">Este nombre de usuario ya está en uso. Por favor, elige otro.</div>
                 )}
-
                 {errorMessage && (
                     <div className="text-red-500 mt-2">{errorMessage}</div>
                 )}
@@ -136,7 +165,17 @@ export default function Navbar() {
 
     return (
         <div className="bg-gray-900 min-h-screen">
-            {/* NUEVO BLOQUE: Solicita un Código de Creador */}
+            {alertMessage && (
+                <div className={`w-full p-4 text-center text-sm font-medium ${
+                    alertMessage.type === 'warning' ? 'bg-yellow-100 text-yellow-800' :
+                    alertMessage.type === 'error' ? 'bg-red-100 text-red-800' :
+                    alertMessage.type === 'success' ? 'bg-green-100 text-green-800' :
+                    'bg-blue-100 text-blue-800'
+                }`}>
+                    {alertMessage.message}
+                </div>
+            )}
+
             <div className="flex flex-col items-center justify-center text-center py-10">
                 <h1 className="text-white text-2xl font-bold mb-4">
                     ¡Solicita ahora un Código de Creador!
@@ -226,5 +265,4 @@ export default function Navbar() {
         </div>
     );
 }
-
 
