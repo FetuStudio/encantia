@@ -26,7 +26,7 @@ export default function Navbar() {
     const fetchAllProfiles = useCallback(async () => {
         const { data, error } = await supabase
             .from('profiles')
-            .select('user_id, name, avatar_url');
+            .select('user_id, name, avatar_url, role');
 
         if (!error && data) {
             setAllProfiles(data);
@@ -51,6 +51,16 @@ export default function Navbar() {
         { icon: "https://images.encantia.lat/users2.png", name: "Usuarios", url: '/profiles' },
         { icon: "https://images.encantia.lat/discord.png", name: "Discord", url: 'https://discord.gg/BRqvv9nWHZ' }
     ];
+
+    // Agrupar perfiles por rol
+    const groupedProfiles = allProfiles.reduce((acc, profile) => {
+        const role = profile.role || 'Sin rol';
+        if (!acc[role]) {
+            acc[role] = [];
+        }
+        acc[role].push(profile);
+        return acc;
+    }, {});
 
     return (
         <div className="bg-gray-900 min-h-screen text-white">
@@ -105,29 +115,34 @@ export default function Navbar() {
                 )}
             </div>
 
-            {/* Sección de todos los perfiles */}
+            {/* Sección de todos los perfiles agrupados por rol */}
             <div className="p-4 mt-0">
-                <h2 className="text-xl font-semibold mb-4">Perfiles de usuarios</h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                    {allProfiles.map(profile => (
-                        <div key={profile.user_id} className="bg-gray-800 rounded-lg p-4 flex items-center space-x-4">
-                            <img
-                                src={profile.avatar_url || 'https://i.ibb.co/d0mWy0kP/perfildef.png'}
-                                alt={profile.name}
-                                className="w-12 h-12 rounded-full"
-                            />
-                            <div className="flex-1">
-                                <p className="font-medium">{profile.name}</p>
-                                <button
-                                    onClick={() => router.push(`/profile/${profile.user_id}`)}
-                                    className="text-sm text-blue-400 hover:underline"
-                                >
-                                    Ver perfil
-                                </button>
-                            </div>
+                <h2 className="text-xl font-semibold mb-4">Perfiles de usuarios por rol</h2>
+                {Object.entries(groupedProfiles).map(([role, profiles]) => (
+                    <div key={role} className="mb-6">
+                        <h3 className="text-lg font-bold mb-2 capitalize">{role}</h3>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                            {profiles.map(profile => (
+                                <div key={profile.user_id} className="bg-gray-800 rounded-lg p-4 flex items-center space-x-4">
+                                    <img
+                                        src={profile.avatar_url || 'https://i.ibb.co/d0mWy0kP/perfildef.png'}
+                                        alt={profile.name}
+                                        className="w-12 h-12 rounded-full"
+                                    />
+                                    <div className="flex-1">
+                                        <p className="font-medium">{profile.name}</p>
+                                        <button
+                                            onClick={() => router.push(`/profile/${profile.user_id}`)}
+                                            className="text-sm text-blue-400 hover:underline"
+                                        >
+                                            Ver perfil
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
                         </div>
-                    ))}
-                </div>
+                    </div>
+                ))}
             </div>
 
             <div className="fixed bottom-3 right-3 text-gray-400 text-xs bg-gray-900 p-2 rounded-md shadow-md">
