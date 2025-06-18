@@ -3,73 +3,99 @@ import { useRouter } from "next/router";
 import { supabase } from "../utils/supabaseClient";
 
 export default function Navbar() {
-    const [role, setRole] = useState("");
-    const [showLogoutModal, setShowLogoutModal] = useState(false);
-    const [events, setEvents] = useState([]); // Estado para los eventos
-    const [userProfile, setUserProfile] = useState(null); // Perfil de usuario
-    const [isDropdownOpen, setIsDropdownOpen] = useState(false); // Para controlar el menú desplegable
-    const router = useRouter();
+  const [role, setRole] = useState("");
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [events, setEvents] = useState([]);
+  const [userProfile, setUserProfile] = useState(null);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [alertMessage, setAlertMessage] = useState(null);
 
-    const fetchUserRole = useCallback(async () => {
-        const { data: { user }, error: authError } = await supabase.auth.getUser();
-        if (authError || !user) return;
+  // Estados para completar perfil
+  const [nickname, setNickname] = useState("");
+  const [avatarUrl, setAvatarUrl] = useState("");
+  const [isProfileExisting, setIsProfileExisting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
-        const { data, error } = await supabase
-            .from('user_roles')
-            .select('role')
-            .eq('user_id', user.id)
-            .single();
+  const router = useRouter();
 
-        if (!error) {
-            setRole(data?.role);
-        }
+  const fetchUserRole = useCallback(async () => {
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) return;
 
-        // Obtener perfil de usuario
-        const { data: profileData } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('user_id', user.id)
-            .single();
-        
-        if (profileData) {
-            setUserProfile(profileData);
-        }
-    }, []);
+    const [roleRes, profileRes] = await Promise.all([
+      supabase.from('user_roles').select('role').eq('user_id', user.id).single(),
+      supabase.from('profiles').select('*').eq('user_id', user.id).single()
+    ]);
 
-    const fetchEvents = useCallback(async () => {
-        const { data, error } = await supabase
-            .from('events')
-            .select('*'); // Obtén todos los eventos
+    if (!roleRes.error) setRole(roleRes.data?.role);
+    if (!profileRes.error) setUserProfile(profileRes.data);
+  }, []);
 
-        if (error) {
-            console.error("Error al obtener eventos:", error);
-        } else {
-            setEvents(data);
-        }
-    }, []);
+  const fetchEvents = useCallback(async () => {
+    const { data, error } = await supabase.from('events').select('*');
+    if (error) {
+      console.error("Error al obtener eventos:", error);
+      setAlertMessage({ type: 'error', message: "Error al obtener eventos." });
+    } else {
+      setEvents(data);
+    }
+  }, []);
 
-    useEffect(() => {
-        fetchUserRole();
-        fetchEvents(); // Llamada para obtener los eventos
-    }, [fetchUserRole, fetchEvents]);
+  useEffect(() => {
+    fetchUserRole();
+    fetchEvents();
+  }, [fetchUserRole, fetchEvents]);
 
-    const handleLogout = () => setShowLogoutModal(true);
+  const handleLogout = () => setShowLogoutModal(true);
 
-    const confirmLogout = async () => {
-        await supabase.auth.signOut();
-        router.push("/");
-    };
+  const confirmLogout = async () => {
+    await supabase.auth.signOut();
+    router.push("/");
+  };
 
-    const navButtons = [
-        { icon: "https://images.encantia.lat/home.png", name: "Inicio", url: '/' },
-        { icon: "https://images.encantia.lat/libros.png", name: "Libros", url: '/libros' },
-        { icon: "https://images.encantia.lat/eventos.png", name: "Eventos", url: '/EventsArea' },
-        { icon: "https://images.encantia.lat/music.png", name: "Musica", url: '/music' },
-        { icon: "https://images.encantia.lat/users2.png", name: "Usuarios", url: '/profiles' },
-        { icon: "https://images.encantia.lat/discord.png", name: "Discord", url: 'https://discord.gg/BRqvv9nWHZ' }
-    ];
+  const handleProfileSubmit = async () => {
+    if (!nickname.trim()) {
+      setErrorMessage("El nombre de usuario es obligatorio.");
+      return;
+    }
 
-    const renderAlert = () => (
+    const { data: existingProfile } = await supabase
+      .from('profiles')
+      .select('nickname')
+      .eq('nickname', nickname)
+      .single();
+
+    if (existingProfile) {
+      setIsProfileExisting(true);
+      return;
+    }
+
+    const { data: { user } } = await supabase.auth.getUser();
+
+    const { error } = await supabase.from('profiles').insert({
+      user_id: user.id,
+      nickname,
+      avatar_url: avatarUrl
+    });
+
+    if (error) {
+      setErrorMessage("Error al guardar el perfil.");
+    } else {
+      setAlertMessage({ type: 'success', message: 'Perfil guardado exitosamente.' });
+      fetchUserRole(); // recargar perfil
+    }
+  };
+
+  const navButtons = [
+    { icon: "https://images.encantia.lat/home.png", name: "Inicio", url: '/' },
+    { icon: "https://images.encantia.lat/libros.png", name: "Libros", url: '/libros' },
+    { icon: "https://images.encantia.lat/eventos.png", name: "Eventos", url: '/EventsArea' },
+    { icon: "https://images.encantia.lat/music.png", name: "Musica", url: '/music' },
+    { icon: "https://images.encantia.lat/users2.png", name: "Usuarios", url: '/profiles' },
+    { icon: "https://images.encantia.lat/discord.png", name: "Discord", url: 'https://discord.gg/BRqvv9nWHZ' }
+  ];
+
+  const renderAlert = () =>
     alertMessage && (
       <div
         className={`flex items-start sm:items-center justify-center gap-3 px-4 py-3 text-sm font-medium w-full z-50 ${
@@ -80,25 +106,11 @@ export default function Navbar() {
           'bg-gray-100 text-gray-800'
         }`}
       >
-        <svg className="w-5 h-5 flex-shrink-0 mt-0.5 sm:mt-0" fill="currentColor" viewBox="0 0 20 20">
-          {alertMessage.type === 'info' && (
-            <path fillRule="evenodd" d="M18 10A8 8 0 11 2 10a8 8 0 0116 0zm-7-4a1 1 0 10-2 0 1 1 0 002 0zm-1 2a1 1 0 00-1 1v4a1 1 0 102 0v-4a1 1 0 00-1-1z" clipRule="evenodd" />
-          )}
-          {alertMessage.type === 'success' && (
-            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.707a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 10-1.414 1.414L9 13.414l4.707-4.707z" clipRule="evenodd" />
-          )}
-          {alertMessage.type === 'warning' && (
-            <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.72-1.36 3.485 0l6.518 11.591c.75 1.334-.213 2.99-1.743 2.99H3.482c-1.53 0-2.492-1.656-1.743-2.99L8.257 3.1zM11 14a1 1 0 11-2 0 1 1 0 012 0zm-1-2a1 1 0 01-1-1V9a1 1 0 112 0v2a1 1 0 01-1 1z" clipRule="evenodd" />
-          )}
-          {alertMessage.type === 'error' && (
-            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm-2.707-9.707a1 1 0 011.414-1.414L10 9.586l1.293-1.293a1 1 0 111.414 1.414L11.414 11l1.293 1.293a1 1 0 01-1.414 1.414L10 12.414l-1.293 1.293a1 1 0 01-1.414-1.414L8.586 11l-1.293-1.293z" clipRule="evenodd" />
-          )}
-        </svg>
         <div className="text-left max-w-3xl">{alertMessage.message}</div>
       </div>
-    )
-  );
+    );
 
+  // Mostrar formulario si el perfil no está completo
   if (!userProfile) {
     return (
       <div className="bg-gray-900 min-h-screen flex flex-col items-center">
@@ -113,113 +125,92 @@ export default function Navbar() {
     );
   }
 
-    return (
-        <div className="bg-gray-900 min-h-screen relative">
-            {/* Mostrar los eventos disponibles */}
-            <div className="text-center mt-0">
-                <h1 className="text-3xl font-semibold text-white">Eventos Disponibles</h1>
+  const sortedEvents = [...events].sort((a, b) => new Date(a.date) - new Date(b.date));
+
+  return (
+    <div className="bg-gray-900 min-h-screen relative">
+      {renderAlert()}
+
+      {/* Título de eventos */}
+      <div className="text-center mt-0">
+        <h1 className="text-3xl font-semibold text-white">Eventos Disponibles</h1>
+      </div>
+
+      {/* Lista de eventos */}
+      <div className="flex-grow mt-8 space-y-4 px-4">
+        {sortedEvents.length === 0 ? (
+          <div className="text-center text-gray-400">No hay eventos disponibles.</div>
+        ) : (
+          sortedEvents.map((event) => (
+            <div key={event.id} className="bg-gray-800 p-4 rounded-md shadow-md">
+              <h2 className="text-xl font-semibold text-white">{event.name}</h2>
+              <p className="text-sm text-gray-400">{event.date}</p>
+              <p className="mt-2 text-white">{event.description}</p>
             </div>
+          ))
+        )}
+      </div>
 
-            <div className="flex-grow mt-8 space-y-4 px-4">
-                {events.length === 0 ? (
-                    <div className="text-center text-gray-400">No hay eventos disponibles.</div>
-                ) : (
-                    events.map((event) => (
-                        <div key={event.id} className="bg-gray-800 p-4 rounded-md shadow-md">
-                            <h2 className="text-xl font-semibold text-white">{event.name}</h2>
-                            <p className="text-sm text-gray-400">{event.date}</p>
-                            <p className="mt-2 text-white">{event.description}</p>
-                        </div>
-                    ))
-                )}
+      {/* Modal de logout */}
+      {showLogoutModal && (
+        <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 backdrop-blur-md">
+          <div className="bg-gray-900 text-white p-5 rounded-lg shadow-2xl text-center">
+            <p className="mb-4 text-lg font-semibold">¿Seguro que quieres cerrar sesión?</p>
+            <div className="flex justify-center gap-4">
+              <button
+                onClick={confirmLogout}
+                className="px-5 py-2 bg-red-500 text-white rounded-lg hover:bg-red-400 transition-all"
+              >
+                Sí
+              </button>
+              <button
+                onClick={() => setShowLogoutModal(false)}
+                className="px-5 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-500 transition-all"
+              >
+                No
+              </button>
             </div>
-
-            {/* Modal de Logout */}
-            {showLogoutModal && (
-                <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 backdrop-blur-md">
-                    <div className="bg-gray-900 text-white p-5 rounded-lg shadow-2xl text-center">
-                        <p className="mb-4 text-lg font-semibold">¿Seguro que quieres cerrar sesión?</p>
-                        <div className="flex justify-center gap-4">
-                            <button
-                                onClick={confirmLogout}
-                                className="px-5 py-2 bg-red-500 text-white rounded-lg hover:bg-red-400 transition-all"
-                            >
-                                Sí
-                            </button>
-                            <button
-                                onClick={() => setShowLogoutModal(false)}
-                                className="px-5 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-500 transition-all"
-                            >
-                                No
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* Navbar inferior */}
-            <div className="fixed bottom-3 left-1/2 transform -translate-x-1/2 flex items-center bg-gray-900 p-2 rounded-full shadow-lg space-x-4 w-max">
-                <img
-                    src="https://images.encantia.lat/encantia-logo-2025.webp"
-                    alt="Logo"
-                    className="h-13 w-auto"
-                />
-
-                {navButtons.map((button, index) => (
-                    <div key={index} className="relative group">
-                        <button
-                            onClick={() => router.push(button.url)}
-                            className="p-2 rounded-full bg-gray-800 text-white text-xl transition-transform transform group-hover:scale-110"
-                        >
-                            <img src={button.icon} alt={button.name} className="w-8 h-8" />
-                        </button>
-                        <span className="absolute bottom-14 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 bg-gray-700 text-white text-xs rounded px-2 py-1 transition-opacity">
-                            {button.name}
-                        </span>
-                    </div>
-                ))}
-
-                {userProfile && (
-                    <div className="relative">
-                        <button onClick={() => setIsDropdownOpen(!isDropdownOpen)} className="p-2 rounded-full bg-gray-800 text-white text-xl transition-transform transform hover:scale-110">
-                            <img
-                                src={userProfile.avatar_url || 'https://i.ibb.co/d0mWy0kP/perfildef.png'}
-                                alt="Avatar"
-                                className="w-8 h-8 rounded-full"
-                            />
-                        </button>
-
-                        {/* Menú desplegable encima de la foto */}
-                        {isDropdownOpen && (
-                            <div className="absolute bottom-12 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-sm rounded-lg shadow-md mt-2 w-40">
-                                <button
-                                    onClick={() => router.push(`/account`)}
-                                    className="w-full text-left px-4 py-2 hover:bg-gray-700"
-                                >
-                                    Configuración
-                                </button>
-                                <button
-                                    onClick={() => router.push(`/profile/${userProfile.user_id}`)}
-                                    className="w-full text-left px-4 py-2 hover:bg-gray-700"
-                                >
-                                    Ver mi perfil
-                                </button>
-                                <button
-                                    onClick={handleLogout}
-                                    className="w-full text-left px-4 py-2 text-red-500 hover:bg-gray-700"
-                                >
-                                    Cerrar sesión
-                                </button>
-                            </div>
-                        )}
-                    </div>
-                )}
-            </div>
-
-            {/* Pie de página */}
-            <div className="fixed bottom-3 right-3 text-gray-400 text-xs bg-gray-900 p-2 rounded-md shadow-md">
-                © 2025 by Encantia is licensed under CC BY-NC-ND 4.0.
-            </div>
+          </div>
         </div>
-    );
+      )}
+
+      {/* Navbar inferior */}
+      <div className="fixed bottom-3 left-1/2 transform -translate-x-1/2 flex items-center bg-gray-900 p-2 rounded-full shadow-lg space-x-4 w-max">
+        <img src="https://images.encantia.lat/encantia-logo-2025.webp" alt="Logo" className="h-13 w-auto" />
+        {navButtons.map((button, index) => (
+          <div key={index} className="relative group">
+            <button onClick={() => router.push(button.url)} className="p-2 rounded-full bg-gray-800 text-white text-xl transition-transform transform group-hover:scale-110">
+              <img src={button.icon} alt={button.name} className="w-8 h-8" />
+            </button>
+            <span className="absolute bottom-14 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 bg-gray-700 text-white text-xs rounded px-2 py-1 transition-opacity">
+              {button.name}
+            </span>
+          </div>
+        ))}
+
+        {/* Avatar y menú desplegable */}
+        <div className="relative">
+          <button onClick={() => setIsDropdownOpen(!isDropdownOpen)} className="p-2 rounded-full bg-gray-800 text-white text-xl transition-transform transform hover:scale-110">
+            <img
+              src={userProfile.avatar_url || 'https://i.ibb.co/d0mWy0kP/perfildef.png'}
+              alt="Avatar"
+              className="w-8 h-8 rounded-full"
+            />
+          </button>
+          {isDropdownOpen && (
+            <div className="absolute bottom-12 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-sm rounded-lg shadow-md mt-2 w-40">
+              <button onClick={() => router.push(`/account`)} className="w-full text-left px-4 py-2 hover:bg-gray-700">Configuración</button>
+              <button onClick={() => router.push(`/profile/${userProfile.user_id}`)} className="w-full text-left px-4 py-2 hover:bg-gray-700">Ver mi perfil</button>
+              <button onClick={handleLogout} className="w-full text-left px-4 py-2 text-red-500 hover:bg-gray-700">Cerrar sesión</button>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Pie de página */}
+      <div className="fixed bottom-3 right-3 text-gray-400 text-xs bg-gray-900 p-2 rounded-md shadow-md">
+        © 2025 by Encantia is licensed under CC BY-NC-ND 4.0.
+      </div>
+    </div>
+  );
 }
