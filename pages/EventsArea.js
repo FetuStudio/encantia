@@ -99,6 +99,19 @@ export default function Navbar() {
     )
   );
 
+  if (!userProfile) {
+    return (
+      <div className="bg-gray-900 min-h-screen flex flex-col items-center">
+        {renderAlert()}
+        <div className="text-white font-bold text-lg mt-8 mb-4">¡Hola! Completa tu perfil</div>
+        <input type="text" placeholder="Nombre de usuario" value={nickname} onChange={(e) => setNickname(e.target.value)} className="p-2 mb-4 text-black rounded" />
+        <input type="text" placeholder="URL de tu foto de perfil" value={avatarUrl} onChange={(e) => setAvatarUrl(e.target.value)} className="p-2 mb-4 text-black rounded" />
+        <button onClick={handleProfileSubmit} className="p-2 bg-blue-500 text-white rounded">Guardar perfil</button>
+        {isProfileExisting && <div className="text-red-500 mt-2">Este nombre ya está en uso.</div>}
+        {errorMessage && <div className="text-red-500 mt-2">{errorMessage}</div>}
+      </div>
+    );
+  }
 
     return (
         <div className="bg-gray-900 min-h-screen relative">
