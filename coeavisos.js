@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import { supabase } from "../utils/supabaseClient";
 
-export default function AvisoAdmin() {
+export default function AvisosAdmin() {
   const [user, setUser] = useState(null);
   const [profile, setProfile] = useState(null);
   const [alert, setAlert] = useState({ message: "", type: "info", active: true });
@@ -12,7 +12,8 @@ export default function AvisoAdmin() {
   const router = useRouter();
 
   useEffect(() => {
-    const init = async () => {
+    const fetchData = async () => {
+      // Verificar sesión
       const { data: { user }, error: userError } = await supabase.auth.getUser();
       if (!user || userError) {
         setError("No has iniciado sesión.");
@@ -22,6 +23,7 @@ export default function AvisoAdmin() {
 
       setUser(user);
 
+      // Obtener perfil
       const { data: profileData, error: profileError } = await supabase
         .from("profiles")
         .select("*")
@@ -36,13 +38,14 @@ export default function AvisoAdmin() {
 
       setProfile(profileData);
 
+      // Verificar rol
       if (profileData.role !== "Creador") {
         setError("No tienes permisos para ver esta página.");
         setLoading(false);
         return;
       }
 
-      // Cargar alerta actual
+      // Obtener alerta activa
       const { data: currentAlert } = await supabase
         .from("alerts")
         .select("*")
@@ -58,7 +61,7 @@ export default function AvisoAdmin() {
       setLoading(false);
     };
 
-    init();
+    fetchData();
   }, []);
 
   const handleSave = async () => {
@@ -67,23 +70,35 @@ export default function AvisoAdmin() {
       .upsert([alert], { onConflict: ['id'] });
 
     if (error) {
-      setError("Error al guardar: " + error.message);
+      setError("Error al guardar el aviso: " + error.message);
     } else {
-      alert("Aviso guardado correctamente.");
+      alert("✅ Aviso actualizado correctamente.");
     }
   };
 
-  if (loading) return <div className="text-white text-center mt-10">Cargando...</div>;
-  if (error) return (
-    <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center">
-      <div className="bg-gray-800 p-6 rounded-lg shadow-lg text-center">{error}</div>
-    </div>
-  );
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center">
+        <p>Cargando...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center">
+        <div className="bg-gray-800 p-6 rounded-lg shadow-lg text-center">
+          <h1 className="text-2xl font-bold mb-2">Acceso denegado</h1>
+          <p>{error}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="bg-gray-900 min-h-screen text-white flex flex-col items-center px-4">
+    <div className="bg-gray-900 min-h-screen text-white flex flex-col items-center px-4 pb-24">
       {/* Título */}
-      <h1 className="text-2xl font-bold mt-8 mb-4">Panel de Aviso Global</h1>
+      <h1 className="text-2xl font-bold mt-8 mb-4">Panel de Avisos Globales</h1>
 
       {/* Formulario */}
       <div className="bg-gray-800 p-6 rounded-lg shadow-lg w-full max-w-xl space-y-4">
@@ -104,10 +119,10 @@ export default function AvisoAdmin() {
             value={alert.type}
             onChange={(e) => setAlert({ ...alert, type: e.target.value })}
           >
-            <option value="info">Info</option>
-            <option value="success">Éxito</option>
-            <option value="warning">Advertencia</option>
-            <option value="error">Error</option>
+            <option value="info">ℹ️ Info</option>
+            <option value="success">✅ Éxito</option>
+            <option value="warning">⚠️ Advertencia</option>
+            <option value="error">❌ Error</option>
           </select>
         </label>
 
@@ -118,7 +133,7 @@ export default function AvisoAdmin() {
             checked={alert.active}
             onChange={(e) => setAlert({ ...alert, active: e.target.checked })}
           />
-          <span className="ml-2 text-sm">Activo</span>
+          <span className="ml-2 text-sm">Mostrar aviso</span>
         </label>
 
         <button
