@@ -44,12 +44,12 @@ export default function Navbar() {
     };
 
     const navButtons = [
-        { icon: "https://images.encantia.lat/home.png", name: "Inicio", url: '/' },
-        { icon: "https://images.encantia.lat/libros.png", name: "Libros", url: '/libros' },
-        { icon: "https://images.encantia.lat/eventos.png", name: "Eventos", url: '/events' },
-        { icon: "https://images.encantia.lat/music.png", name: "Musica", url: '/music' },
-        { icon: "https://images.encantia.lat/users2.png", name: "Usuarios", url: '/profiles' },
-        { icon: "https://images.encantia.lat/discord.png", name: "Discord", url: 'https://discord.gg/BRqvv9nWHZ' }
+    { icon: "https://images.encantia.lat/home.png", name: "Inicio", url: '/' },
+    { icon: "https://images.encantia.lat/libros.png", name: "Libros", url: '/libros' },
+    { icon: "https://images.encantia.lat/eventos.png", name: "Eventos", url: '/events' },
+    { icon: "https://images.encantia.lat/music.png", name: "Musica", url: '/music' },
+    { icon: "https://images.encantia.lat/users2.png", name: "Usuarios", url: '/profiles' },
+    { icon: "https://images.encantia.lat/discord.png", name: "Discord", url: 'https://discord.gg/BRqvv9nWHZ' }
     ];
 
     // Agrupar perfiles por rol
