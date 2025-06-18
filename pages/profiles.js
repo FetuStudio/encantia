@@ -54,7 +54,7 @@ export default function Navbar() {
 
     // Agrupar perfiles por rol
     const groupedProfiles = allProfiles.reduce((acc, profile) => {
-        const role = profile.role || 'Sin rol';
+        const role = profile.role || 'Usuarios'; // renombramos "Sin rol" directamente aquí
         if (!acc[role]) {
             acc[role] = [];
         }
