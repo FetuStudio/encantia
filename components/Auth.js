@@ -239,17 +239,6 @@ export default function Auth() {
                                     Registrate aquí
                                 </button>
                             </p>
-                            <p className="text-white text-sm mt-2">
-                                ¿Eres admin?{" "}
-                                <a
-                                    href="https://admin.encantia.lat/"
-                                    className="text-blue-500 hover:underline"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                >
-                                    Haz click aquí
-                                </a>
-                            </p>
                         </>
                     )}
                 </div>
