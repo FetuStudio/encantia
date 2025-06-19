@@ -8,86 +8,65 @@ export default function Auth() {
     const [password, setPassword] = useState('');
     const [errorMessage, setErrorMessage] = useState(null);
     const [loading, setLoading] = useState(false);
-    const [isLoadingGifVisible, setIsLoadingGifVisible] = useState(false);
     const [passwordVisible, setPasswordVisible] = useState(false);
     const [isSignUp, setIsSignUp] = useState(false);
 
-    const dominiosRestringidos = ['gmail.com', 'outlook.com', 'outlook.es', 'hotmail.com'];
+    const dominiosRestringidos = ['gmail.com', 'outlook.com', 'outlook.es', 'hotmail.com', 'encantia.lat'];
 
-    const handleSignIn = async () => {
+    const dominioEmail = email.split('@')[1];
+
+    const isDominioProhibido = dominiosRestringidos.includes(dominioEmail);
+
+    const handleAuth = async () => {
         setLoading(true);
         setErrorMessage(null);
-        setIsLoadingGifVisible(true);
 
-        const dominioEmail = email.split('@')[1];
-        if (dominioEmail === 'encantia.lat') {
-            setErrorMessage('No se permite el correo de tipo @encantia.lat en el inicio de sesión. Este correo es exclusivo para el acceso de administradores.');
+        if (!email || !password) {
+            setErrorMessage('Correo y contraseña son obligatorios.');
             setLoading(false);
-            setIsLoadingGifVisible(false);
+            return;
+        }
+
+        if (isDominioProhibido) {
+            const msg =
+                dominioEmail === 'encantia.lat'
+                    ? 'No se permite el correo de tipo @encantia.lat. Es exclusivo para administradores.'
+                    : 'No se permite el uso de correos personales como Gmail, Outlook, Hotmail.';
+            setErrorMessage(msg);
+            setLoading(false);
             return;
         }
 
         try {
-            const { error } = await supabase.auth.signInWithPassword({ email, password });
+            const { error } = isSignUp
+                ? await supabase.auth.signUp({ email, password })
+                : await supabase.auth.signInWithPassword({ email, password });
+
             if (error) throw error;
-            setTimeout(() => {
-                router.push('/');
-            }, 3000);
+
+            router.push('/');
         } catch (e) {
             setErrorMessage(e.message);
         } finally {
             setLoading(false);
-            setIsLoadingGifVisible(false);
-        }
-    };
-
-    const handleSignUp = async () => {
-        setLoading(true);
-        setErrorMessage(null);
-        setIsLoadingGifVisible(true);
-
-        const dominioEmail = email.split('@')[1];
-        if (dominioEmail === 'encantia.lat') {
-            setErrorMessage('No se permite el correo de tipo @encantia.lat para el registro. Este correo es exclusivo para el acceso de administradores.');
-            setLoading(false);
-            setIsLoadingGifVisible(false);
-            return;
-        }
-
-        try {
-            const { error } = await supabase.auth.signUp({ email, password });
-            if (error) throw error;
-            setTimeout(() => {
-                router.push('/');
-            }, 3000);
-        } catch (e) {
-            setErrorMessage(e.message);
-        } finally {
-            setLoading(false);
-            setIsLoadingGifVisible(false);
         }
     };
 
     const handleOAuthLogin = async (provider) => {
-        const { user, session, error } = await supabase.auth.signInWithOAuth({
+        const { error } = await supabase.auth.signInWithOAuth({
             provider,
             options: {
-                redirectTo: window.location.origin, // Redirigir después del login
+                redirectTo: window.location.origin,
             },
         });
 
-        if (error) {
-            setErrorMessage(error.message);
-        } else {
-            // Si la autenticación es exitosa, redirigir al usuario
-            router.push('/');
-        }
+        if (error) setErrorMessage(error.message);
     };
 
     return (
         <div className="bg-gray-900 h-screen flex items-center justify-center relative">
             {errorMessage && (
-                <div className="absolute top-6 left-1/2 transform -translate-x-1/2 bg-red-500 text-black p-3 rounded shadow-lg transition-transform duration-500 ease-in-out animate-slide-down flex justify-between items-center">
+                <div className="absolute top-6 left-1/2 transform -translate-x-1/2 bg-red-500 text-black p-3 rounded shadow-lg flex justify-between items-center">
                     <span>{errorMessage}</span>
                     <button
                         className="ml-4 font-bold hover:bg-gray-300 px-2 rounded"
@@ -106,6 +85,7 @@ export default function Auth() {
                         className="h-25"
                     />
                 </div>
+
                 <h1 className="text-center text-white text-2xl">
                     {isSignUp ? "Registrarse" : "Iniciar sesión"}
                 </h1>
@@ -120,11 +100,7 @@ export default function Auth() {
                             value={email}
                             placeholder="Correo electrónico"
                         />
-                        <img
-                            src="https://images.encantia.lat/email.png"
-                            alt="Correo electrónico icono"
-                            className="w-6 h-6 ml-2"
-                        />
+                        <img src="https://images.encantia.lat/email.png" alt="Correo" className="w-6 h-6 ml-2" />
                     </div>
                 </div>
 
@@ -138,11 +114,7 @@ export default function Auth() {
                             value={password}
                             placeholder="Contraseña"
                         />
-                        <img
-                            src="https://images.encantia.lat/password.png"
-                            alt="Contraseña icono"
-                            className="w-6 h-6 ml-2"
-                        />
+                        <img src="https://images.encantia.lat/password.png" alt="Contraseña" className="w-6 h-6 ml-2" />
                         <button
                             type="button"
                             className="ml-2 text-white"
@@ -158,102 +130,59 @@ export default function Auth() {
                 </div>
 
                 <button
-                    className="border p-2 w-full mt-5 rounded bg-blue-600 text-white relative"
-                    onClick={isSignUp ? handleSignUp : handleSignIn}
+                    className="border p-2 w-full mt-5 rounded bg-blue-600 text-white flex justify-center items-center relative"
+                    onClick={handleAuth}
                     disabled={loading}
                 >
-                    {!loading ? (isSignUp ? 'Registrarse' : 'Iniciar sesión') : ' '}
-                    {loading && (
+                    {loading ? (
                         <img
                             src="https://images.encantia.lat/loading.gif"
                             alt="Cargando..."
-                            className="absolute inset-0 w-6 h-6 m-auto"
+                            className="w-6 h-6"
                         />
-                    )}
+                    ) : isSignUp ? 'Registrarse' : 'Iniciar sesión'}
                 </button>
 
                 <div className="mt-6 flex justify-center space-x-4">
-                    <button
-                        onClick={() => handleOAuthLogin('github')}
-                        className="p-2 rounded flex items-center justify-center gap-2 text-lg"
-                    >
-                        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg" alt="GitHub" className="w-8 h-8" />
-                    </button>
-
-                    <button
-                        onClick={() => handleOAuthLogin('discord')}
-                        className="p-2 rounded flex items-center justify-center gap-2 text-lg"
-                    >
-                        <img src="https://th.bing.com/th/id/R.18caff5f9c259a9ba08aa5de464e217a?rik=3LUHiVA9UTofuA&pid=ImgRaw&r=0" alt="Discord" className="w-8 h-8" />
-                    </button>
-
-                    <button
-                        onClick={() => handleOAuthLogin('gitlab')}
-                        className="p-2 rounded flex items-center justify-center gap-2 text-lg"
-                    >
-                        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/gitlab/gitlab-original.svg" alt="GitLab" className="w-8 h-8" />
-                    </button>
-
-                    <button
-                        onClick={() => handleOAuthLogin('google')}
-                        className="p-2 rounded flex items-center justify-center gap-2 text-lg"
-                    >
-                        <img
-                            src="https://cdn4.iconfinder.com/data/icons/logos-brands-7/512/google_logo-google_icongoogle-1024.png"
-                            alt="Google"
-                            className="w-8 h-8"
-                        />
-                    </button>
-
-                    <button
-                        onClick={() => handleOAuthLogin('spotify')}
-                        className="p-2 rounded flex items-center justify-center gap-2 text-lg"
-                    >
-                        <img
-                            src="https://logospng.org/download/spotify/logo-spotify-icon-4096.png"
-                            alt="Spotify"
-                            className="w-8 h-8"
-                        />
-                    </button>
+                    {['github', 'discord', 'gitlab', 'google', 'spotify'].map((provider) => (
+                        <button
+                            key={provider}
+                            onClick={() => handleOAuthLogin(provider)}
+                            className="p-2 rounded flex items-center justify-center gap-2 text-lg"
+                        >
+                            <img
+                                src={
+                                    provider === 'github' ? "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg" :
+                                    provider === 'discord' ? "https://th.bing.com/th/id/R.18caff5f9c259a9ba08aa5de464e217a?rik=3LUHiVA9UTofuA&pid=ImgRaw&r=0" :
+                                    provider === 'gitlab' ? "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/gitlab/gitlab-original.svg" :
+                                    provider === 'google' ? "https://cdn4.iconfinder.com/data/icons/logos-brands-7/512/google_logo-google_icongoogle-1024.png" :
+                                    "https://logospng.org/download/spotify/logo-spotify-icon-4096.png"
+                                }
+                                alt={provider}
+                                className="w-8 h-8"
+                            />
+                        </button>
+                    ))}
                 </div>
 
                 <div className="mt-4 text-center">
-                    {isSignUp ? (
-                        <p className="text-white text-sm">
-                            ¿Ya tienes una cuenta?{" "}
-                            <button
-                                onClick={() => setIsSignUp(false)}
-                                className="text-blue-500 hover:underline"
-                            >
-                                Iniciar sesión
-                            </button>
-                        </p>
-                    ) : (
-                        <>
-                            <p className="text-white text-sm">
-                                ¿No tienes una cuenta?{" "}
-                                <button
-                                    onClick={() => setIsSignUp(true)}
-                                    className="text-blue-500 hover:underline"
-                                >
-                                    Registrate aquí
-                                </button>
-                            </p>
-                        </>
-                    )}
+                    <p className="text-white text-sm">
+                        {isSignUp ? '¿Ya tienes una cuenta? ' : '¿No tienes una cuenta? '}
+                        <button
+                            onClick={() => setIsSignUp(!isSignUp)}
+                            className="text-blue-500 hover:underline"
+                        >
+                            {isSignUp ? 'Inicia sesión' : 'Regístrate aquí'}
+                        </button>
+                    </p>
                 </div>
             </div>
 
-            {/* Powered by Encatia - Rectángulo verde pastel */}
             <div className="absolute bottom-4 right-4 text-xs flex items-center gap-1">
-                <div>
-                    <span className="text-white">Powered</span>
-                </div>
-                <span className="text-white">by</span>
+                <span className="text-white">Powered by</span>
                 <span className="bg-green-400 py-1 px-2 rounded-xl">Encantia</span>
             </div>
 
-            {/* Buy Me a Coffee button */}
             <a
                 href="https://buymeacoffee.com/encantiaesp"
                 target="_blank"
@@ -268,9 +197,8 @@ export default function Auth() {
                 Buy me a coffee
             </a>
 
-            {/* Ko-fi button */}
             <a
-                href="https://ko-fi.com/S6S71EQT6F"               
+                href="https://ko-fi.com/S6S71EQT6F"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="fixed bottom-4 left-4 z-50"
@@ -279,7 +207,7 @@ export default function Auth() {
                     height="36"
                     style={{ border: 0, height: '36px' }}
                     src="https://storage.ko-fi.com/cdn/kofi6.png?v=6"
-                    alt="Support me on Ko-fi at ko-fi.com"
+                    alt="Support me on Ko-fi"
                 />
             </a>
         </div>
