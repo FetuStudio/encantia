@@ -11,7 +11,7 @@ export default function Auth() {
     const [passwordVisible, setPasswordVisible] = useState(false);
     const [isSignUp, setIsSignUp] = useState(false);
 
-    const dominiosRestringidos = ['gmail.com', 'outlook.com', 'outlook.es', 'hotmail.com', 'encantia.lat'];
+    const dominiosRestringidos = [];
 
     const dominioEmail = email.split('@')[1];
 
