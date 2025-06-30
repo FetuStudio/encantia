@@ -149,11 +149,6 @@ export default function Navbar() {
       {renderAlert()}
 
       {/* Códigos y navegación */}
-      <div className="flex flex-col items-center justify-center text-center py-10">
-        <h1 className="text-white text-2xl font-bold mb-4">¡Solicita ahora un Código de Creador!</h1>
-        <a href="https://www.encantia.lat/cco/request/encantia/CreatorCodeForm" target="_blank" rel="noopener noreferrer" className="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-6 rounded-full transition">Solicitar ahora</a>
-        <a href="https://cco.encantia.lat" target="_blank" rel="noopener noreferrer" className="mt-4 text-blue-400 hover:text-blue-300 underline text-sm">Revisa si cumples los requisitos</a>
-      </div>
 
       <div className="fixed bottom-3 left-1/2 transform -translate-x-1/2 flex items-center bg-gray-900 p-2 rounded-full shadow-lg space-x-4 w-max">
         <img src="https://images.encantia.lat/encantia-logo-2025.webp" alt="Logo" className="h-13 w-auto" />
