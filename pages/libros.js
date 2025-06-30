@@ -11,7 +11,9 @@ export default function Libros() {
     useEffect(() => {
         const fetchBooksAndUserProfile = async () => {
             // Fetching books
-            const { data: booksData, error: booksError } = await supabase.from('books').select('*');
+            const { data: booksData, error: booksError } = await supabase
+                .from("books")
+                .select("*");
             if (booksError) {
                 console.error("Error al obtener los libros:", booksError.message);
             } else {
@@ -23,9 +25,9 @@ export default function Libros() {
             if (!user) return;
 
             const { data: profileData } = await supabase
-                .from('profiles')
-                .select('*')
-                .eq('user_id', user.id)
+                .from("profiles")
+                .select("*")
+                .eq("user_id", user.id)
                 .single();
 
             if (profileData) setUserProfile(profileData);
@@ -34,7 +36,8 @@ export default function Libros() {
         fetchBooksAndUserProfile();
     }, []);
 
-    const isValidImageUrl = (url) => /^https?:\/\/\S+\.(jpg|jpeg|png|gif|bmp|webp)$/i.test(url);
+    const isValidImageUrl = (url) =>
+        /^https?:\/\/\S+\.(jpg|jpeg|png|gif|bmp|webp)$/i.test(url);
 
     const handleImageError = (e) => {
         e.target.onerror = null;
@@ -43,16 +46,16 @@ export default function Libros() {
 
     const handleSignOut = async () => {
         await supabase.auth.signOut();
-        router.push('/');
+        router.push("/");
     };
 
     const navigationLinks = [
-        { icon: "home.png", name: "Inicio", url: '/' },
-        { icon: "libros.png", name: "Libros", url: '/libros' },
-        { icon: "eventos.png", name: "Eventos", url: '/events },
-        { icon: "music.png", name: "Musica", url: '/music' },
-        { icon: "https://images.encantia.lat/users2.png", name: "Usuarios", url: '/profiles' },
-        { icon: "discord.png", name: "Discord", url: 'https://discord.gg/BRqvv9nWHZ', external: true }
+        { icon: "home.png", name: "Inicio", url: "/" },
+        { icon: "libros.png", name: "Libros", url: "/libros" },
+        { icon: "eventos.png", name: "Eventos", url: "/events" },
+        { icon: "music.png", name: "Musica", url: "/music" },
+        { icon: "https://images.encantia.lat/users2.png", name: "Usuarios", url: "/profiles" },
+        { icon: "discord.png", name: "Discord", url: "https://discord.gg/BRqvv9nWHZ", external: true },
     ];
 
     return (
@@ -61,7 +64,9 @@ export default function Libros() {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {books.length === 0 ? (
-                    <div className="text-center text-gray-400 col-span-full">No hay libros disponibles.</div>
+                    <div className="text-center text-gray-400 col-span-full">
+                        No hay libros disponibles.
+                    </div>
                 ) : (
                     books.map((book) => (
                         <div
@@ -84,8 +89,15 @@ export default function Libros() {
                             )}
                             <h2 className="text-xl font-bold mt-3">{book.title}</h2>
                             <p className="text-gray-400">{book.description}</p>
-                            {isValidImageUrl(book.cover_url) && (
-                                <a href={book.cover_url} target="_blank" className="text-blue-400 hover:underline mt-2 block">Ver el libro</a>
+                            {book.portada_url && (
+                                <a
+                                    href={book.portada_url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-blue-400 hover:underline mt-2 block"
+                                >
+                                    Ver el libro
+                                </a>
                             )}
                         </div>
                     ))
@@ -101,7 +113,7 @@ export default function Libros() {
                             onClick={() => external ? window.open(url, "_blank") : router.push(url)}
                             className="p-2 rounded-full bg-gray-800 text-white text-xl transition-transform transform group-hover:scale-110"
                         >
-                            <img src={`https://images.encantia.lat/${icon}`} alt={name} className="w-8 h-8" />
+                            <img src={icon.startsWith('http') ? icon : `https://images.encantia.lat/${icon}`} alt={name} className="w-8 h-8" />
                         </button>
                         <span className="absolute bottom-14 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 bg-gray-700 text-white text-xs rounded px-2 py-1 transition-opacity">
                             {name}
