@@ -6,6 +6,7 @@ export default function Libros() {
     const [books, setBooks] = useState([]);
     const [userProfile, setUserProfile] = useState(null);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const [alertMessage, setAlertMessage] = useState(null);
     const router = useRouter();
 
     useEffect(() => {
@@ -33,8 +34,39 @@ export default function Libros() {
             if (profileData) setUserProfile(profileData);
         };
 
+        const fetchAlertMessage = async () => {
+            const { data, error } = await supabase
+                .from('alerts')
+                .select('*')
+                .eq('active', true)
+                .order('id', { ascending: false })
+                .limit(1)
+                .single();
+
+            if (data) {
+                setAlertMessage({ message: data.message, type: data.type });
+            }
+        };
+
         fetchBooksAndUserProfile();
+        fetchAlertMessage();
     }, []);
+
+    const renderAlert = () => (
+        alertMessage && (
+            <div
+                className={`flex items-start sm:items-center justify-center gap-3 px-4 py-3 text-sm font-medium w-full z-50 ${
+                    alertMessage.type === 'info' ? 'bg-blue-100 text-blue-800' :
+                    alertMessage.type === 'success' ? 'bg-green-100 text-green-800' :
+                    alertMessage.type === 'warning' ? 'bg-yellow-100 text-yellow-800' :
+                    alertMessage.type === 'error' ? 'bg-red-100 text-red-800' :
+                    'bg-gray-100 text-gray-800'
+                }`}
+            >
+                <div className="text-left max-w-3xl">{alertMessage.message}</div>
+            </div>
+        )
+    );
 
     const isValidImageUrl = (url) =>
         /^https?:\/\/\S+\.(jpg|jpeg|png|gif|bmp|webp)$/i.test(url);
@@ -60,6 +92,8 @@ export default function Libros() {
 
     return (
         <div className="flex flex-col min-h-screen bg-gray-900 text-white p-4">
+            {renderAlert()}
+
             <h1 className="text-3xl mb-6">📚 Libros Disponibles</h1>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
