@@ -11,28 +11,12 @@ export default function Auth() {
     const [passwordVisible, setPasswordVisible] = useState(false);
     const [isSignUp, setIsSignUp] = useState(false);
 
-    const dominiosRestringidos = [];
-
-    const dominioEmail = email.split('@')[1];
-
-    const isDominioProhibido = dominiosRestringidos.includes(dominioEmail);
-
     const handleAuth = async () => {
         setLoading(true);
         setErrorMessage(null);
 
         if (!email || !password) {
             setErrorMessage('Correo y contraseña son obligatorios.');
-            setLoading(false);
-            return;
-        }
-
-        if (isDominioProhibido) {
-            const msg =
-                dominioEmail === 'encantia.lat'
-                    ? 'No se permite el correo de tipo @encantia.lat. Es exclusivo para administradores.'
-                    : 'No se permite el uso de correos personales como Gmail, Outlook, Hotmail.';
-            setErrorMessage(msg);
             setLoading(false);
             return;
         }
@@ -213,3 +197,4 @@ export default function Auth() {
         </div>
     );
 }
+
