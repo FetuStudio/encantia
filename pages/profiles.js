@@ -4,125 +4,108 @@ import { supabase } from "../utils/supabaseClient";
 
 export default function Navbar() {
   const [userProfile, setUserProfile] = useState(null);
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [allProfiles, setAllProfiles] = useState([]);
+  const [onlineUsers, setOnlineUsers] = useState({});
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const router = useRouter();
 
+  // Load current user
   const fetchUserProfile = useCallback(async () => {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
-    const { data: profileData, error } = await supabase
+    const { data: profileData } = await supabase
       .from("profiles")
       .select("*")
       .eq("user_id", user.id)
       .single();
 
-    if (!error && profileData) {
-      setUserProfile(profileData);
-    }
+    if (profileData) setUserProfile(profileData);
   }, []);
 
+  // Fetch all user profiles
   const fetchAllProfiles = useCallback(async () => {
     const { data, error } = await supabase
       .from("profiles")
       .select("user_id, name, avatar_url, role");
 
-    if (!error && data) {
-      setAllProfiles(data);
-    }
+    if (!error && data) setAllProfiles(data);
   }, []);
 
+  // Fetch online.json from bucket
   const fetchOnlineUsers = useCallback(async () => {
-    const { data, error } = await supabase.storage
-      .from("online-status")
-      .list("online", { limit: 100 });
+    const { data, error } = await supabase
+      .storage
+      .from("status")
+      .download("online.json");
 
     if (error) {
-      console.error("Error fetching online users:", error);
-      return [];
+      console.error("Error fetching online.json:", error);
+      return;
     }
 
-    return data.map((file) => file.name.replace(".json", ""));
+    const text = await data.text();
+    try {
+      const parsed = JSON.parse(text);
+      setOnlineUsers(parsed);
+    } catch (err) {
+      console.error("Error parsing online.json:", err);
+    }
   }, []);
 
+  // Heartbeat: Update own status every 5s
+  useEffect(() => {
+    let interval;
+    const updateOnlineJson = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data, error } = await supabase
+        .storage
+        .from("status")
+        .download("online.json");
+
+      if (error) return console.error("Fetch error:", error);
+
+      const text = await data.text();
+      let json = {};
+      try {
+        json = JSON.parse(text);
+      } catch {}
+
+      json[user.id] = Date.now();
+
+      const { error: uploadError } = await supabase
+        .storage
+        .from("status")
+        .upload("online.json", new Blob([JSON.stringify(json)], { type: "application/json" }), {
+          upsert: true,
+        });
+
+      if (uploadError) console.error("Upload error:", uploadError);
+    };
+
+    updateOnlineJson();
+    interval = setInterval(updateOnlineJson, 5000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  // Periodic check of who is online
   useEffect(() => {
     fetchUserProfile();
     fetchAllProfiles();
-  }, [fetchUserProfile, fetchAllProfiles]);
+    fetchOnlineUsers();
 
-  // Manejo de conexión online con Storage
-  useEffect(() => {
-    const updateOnlineStatus = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) return;
-
-      const file = new Blob([JSON.stringify({ timestamp: new Date().toISOString() })], {
-        type: "application/json",
-      });
-
-      await supabase.storage
-        .from("online-status")
-        .upload(`online/${user.id}.json`, file, { upsert: true });
-    };
-
-    const removeOnlineStatus = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (user) {
-        await supabase.storage.from("online-status").remove([`online/${user.id}.json`]);
-      }
-    };
-
-    updateOnlineStatus();
-
-    window.addEventListener("beforeunload", removeOnlineStatus);
-    return () => {
-      removeOnlineStatus();
-      window.removeEventListener("beforeunload", removeOnlineStatus);
-    };
-  }, []);
-
-  // Asigna estado de conexión a perfiles
-  useEffect(() => {
-    const updateStatus = async () => {
-      const onlineIds = await fetchOnlineUsers();
-      setAllProfiles((prev) =>
-        prev.map((profile) => ({
-          ...profile,
-          is_online: onlineIds.includes(profile.user_id),
-        }))
-      );
-    };
-
-    updateStatus();
-    const interval = setInterval(updateStatus, 10000);
+    const interval = setInterval(fetchOnlineUsers, 5000);
     return () => clearInterval(interval);
-  }, [fetchOnlineUsers]);
+  }, [fetchUserProfile, fetchAllProfiles, fetchOnlineUsers]);
 
-  const handleSignOut = async () => {
-    await supabase.storage
-      .from("online-status")
-      .remove([`online/${userProfile.user_id}.json`]);
-
-    const { error } = await supabase.auth.signOut();
-    if (!error) router.push("/");
-    else console.error("Sign-out error:", error);
+  const isUserOnline = (userId) => {
+    const timestamp = onlineUsers[userId];
+    if (!timestamp) return false;
+    return Date.now() - timestamp < 10000; // 10s threshold
   };
-
-  const navButtons = [
-    { icon: "https://images.encantia.lat/home.png", name: "Inicio", url: "/" },
-    { icon: "https://images.encantia.lat/libros.png", name: "Libros", url: "/libros" },
-    { icon: "https://images.encantia.lat/eventos.png", name: "Eventos", url: "/events" },
-    { icon: "https://images.encantia.lat/music.png", name: "Musica", url: "/music" },
-    { icon: "https://images.encantia.lat/users2.png", name: "Usuarios", url: "/profiles" },
-    { icon: "https://images.encantia.lat/discord.png", name: "Discord", url: "https://discord.gg/BRqvv9nWHZ" },
-  ];
 
   const groupedProfiles = allProfiles.reduce((acc, profile) => {
     const role = profile.role?.trim() || "Usuarios";
@@ -133,27 +116,9 @@ export default function Navbar() {
 
   return (
     <div className="bg-gray-900 min-h-screen text-white">
-      {/* Bottom Navbar */}
+      {/* Navbar (puedes dejar igual) */}
       <div className="fixed bottom-3 left-1/2 transform -translate-x-1/2 flex items-center bg-gray-900 p-2 rounded-full shadow-lg space-x-4 w-max z-50">
-        <img
-          src="https://images.encantia.lat/encantia-logo-2025.webp"
-          alt="Logo"
-          className="h-13 w-auto"
-        />
-
-        {navButtons.map((button, index) => (
-          <div key={index} className="relative group">
-            <button
-              onClick={() => router.push(button.url)}
-              className="p-2 rounded-full bg-gray-800 text-white text-xl transition-transform transform group-hover:scale-110"
-            >
-              <img src={button.icon} alt={button.name} className="w-8 h-8" />
-            </button>
-            <span className="absolute bottom-14 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 bg-gray-700 text-white text-xs rounded px-2 py-1 transition-opacity">
-              {button.name}
-            </span>
-          </div>
-        ))}
+        {/* ... tu logo y navegación ... */}
 
         {userProfile && (
           <div className="relative">
@@ -177,7 +142,10 @@ export default function Navbar() {
                   Ver mi perfil
                 </button>
                 <button
-                  onClick={handleSignOut}
+                  onClick={async () => {
+                    await supabase.auth.signOut();
+                    router.push("/");
+                  }}
                   className="w-full text-left px-4 py-2 text-red-500 hover:bg-gray-700"
                 >
                   Cerrar sesión
@@ -206,18 +174,17 @@ export default function Navbar() {
                     className="w-12 h-12 rounded-full"
                   />
                   <div className="flex-1">
-                    <p className="font-medium flex items-center gap-2">
-                      {profile.name}
-                      <span
-                        className={`w-2 h-2 rounded-full ${
-                          profile.is_online ? "bg-green-500" : "bg-gray-500"
-                        }`}
-                        title={profile.is_online ? "En línea" : "Desconectado"}
-                      ></span>
+                    <p className="font-medium">{profile.name}</p>
+                    <p className="text-sm mt-1">
+                      {isUserOnline(profile.user_id) ? (
+                        <span className="text-green-400">🟢 Online</span>
+                      ) : (
+                        <span className="text-red-400">🔴 Desconectado</span>
+                      )}
                     </p>
                     <button
                       onClick={() => router.push(`/profile/${profile.user_id}`)}
-                      className="text-sm text-blue-400 hover:underline"
+                      className="text-sm text-blue-400 hover:underline mt-1"
                     >
                       Ver perfil
                     </button>
@@ -229,7 +196,6 @@ export default function Navbar() {
         ))}
       </div>
 
-      {/* Footer */}
       <div className="fixed bottom-3 right-3 text-gray-400 text-xs bg-gray-900 p-2 rounded-md shadow-md z-40">
         © 2025 by Encantia is licensed under CC BY-NC-ND 4.0.
       </div>
