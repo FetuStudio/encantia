@@ -9,21 +9,20 @@ export default function Navbar() {
   const router = useRouter();
 
   const fetchUserProfile = useCallback(async () => {
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
-    if (userError || !user) return;
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return;
 
-    const { data: profileData, error: profileError } = await supabase
+    const { data: profileData, error } = await supabase
       .from("profiles")
       .select("*")
       .eq("user_id", user.id)
       .single();
 
-    if (profileError) {
-      console.error("Error fetching profile:", profileError);
-      return;
+    if (!error && profileData) {
+      setUserProfile(profileData);
     }
-
-    if (profileData) setUserProfile(profileData);
   }, []);
 
   const fetchAllProfiles = useCallback(async () => {
@@ -31,12 +30,22 @@ export default function Navbar() {
       .from("profiles")
       .select("user_id, name, avatar_url, role");
 
+    if (!error && data) {
+      setAllProfiles(data);
+    }
+  }, []);
+
+  const fetchOnlineUsers = useCallback(async () => {
+    const { data, error } = await supabase.storage
+      .from("online-status")
+      .list("online", { limit: 100 });
+
     if (error) {
-      console.error("Error fetching all profiles:", error);
-      return;
+      console.error("Error fetching online users:", error);
+      return [];
     }
 
-    if (data) setAllProfiles(data);
+    return data.map((file) => file.name.replace(".json", ""));
   }, []);
 
   useEffect(() => {
@@ -44,7 +53,63 @@ export default function Navbar() {
     fetchAllProfiles();
   }, [fetchUserProfile, fetchAllProfiles]);
 
+  // Manejo de conexión online con Storage
+  useEffect(() => {
+    const updateOnlineStatus = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const file = new Blob([JSON.stringify({ timestamp: new Date().toISOString() })], {
+        type: "application/json",
+      });
+
+      await supabase.storage
+        .from("online-status")
+        .upload(`online/${user.id}.json`, file, { upsert: true });
+    };
+
+    const removeOnlineStatus = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (user) {
+        await supabase.storage.from("online-status").remove([`online/${user.id}.json`]);
+      }
+    };
+
+    updateOnlineStatus();
+
+    window.addEventListener("beforeunload", removeOnlineStatus);
+    return () => {
+      removeOnlineStatus();
+      window.removeEventListener("beforeunload", removeOnlineStatus);
+    };
+  }, []);
+
+  // Asigna estado de conexión a perfiles
+  useEffect(() => {
+    const updateStatus = async () => {
+      const onlineIds = await fetchOnlineUsers();
+      setAllProfiles((prev) =>
+        prev.map((profile) => ({
+          ...profile,
+          is_online: onlineIds.includes(profile.user_id),
+        }))
+      );
+    };
+
+    updateStatus();
+    const interval = setInterval(updateStatus, 10000);
+    return () => clearInterval(interval);
+  }, [fetchOnlineUsers]);
+
   const handleSignOut = async () => {
+    await supabase.storage
+      .from("online-status")
+      .remove([`online/${userProfile.user_id}.json`]);
+
     const { error } = await supabase.auth.signOut();
     if (!error) router.push("/");
     else console.error("Sign-out error:", error);
@@ -141,7 +206,15 @@ export default function Navbar() {
                     className="w-12 h-12 rounded-full"
                   />
                   <div className="flex-1">
-                    <p className="font-medium">{profile.name}</p>
+                    <p className="font-medium flex items-center gap-2">
+                      {profile.name}
+                      <span
+                        className={`w-2 h-2 rounded-full ${
+                          profile.is_online ? "bg-green-500" : "bg-gray-500"
+                        }`}
+                        title={profile.is_online ? "En línea" : "Desconectado"}
+                      ></span>
+                    </p>
                     <button
                       onClick={() => router.push(`/profile/${profile.user_id}`)}
                       className="text-sm text-blue-400 hover:underline"
@@ -163,4 +236,3 @@ export default function Navbar() {
     </div>
   );
 }
-
