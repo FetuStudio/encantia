@@ -4,12 +4,21 @@ import { supabase } from "../utils/supabaseClient";
 
 export default function Navbar() {
   const [userProfile, setUserProfile] = useState(null);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [allProfiles, setAllProfiles] = useState([]);
   const [onlineUsers, setOnlineUsers] = useState({});
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const router = useRouter();
 
-  // Load current user
+  const navButtons = [
+    { icon: "https://images.encantia.lat/home.png", name: "Inicio", url: "/" },
+    { icon: "https://images.encantia.lat/libros.png", name: "Libros", url: "/libros" },
+    { icon: "https://images.encantia.lat/eventos.png", name: "Eventos", url: "/events" },
+    { icon: "https://images.encantia.lat/music.png", name: "Musica", url: "/music" },
+    { icon: "https://images.encantia.lat/users2.png", name: "Usuarios", url: "/profiles" },
+    { icon: "https://images.encantia.lat/discord.png", name: "Discord", url: "https://discord.gg/BRqvv9nWHZ" },
+  ];
+
+  // Obtener usuario actual
   const fetchUserProfile = useCallback(async () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
@@ -23,7 +32,7 @@ export default function Navbar() {
     if (profileData) setUserProfile(profileData);
   }, []);
 
-  // Fetch all user profiles
+  // Obtener todos los perfiles
   const fetchAllProfiles = useCallback(async () => {
     const { data, error } = await supabase
       .from("profiles")
@@ -32,28 +41,23 @@ export default function Navbar() {
     if (!error && data) setAllProfiles(data);
   }, []);
 
-  // Fetch online.json from bucket
+  // Obtener online.json
   const fetchOnlineUsers = useCallback(async () => {
     const { data, error } = await supabase
       .storage
       .from("status")
       .download("online.json");
 
-    if (error) {
-      console.error("Error fetching online.json:", error);
-      return;
-    }
+    if (error) return;
 
     const text = await data.text();
     try {
       const parsed = JSON.parse(text);
       setOnlineUsers(parsed);
-    } catch (err) {
-      console.error("Error parsing online.json:", err);
-    }
+    } catch {}
   }, []);
 
-  // Heartbeat: Update own status every 5s
+  // Heartbeat: actualizar online.json cada 5s
   useEffect(() => {
     let interval;
     const updateOnlineJson = async () => {
@@ -65,7 +69,7 @@ export default function Navbar() {
         .from("status")
         .download("online.json");
 
-      if (error) return console.error("Fetch error:", error);
+      if (error) return;
 
       const text = await data.text();
       let json = {};
@@ -75,14 +79,12 @@ export default function Navbar() {
 
       json[user.id] = Date.now();
 
-      const { error: uploadError } = await supabase
+      await supabase
         .storage
         .from("status")
         .upload("online.json", new Blob([JSON.stringify(json)], { type: "application/json" }), {
           upsert: true,
         });
-
-      if (uploadError) console.error("Upload error:", uploadError);
     };
 
     updateOnlineJson();
@@ -91,7 +93,7 @@ export default function Navbar() {
     return () => clearInterval(interval);
   }, []);
 
-  // Periodic check of who is online
+  // Cargar perfiles y usuarios online al iniciar
   useEffect(() => {
     fetchUserProfile();
     fetchAllProfiles();
@@ -103,8 +105,7 @@ export default function Navbar() {
 
   const isUserOnline = (userId) => {
     const timestamp = onlineUsers[userId];
-    if (!timestamp) return false;
-    return Date.now() - timestamp < 10000; // 10s threshold
+    return timestamp && Date.now() - timestamp < 10000;
   };
 
   const groupedProfiles = allProfiles.reduce((acc, profile) => {
@@ -114,11 +115,40 @@ export default function Navbar() {
     return acc;
   }, {});
 
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    router.push("/");
+  };
+
   return (
     <div className="bg-gray-900 min-h-screen text-white">
-      {/* Navbar (puedes dejar igual) */}
+      {/* Navbar inferior */}
       <div className="fixed bottom-3 left-1/2 transform -translate-x-1/2 flex items-center bg-gray-900 p-2 rounded-full shadow-lg space-x-4 w-max z-50">
-        {/* ... tu logo y navegación ... */}
+        <img
+          src="https://images.encantia.lat/encantia-logo-2025.webp"
+          alt="Logo"
+          className="h-13 w-auto"
+        />
+
+        {navButtons.map((button, index) => (
+          <div key={index} className="relative group">
+            <button
+              onClick={() => {
+                if (button.url.startsWith("http")) {
+                  window.open(button.url, "_blank");
+                } else {
+                  router.push(button.url);
+                }
+              }}
+              className="p-2 rounded-full bg-gray-800 text-white text-xl transition-transform transform group-hover:scale-110"
+            >
+              <img src={button.icon} alt={button.name} className="w-8 h-8" />
+            </button>
+            <span className="absolute bottom-14 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 bg-gray-700 text-white text-xs rounded px-2 py-1 transition-opacity">
+              {button.name}
+            </span>
+          </div>
+        ))}
 
         {userProfile && (
           <div className="relative">
@@ -142,10 +172,7 @@ export default function Navbar() {
                   Ver mi perfil
                 </button>
                 <button
-                  onClick={async () => {
-                    await supabase.auth.signOut();
-                    router.push("/");
-                  }}
+                  onClick={handleSignOut}
                   className="w-full text-left px-4 py-2 text-red-500 hover:bg-gray-700"
                 >
                   Cerrar sesión
@@ -196,6 +223,7 @@ export default function Navbar() {
         ))}
       </div>
 
+      {/* Footer */}
       <div className="fixed bottom-3 right-3 text-gray-400 text-xs bg-gray-900 p-2 rounded-md shadow-md z-40">
         © 2025 by Encantia is licensed under CC BY-NC-ND 4.0.
       </div>
