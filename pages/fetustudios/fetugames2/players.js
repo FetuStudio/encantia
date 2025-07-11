@@ -80,12 +80,14 @@ export default function Navbar() {
   const totalGanadores = totales["ganador"] || 0;
   const totalVivos = totales["vivo"] || 0;
   const totalDescalificados = totales["descalificado"] || 0;
+  const totalGuardia = totales["guardia"] || 0;
 
   const cards = [
     { count: totalVivos, label: "Vivos", emoji: "🟢", bg: "from-green-700 to-green-900", border: "border-green-400", estado: "vivo" },
     { count: totalMuertos, label: "Muertos", emoji: "💀", bg: "from-red-700 to-red-900", border: "border-red-500", estado: "muerto" },
     { count: totalGanadores, label: "Ganadores", emoji: "🏆", bg: "from-yellow-300 to-yellow-500", border: "border-yellow-300 text-black", estado: "ganador" },
     { count: totalDescalificados, label: "Descalificados", emoji: "🚫", bg: "from-gray-700 to-gray-900", border: "border-gray-400", estado: "descalificado" },
+    { count: totalGuardia, label: "Guardia", emoji: "🪪", bg: "from-pink-600 to-pink-800", border: "border-pink-400", estado: "guardia" },
   ];
 
   const reflejoVariants = {
@@ -105,6 +107,22 @@ export default function Navbar() {
   const jugadoresFiltrados = filtroActivo
     ? jugadores.filter(j => j.estado === filtroActivo)
     : [];
+
+  const getColorClass = (estado) => {
+    switch (estado) {
+      case "vivo":
+        return "bg-green-600";
+      case "muerto":
+        return "bg-red-600";
+      case "ganador":
+        return "bg-yellow-500 text-black";
+      case "guardia":
+        return "bg-pink-600";
+      case "descalificado":
+      default:
+        return "bg-gray-600";
+    }
+  };
 
   return (
     <div style={{ backgroundColor: '#032c3d' }} className="min-h-screen text-white relative">
@@ -166,12 +184,7 @@ export default function Navbar() {
                 )}
                 <span className="text-white">{jugador.players}</span>
               </h3>
-              <span className={`text-sm mt-1 px-2 py-1 rounded 
-                ${jugador.estado === 'vivo' ? 'bg-green-600' :
-                  jugador.estado === 'muerto' ? 'bg-red-600' :
-                    jugador.estado === 'ganador' ? 'bg-yellow-500 text-black' :
-                      'bg-gray-600'}
-              `}>
+              <span className={`text-sm mt-1 px-2 py-1 rounded ${getColorClass(jugador.estado)}`}>
                 {jugador.estado}
               </span>
             </a>
@@ -231,12 +244,7 @@ export default function Navbar() {
                         )}
                         <span className="text-white">{jugador.players}</span>
                       </h3>
-                      <span className={`text-sm mt-1 px-2 py-1 rounded 
-                        ${jugador.estado === 'vivo' ? 'bg-green-600' :
-                          jugador.estado === 'muerto' ? 'bg-red-600' :
-                            jugador.estado === 'ganador' ? 'bg-yellow-500 text-black' :
-                              'bg-gray-600'}
-                      `}>
+                      <span className={`text-sm mt-1 px-2 py-1 rounded ${getColorClass(jugador.estado)}`}>
                         {jugador.estado}
                       </span>
                     </a>
