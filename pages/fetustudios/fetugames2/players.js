@@ -38,10 +38,9 @@ export default function Navbar() {
     }
 
     async function fetchJugadores() {
-      // Asumo que tienes estas columnas booleanas: estado (vivo/muerto), guardia, descalificado, ganador
       const { data, error } = await supabase
         .from("jugadores")
-        .select("players, estado, numero, guardia, descalificado, ganador")
+        .select("players, estado, numero, guardia")
         .order("numero", { ascending: true });
 
       if (!error) {
@@ -78,11 +77,7 @@ export default function Navbar() {
   }
 
   const totales = jugadores.reduce((acc, jugador) => {
-    if (jugador.ganador) {
-      acc["ganador"] = (acc["ganador"] || 0) + 1;
-    } else if (jugador.descalificado) {
-      acc["descalificado"] = (acc["descalificado"] || 0) + 1;
-    } else if (jugador.guardia) {
+    if (jugador.guardia) {
       acc["guardia"] = (acc["guardia"] || 0) + 1;
     } else if (jugador.estado) {
       acc["vivo"] = (acc["vivo"] || 0) + 1;
@@ -92,37 +87,11 @@ export default function Navbar() {
     return acc;
   }, {});
 
-  const totalGanador = totales["ganador"] || 0;
-  const totalDescalificado = totales["descalificado"] || 0;
-  const totalGuardia = totales["guardia"] || 0;
-  const totalVivos = totales["vivo"] || 0;
   const totalMuertos = totales["muerto"] || 0;
+  const totalVivos = totales["vivo"] || 0;
+  const totalGuardia = totales["guardia"] || 0;
 
   const cards = [
-    {
-      count: totalGanador,
-      label: "Ganadores",
-      emoji: "🏆",
-      bg: "from-yellow-500 to-yellow-700",
-      border: "border-yellow-400",
-      estado: "ganador",
-    },
-    {
-      count: totalDescalificado,
-      label: "Descalificados",
-      emoji: "❌",
-      bg: "from-gray-600 to-gray-800",
-      border: "border-gray-400",
-      estado: "descalificado",
-    },
-    {
-      count: totalGuardia,
-      label: "Guardia",
-      emoji: "🛡️",
-      bg: "from-pink-600 to-pink-800",
-      border: "border-pink-400",
-      estado: "guardia",
-    },
     {
       count: totalVivos,
       label: "Vivos",
@@ -138,6 +107,14 @@ export default function Navbar() {
       bg: "from-red-700 to-red-900",
       border: "border-red-500",
       estado: "muerto",
+    },
+    {
+      count: totalGuardia,
+      label: "Guardia",
+      emoji: "🛡️",
+      bg: "from-pink-600 to-pink-800",
+      border: "border-pink-400",
+      estado: "guardia",
     },
   ];
 
@@ -157,18 +134,10 @@ export default function Navbar() {
 
   const jugadoresFiltrados = filtroActivo
     ? jugadores.filter((j) => {
-        if (filtroActivo === "ganador") return j.ganador === true;
-        if (filtroActivo === "descalificado") return j.descalificado === true;
         if (filtroActivo === "guardia") return j.guardia === true;
-        if (filtroActivo === "vivo")
-          return j.estado === true && !j.guardia && !j.ganador && !j.descalificado;
+        if (filtroActivo === "vivo") return j.estado === true && j.guardia !== true;
         if (filtroActivo === "muerto")
-          return (
-            j.estado === false &&
-            !j.guardia &&
-            !j.ganador &&
-            !j.descalificado
-          );
+          return j.estado === false && j.guardia !== true;
         return false;
       })
     : [];
@@ -190,7 +159,7 @@ export default function Navbar() {
           ⚔️ Jugadores ⚔️
         </h2>
 
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-center font-semibold mb-8 relative">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center font-semibold mb-8 relative">
           {cards.map((card, index) => (
             <motion.div
               key={index}
@@ -241,22 +210,14 @@ export default function Navbar() {
               </h3>
               <span
                 className={`text-sm mt-1 px-2 py-1 rounded ${
-                  jugador.ganador
-                    ? "bg-yellow-500 text-white"
-                    : jugador.descalificado
-                    ? "bg-gray-600 text-white"
-                    : jugador.guardia
+                  jugador.guardia
                     ? "bg-pink-600 text-white"
                     : jugador.estado
                     ? "bg-green-600"
                     : "bg-red-600"
                 }`}
               >
-                {jugador.ganador
-                  ? "ganador"
-                  : jugador.descalificado
-                  ? "descalificado"
-                  : jugador.guardia
+                {jugador.guardia
                   ? "guardia"
                   : jugador.estado
                   ? "vivo"
@@ -325,22 +286,14 @@ export default function Navbar() {
                       </h3>
                       <span
                         className={`text-sm mt-1 px-2 py-1 rounded ${
-                          jugador.ganador
-                            ? "bg-yellow-500 text-white"
-                            : jugador.descalificado
-                            ? "bg-gray-600 text-white"
-                            : jugador.guardia
+                          jugador.guardia
                             ? "bg-pink-600 text-white"
                             : jugador.estado
                             ? "bg-green-600"
                             : "bg-red-600"
                         }`}
                       >
-                        {jugador.ganador
-                          ? "ganador"
-                          : jugador.descalificado
-                          ? "descalificado"
-                          : jugador.guardia
+                        {jugador.guardia
                           ? "guardia"
                           : jugador.estado
                           ? "vivo"
