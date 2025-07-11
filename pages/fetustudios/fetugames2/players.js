@@ -13,7 +13,9 @@ export default function Navbar() {
 
   useEffect(() => {
     async function fetchProfile() {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) {
         setAvatarUrl("");
         setProfileComplete(false);
@@ -38,7 +40,7 @@ export default function Navbar() {
     async function fetchJugadores() {
       const { data, error } = await supabase
         .from("jugadores")
-        .select("players, estado, numero")
+        .select("players, estado, numero, guardia")
         .order("numero", { ascending: true });
 
       if (!error) {
@@ -57,12 +59,15 @@ export default function Navbar() {
   if (!profileComplete) {
     return (
       <div className="min-h-screen flex flex-col justify-center items-center bg-gray-900 text-white p-6">
-        <h1 className="text-2xl font-bold mb-4">¡No puedes ver el contenido de esta página!</h1>
+        <h1 className="text-2xl font-bold mb-4">
+          ¡No puedes ver el contenido de esta página!
+        </h1>
         <p className="mb-6 text-center max-w-md">
-          Para acceder a esta sección debes tener configurado tu nombre de usuario y foto de perfil.
+          Para acceder a esta sección debes tener configurado tu nombre de usuario
+          y foto de perfil.
         </p>
         <button
-          onClick={() => router.push('/account')}
+          onClick={() => router.push("/account")}
           className="bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded text-white font-semibold"
         >
           Completar perfil
@@ -72,22 +77,45 @@ export default function Navbar() {
   }
 
   const totales = jugadores.reduce((acc, jugador) => {
-    acc[jugador.estado] = (acc[jugador.estado] || 0) + 1;
+    if (jugador.guardia) {
+      acc["guardia"] = (acc["guardia"] || 0) + 1;
+    } else if (jugador.estado) {
+      acc["vivo"] = (acc["vivo"] || 0) + 1;
+    } else {
+      acc["muerto"] = (acc["muerto"] || 0) + 1;
+    }
     return acc;
   }, {});
 
   const totalMuertos = totales["muerto"] || 0;
-  const totalGanadores = totales["ganador"] || 0;
   const totalVivos = totales["vivo"] || 0;
-  const totalDescalificados = totales["descalificado"] || 0;
   const totalGuardia = totales["guardia"] || 0;
 
   const cards = [
-    { count: totalVivos, label: "Vivos", emoji: "🟢", bg: "from-green-700 to-green-900", border: "border-green-400", estado: "vivo" },
-    { count: totalMuertos, label: "Muertos", emoji: "💀", bg: "from-red-700 to-red-900", border: "border-red-500", estado: "muerto" },
-    { count: totalGanadores, label: "Ganadores", emoji: "🏆", bg: "from-yellow-300 to-yellow-500", border: "border-yellow-300 text-black", estado: "ganador" },
-    { count: totalDescalificados, label: "Descalificados", emoji: "🚫", bg: "from-gray-700 to-gray-900", border: "border-gray-400", estado: "descalificado" },
-    { count: totalGuardia, label: "Guardia", emoji: "🪪", bg: "from-pink-600 to-pink-800", border: "border-pink-400", estado: "guardia" },
+    {
+      count: totalVivos,
+      label: "Vivos",
+      emoji: "🟢",
+      bg: "from-green-700 to-green-900",
+      border: "border-green-400",
+      estado: "vivo",
+    },
+    {
+      count: totalMuertos,
+      label: "Muertos",
+      emoji: "💀",
+      bg: "from-red-700 to-red-900",
+      border: "border-red-500",
+      estado: "muerto",
+    },
+    {
+      count: totalGuardia,
+      label: "Guardia",
+      emoji: "🛡️",
+      bg: "from-pink-600 to-pink-800",
+      border: "border-pink-400",
+      estado: "guardia",
+    },
   ];
 
   const reflejoVariants = {
@@ -99,41 +127,37 @@ export default function Navbar() {
           repeatType: "loop",
           duration: 3,
           ease: "linear",
-        }
-      }
-    }
+        },
+      },
+    },
   };
 
   const jugadoresFiltrados = filtroActivo
-    ? jugadores.filter(j => j.estado === filtroActivo)
+    ? jugadores.filter((j) => {
+        if (filtroActivo === "guardia") return j.guardia === true;
+        if (filtroActivo === "vivo") return j.estado === true && j.guardia !== true;
+        if (filtroActivo === "muerto")
+          return j.estado === false && j.guardia !== true;
+        return false;
+      })
     : [];
 
-  const getColorClass = (estado) => {
-    switch (estado) {
-      case "vivo":
-        return "bg-green-600";
-      case "muerto":
-        return "bg-red-600";
-      case "ganador":
-        return "bg-yellow-500 text-black";
-      case "guardia":
-        return "bg-pink-600";
-      case "descalificado":
-      default:
-        return "bg-gray-600";
-    }
-  };
-
   return (
-    <div style={{ backgroundColor: '#032c3d' }} className="min-h-screen text-white relative">
+    <div style={{ backgroundColor: "#032c3d" }} className="min-h-screen text-white relative">
       {/* Logo */}
       <div className="flex justify-center pt-4">
-        <img className="w-150 h-auto" src="https://images.encantia.lat/fg2.png" alt="FetuGames2Logo" />
+        <img
+          className="w-150 h-auto"
+          src="https://images.encantia.lat/fg2.png"
+          alt="FetuGames2Logo"
+        />
       </div>
 
       {/* Totales */}
       <div className="px-4 py-10">
-        <h2 className="text-3xl font-extrabold text-center mb-6 animate-pulse">⚔️ Jugadores ⚔️</h2>
+        <h2 className="text-3xl font-extrabold text-center mb-6 animate-pulse">
+          ⚔️ Jugadores ⚔️
+        </h2>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center font-semibold mb-8 relative">
           {cards.map((card, index) => (
@@ -184,8 +208,20 @@ export default function Navbar() {
                 )}
                 <span className="text-white">{jugador.players}</span>
               </h3>
-              <span className={`text-sm mt-1 px-2 py-1 rounded ${getColorClass(jugador.estado)}`}>
-                {jugador.estado}
+              <span
+                className={`text-sm mt-1 px-2 py-1 rounded ${
+                  jugador.guardia
+                    ? "bg-pink-600 text-white"
+                    : jugador.estado
+                    ? "bg-green-600"
+                    : "bg-red-600"
+                }`}
+              >
+                {jugador.guardia
+                  ? "guardia"
+                  : jugador.estado
+                  ? "vivo"
+                  : "muerto"}
               </span>
             </a>
           ))}
@@ -207,7 +243,7 @@ export default function Navbar() {
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.8, opacity: 0 }}
-              onClick={e => e.stopPropagation()}
+              onClick={(e) => e.stopPropagation()}
             >
               <button
                 onClick={() => setFiltroActivo(null)}
@@ -217,12 +253,14 @@ export default function Navbar() {
                 &times;
               </button>
               <h3 className="text-2xl font-bold mb-4 text-center">
-                {cards.find(c => c.estado === filtroActivo)?.emoji}{" "}
-                {cards.find(c => c.estado === filtroActivo)?.label}
+                {cards.find((c) => c.estado === filtroActivo)?.emoji}{" "}
+                {cards.find((c) => c.estado === filtroActivo)?.label}
               </h3>
 
               {jugadoresFiltrados.length === 0 ? (
-                <p className="text-center text-gray-400">No hay jugadores en esta categoría.</p>
+                <p className="text-center text-gray-400">
+                  No hay jugadores en esta categoría.
+                </p>
               ) : (
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   {jugadoresFiltrados.map((jugador, index) => (
@@ -240,12 +278,26 @@ export default function Navbar() {
                       />
                       <h3 className="font-semibold text-center">
                         {jugador.numero != null && (
-                          <span className="text-yellow-400 font-bold">#{jugador.numero} </span>
+                          <span className="text-yellow-400 font-bold">
+                            #{jugador.numero}{" "}
+                          </span>
                         )}
                         <span className="text-white">{jugador.players}</span>
                       </h3>
-                      <span className={`text-sm mt-1 px-2 py-1 rounded ${getColorClass(jugador.estado)}`}>
-                        {jugador.estado}
+                      <span
+                        className={`text-sm mt-1 px-2 py-1 rounded ${
+                          jugador.guardia
+                            ? "bg-pink-600 text-white"
+                            : jugador.estado
+                            ? "bg-green-600"
+                            : "bg-red-600"
+                        }`}
+                      >
+                        {jugador.guardia
+                          ? "guardia"
+                          : jugador.estado
+                          ? "vivo"
+                          : "muerto"}
                       </span>
                     </a>
                   ))}
