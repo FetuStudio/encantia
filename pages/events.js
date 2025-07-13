@@ -33,7 +33,7 @@ export default function Navbar() {
   }, []);
 
   const fetchAlertMessage = useCallback(async () => {
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from('alerts')
       .select('*')
       .eq('active', true)
@@ -49,7 +49,7 @@ export default function Navbar() {
   const fetchEvents = useCallback(async () => {
     const { data, error } = await supabase
       .from('events')
-      .select('id, name, date, description')
+      .select('id, name, date, description, cover, winner')
       .order('date', { ascending: true });
 
     if (!error) {
@@ -115,16 +115,13 @@ export default function Navbar() {
 
   const renderAlert = () => (
     alertMessage && (
-      <div
-        className={`flex items-start sm:items-center justify-center gap-3 px-4 py-3 text-sm font-medium w-full z-50 ${
-          alertMessage.type === 'info' ? 'bg-blue-100 text-blue-800' :
-          alertMessage.type === 'success' ? 'bg-green-100 text-green-800' :
-          alertMessage.type === 'warning' ? 'bg-yellow-100 text-yellow-800' :
-          alertMessage.type === 'error' ? 'bg-red-100 text-red-800' :
-          'bg-gray-100 text-gray-800'
-        }`}
-      >
-        {/* SVG ICON OMITTED FOR BREVITY */}
+      <div className={`flex items-start sm:items-center justify-center gap-3 px-4 py-3 text-sm font-medium w-full z-50 ${
+        alertMessage.type === 'info' ? 'bg-blue-100 text-blue-800' :
+        alertMessage.type === 'success' ? 'bg-green-100 text-green-800' :
+        alertMessage.type === 'warning' ? 'bg-yellow-100 text-yellow-800' :
+        alertMessage.type === 'error' ? 'bg-red-100 text-red-800' :
+        'bg-gray-100 text-gray-800'
+      }`}>
         <div className="text-left max-w-3xl">{alertMessage.message}</div>
       </div>
     )
@@ -150,14 +147,30 @@ export default function Navbar() {
 
       {/* Eventos */}
       <div className="px-4 py-8">
-        <h2 className="text-2xl font-bold mb-4">Próximos Eventos</h2>
-        <div className="space-y-4">
+        <h2 className="text-2xl font-bold mb-6">Próximos Eventos</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {events.length === 0 && <p>No hay eventos próximos.</p>}
           {events.map(event => (
-            <div key={event.id} className="border border-gray-700 rounded p-4">
-              <h3 className="text-xl font-semibold">{event.name}</h3>
-              <p className="text-sm text-gray-400">{new Date(event.date).toLocaleDateString()}</p>
-              <p className="mt-2">{event.description}</p>
+            <div key={event.id} className="border border-gray-700 rounded-lg overflow-hidden bg-gray-800 shadow-lg">
+              {event.cover && (
+                <img
+                  src={event.cover}
+                  alt={`Portada de ${event.name}`}
+                  className="w-full object-contain"
+                  style={{ maxHeight: '300px' }}
+                />
+              )}
+              <div className="p-4">
+                <h3 className="text-xl font-semibold mb-1">{event.name}</h3>
+                <p className="text-sm text-gray-400">{new Date(event.date).toLocaleDateString()}</p>
+                <p className="mt-2 text-sm">{event.description}</p>
+
+                {event.winner && (
+                  <div className="mt-4 p-2 bg-yellow-300 text-black rounded flex items-center justify-center gap-2 text-sm font-semibold">
+                    👑 Ganador: {event.winner}
+                  </div>
+                )}
+              </div>
             </div>
           ))}
         </div>
@@ -196,4 +209,3 @@ export default function Navbar() {
     </div>
   );
 }
-
