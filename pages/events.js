@@ -147,7 +147,7 @@ export default function Navbar() {
 
       {/* Eventos */}
       <div className="px-4 py-8">
-        <h2 className="text-2xl font-bold mb-6">Próximos Eventos</h2>
+        <h2 className="text-2xl font-bold mb-6">Eventos</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {events.length === 0 && <p>No hay eventos próximos.</p>}
           {events.map(event => (
