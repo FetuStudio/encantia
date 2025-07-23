@@ -166,34 +166,6 @@ export default function Auth() {
                 <span className="text-white">Powered by</span>
                 <span className="bg-green-400 py-1 px-2 rounded-xl">Encantia</span>
             </div>
-
-            <a
-                href="https://buymeacoffee.com/encantiaesp"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="fixed bottom-20 left-4 z-50 bg-yellow-300 hover:bg-yellow-400 text-black font-semibold py-2 px-4 rounded-full shadow-lg flex items-center gap-2"
-            >
-                <img
-                    src="https://vectorseek.com/wp-content/uploads/2023/08/Buy-Me-A-Coffee-Logo-Vector.svg-.png"
-                    alt="Buy me a coffee"
-                    className="w-5 h-5"
-                />
-                Buy me a coffee
-            </a>
-
-            <a
-                href="https://ko-fi.com/S6S71EQT6F"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="fixed bottom-4 left-4 z-50"
-            >
-                <img
-                    height="36"
-                    style={{ border: 0, height: '36px' }}
-                    src="https://storage.ko-fi.com/cdn/kofi6.png?v=6"
-                    alt="Support me on Ko-fi"
-                />
-            </a>
         </div>
     );
 }
