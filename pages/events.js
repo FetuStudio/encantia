@@ -12,6 +12,7 @@ export default function Navbar() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [alertMessage, setAlertMessage] = useState(null);
   const [events, setEvents] = useState([]);
+  const [eventCountdowns, setEventCountdowns] = useState({});
   const router = useRouter();
 
   const fetchUserProfile = useCallback(async () => {
@@ -63,6 +64,44 @@ export default function Navbar() {
     fetchAlertMessage();
     fetchEvents();
   }, [fetchUserProfile, fetchUsers, fetchAlertMessage, fetchEvents]);
+
+  // Calcular diferencias de tiempo en formato "Meses, Días, Horas..."
+  const getTimeDiffString = (targetDate) => {
+    const now = new Date();
+    const end = new Date(targetDate);
+    const diff = end - now;
+
+    if (diff <= 0) return "¡Ya ocurrió!";
+
+    let totalSeconds = Math.floor(diff / 1000);
+
+    const months = Math.floor(totalSeconds / (60 * 60 * 24 * 30));
+    totalSeconds %= (60 * 60 * 24 * 30);
+
+    const days = Math.floor(totalSeconds / (60 * 60 * 24));
+    totalSeconds %= (60 * 60 * 24);
+
+    const hours = Math.floor(totalSeconds / (60 * 60));
+    totalSeconds %= (60 * 60);
+
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+
+    return `${months}M ${days}d ${hours}h ${minutes}m ${seconds}s`;
+  };
+
+  // Actualiza countdowns cada segundo
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const newCountdowns = {};
+      events.forEach(event => {
+        newCountdowns[event.id] = getTimeDiffString(event.date);
+      });
+      setEventCountdowns(newCountdowns);
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [events]);
 
   const handleSignOut = async () => {
     const { error } = await supabase.auth.signOut();
@@ -127,20 +166,6 @@ export default function Navbar() {
     )
   );
 
-  const getCountdown = (eventDate) => {
-    const now = new Date();
-    const targetDate = new Date(eventDate);
-    const diff = targetDate - now;
-
-    if (diff <= 0) return "¡Ya ocurrió!";
-
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
-    const minutes = Math.floor((diff / (1000 * 60)) % 60);
-
-    return `${days}d ${hours}h ${minutes}m`;
-  };
-
   if (!userProfile) {
     return (
       <div className="bg-gray-900 min-h-screen flex flex-col items-center">
@@ -176,7 +201,9 @@ export default function Navbar() {
               )}
               <div className="p-4">
                 <h3 className="text-xl font-semibold mb-1">{event.name}</h3>
-                <p className="text-sm text-gray-400">Empieza en: {getCountdown(event.date)}</p>
+                <p className="text-sm text-gray-400">
+                  Empieza en: {eventCountdowns[event.id] || 'Calculando...'}
+                </p>
                 <p className="mt-2 text-sm">{event.description}</p>
 
                 {event.winner && (
