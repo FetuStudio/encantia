@@ -127,6 +127,20 @@ export default function Navbar() {
     )
   );
 
+  const getCountdown = (eventDate) => {
+    const now = new Date();
+    const targetDate = new Date(eventDate);
+    const diff = targetDate - now;
+
+    if (diff <= 0) return "¡Ya ocurrió!";
+
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+    const minutes = Math.floor((diff / (1000 * 60)) % 60);
+
+    return `${days}d ${hours}h ${minutes}m`;
+  };
+
   if (!userProfile) {
     return (
       <div className="bg-gray-900 min-h-screen flex flex-col items-center">
@@ -162,7 +176,7 @@ export default function Navbar() {
               )}
               <div className="p-4">
                 <h3 className="text-xl font-semibold mb-1">{event.name}</h3>
-                <p className="text-sm text-gray-400">{new Date(event.date).toLocaleDateString()}</p>
+                <p className="text-sm text-gray-400">Empieza en: {getCountdown(event.date)}</p>
                 <p className="mt-2 text-sm">{event.description}</p>
 
                 {event.winner && (
