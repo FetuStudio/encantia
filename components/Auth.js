@@ -44,7 +44,7 @@ export default function Auth() {
     // 👇 WorkOS requiere connection_id
     if (provider === 'workos') {
       options.queryParams = {
-        connection: '<TU_CONNECTION_ID>', // <-- cámbialo por el de tu WorkOS Dashboard
+        connection: 'conn_01K2YFW29SHV2BJS1713AZ2W2Q', // <-- cámbialo por el de tu WorkOS Dashboard
       };
     }
 
